@@ -1,0 +1,16 @@
+ipython
+myst_parser
+nbsphinx
+sphinx-gallery
+sphinx_copybutton
+sphinxcontrib-bibtex==1.0.0
+nbsphinx-link
+sphinxcontrib-svg2pdfconverter
+sphinx_design
+sphinx-inline-tabs
+furo
+
+networkx
+plotly
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
+tornado>=6.3.2 # not directly required, pinned by Snyk to avoid a vulnerability
