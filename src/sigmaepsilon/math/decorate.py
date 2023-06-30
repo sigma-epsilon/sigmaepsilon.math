@@ -1,15 +1,15 @@
-from typing import Callable
+from typing import Callable, Any
 import numpy as np
 
 
 __all__ = ["squeeze"]
 
 
-def squeeze_if_array(arr):
+def _squeeze_if_array(arr: Any) -> Any:
     return np.squeeze(arr) if isinstance(arr, np.ndarray) else arr
 
 
-def squeeze(default=True):
+def squeeze(default:bool=True) -> Callable:
     """
     A decorator that squeezes outputs of a function if
     * the result is a NumPy array
@@ -34,11 +34,11 @@ def squeeze(default=True):
             if squeeze:
                 res = fnc(*args, **kwargs)
                 if isinstance(res, tuple):
-                    return list(map(squeeze_if_array, res))
+                    return list(map(_squeeze_if_array, res))
                 elif isinstance(res, dict):
-                    return {k: squeeze_if_array(v) for k, v in res.items()}
+                    return {k: _squeeze_if_array(v) for k, v in res.items()}
                 else:
-                    return squeeze_if_array(res)
+                    return _squeeze_if_array(res)
             else:
                 return fnc(*args, **kwargs)
 
@@ -47,10 +47,3 @@ def squeeze(default=True):
 
     return decorator
 
-
-"""def config(*args, **kwargs):
-    def decorator(fnc: Callable):
-        def inner(*args, **kwargs):
-            return fnc(*args, **kwargs)
-        return inner
-    return decorator"""
