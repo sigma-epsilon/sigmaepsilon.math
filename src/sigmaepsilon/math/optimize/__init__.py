@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-from .ga import *
+from .bga import BinaryGeneticAlgorithm
 from .lp import LinearProgrammingProblem
 from .errors import *

@@ -8,30 +8,45 @@
 # https://github.com/pradyunsg/furo/blob/main/docs/conf.py
 # https://github.com/sphinx-gallery/sphinx-gallery/blob/master/doc/conf.py
 
+# --------------------------------------------------------------------------
+
 import sys
 import os
 from datetime import date
 import warnings
 
-import sigmaepsilon.math
+import sigmaepsilon.math as library
+
+from sphinx.config import Config
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-# sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../../src"))
+
+from doc_utils import generate_examples_gallery_rst
+
+generate_examples_gallery_rst(
+    title="Examples", filename="examples_gallery", foldername="examples", reversed=True
+)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "sigmaepsilon.math"
+project = library.__project_name__
 copyright = "2014-%s, Bence Balogh" % date.today().year
 author = "Bence Balogh"
 
+
+def setup(app: Config):
+    app.add_config_value("project_name", project, "html")
+
+
 # The short X.Y version.
-version = sigmaepsilon.math.__version__
+version = library.__version__
 # The full version, including alpha/beta/rc tags.
-release = sigmaepsilon.math.__version__
+release = "v" + library.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -49,10 +64,10 @@ extensions = [
     "sphinx.ext.intersphinx",
     # Napoleon is a extension that enables Sphinx to parse both NumPy and Google style docstrings
     "sphinx.ext.napoleon",
-    # 'sphinx_gallery.gen_gallery',
-    # 'sphinx_gallery.load_style',  # load CSS for gallery (needs SG >= 0.6)
+    #'sphinx_gallery.gen_gallery',
+    #'sphinx_gallery.load_style',  # load CSS for gallery (needs SG >= 0.6)
     "nbsphinx",  # to handle jupyter notebooks
-    "nbsphinx_link",  # for including notebook files from outside the sphinx source root
+    # "nbsphinx_link",  # for including notebook files from outside the sphinx source root
     "sphinx_copybutton",  # for "copy to clipboard" buttons
     "sphinx.ext.mathjax",  # for math equations
     "sphinxcontrib.bibtex",  # for bibliographic references
@@ -73,6 +88,12 @@ autosummary_generate = True
 templates_path = ["_templates"]
 
 exclude_patterns = ["_build"]
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 # The master toctree document.
 master_doc = "index"
@@ -99,7 +120,18 @@ intersphinx_mapping = {
     "sphinx": (r"https://www.sphinx-doc.org/en/master", None),
     "pandas": (r"https://pandas.pydata.org/pandas-docs/stable/", None),
     "awkward": (r"https://awkward-array.readthedocs.io/en/latest/", None),
+    "sigmaepsilon.core": (r"https://sigmaepsiloncore.readthedocs.io/en/latest/", None),
+    "linkeddeepdict": (r"https://linkeddeepdict.readthedocs.io/en/latest/", None),
 }
+
+# -- bibtex configuration -------------------------------------------------
+# https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html
+
+bibtex_bibfiles = ["references.bib"]
+bibtex_default_style = "unsrt"
+
+# If no encoding is specified, utf-8-sig is assumed.
+# bibtex_encoding = 'latin'
 
 # -- MathJax Configuration -------------------------------------------------
 
@@ -122,45 +154,34 @@ warnings.filterwarnings(
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "furo"
+html_theme = "pydata_sphinx_theme"
+
 html_static_path = ["_static"]
 
-html_sidebars = {
-    "**": [
-        "sidebar/scroll-start.html",
-        "sidebar/brand.html",
-        "sidebar/search.html",
-        "sidebar/navigation.html",
-        "sidebar/ethical-ads.html",
-        "sidebar/scroll-end.html",
-    ]
-}
+# This is processed by Jinja2 and inserted before each notebook
+nbsphinx_prolog = r"""
+{% set docname = 'docs/source/' + env.doc2path(env.docname, base=None) %}
 
-html_theme_options = {
-    "light_css_variables": {
-        "color-brand-primary": "#7C4DFF",
-        "color-brand-content": "#7C4DFF",
-    },
-    "dark_css_variables": {
-        # "color-brand-primary": "red",
-        # "color-brand-content": "#CC3333",
-        "color-brand-primary": "orange",
-        "color-brand-content": "orange",
-        # "color-admonition-background": "orange",
-    },
-    "footer_icons": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/dewloosh/sigmaepsilon.math",
-            "html": """
-                <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                </svg>
-            """,
-            "class": "",
-        },
-    ],
-    "source_repository": "https://github.com/dewloosh/sigmaepsilon.math/",
-    "source_branch": "main",
-    "source_directory": "docs/",
-}
+.. raw:: html
+
+    <div class="admonition note">
+      This page was generated from
+      <a class="reference external" href="https://github.com/sigmaepsilon/{{ env.config.project_name }}/blob/{{ env.config.release|e }}/{{ docname|e }}">{{ docname|e }}</a>.
+    </div>
+
+.. raw:: latex
+
+    \nbsphinxstartnotebook{\scriptsize\noindent\strut
+    \textcolor{gray}{The following section was generated from
+    \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
+"""
+
+# This is processed by Jinja2 and inserted after each notebook
+nbsphinx_epilog = r"""
+{% set docname = 'docs/source/' + env.doc2path(env.docname, base=None) %}
+.. raw:: latex
+
+    \nbsphinxstopnotebook{\scriptsize\noindent\strut
+    \textcolor{gray}{\dotfill\ \sphinxcode{\sphinxupquote{\strut
+    {{ docname | escape_latex }}}} ends here.}}
+"""

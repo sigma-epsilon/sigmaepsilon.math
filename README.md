@@ -1,7 +1,7 @@
 # **SigmaEpsilon.Math** - A Python Library for Applied Mathematics in Physical Sciences
 
-[![CircleCI](https://circleci.com/gh/dewloosh/sigmaepsilon.math.svg?style=shield)](https://circleci.com/gh/dewloosh/sigmaepsilon.math)
-[![Documentation Status](https://readthedocs.org/projects/sigmaepsilon.math/badge/?version=latest)](https://sigmaepsilon.math.readthedocs.io/en/latest/?badge=latest)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/sigma-epsilon/sigmaepsilon.math/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/sigma-epsilon/sigmaepsilon.math/tree/main)
+[![Documentation Status](https://readthedocs.org/projects/sigmaepsilonmath/badge/?version=latest)](https://sigmaepsilonmath.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://badge.fury.io/py/sigmaepsilon.math.svg)](https://pypi.org/project/sigmaepsilon.math)
 [![codecov](https://codecov.io/gh/dewloosh/sigmaepsilon.math/branch/main/graph/badge.svg?token=TBI6GG4ECG)](https://codecov.io/gh/dewloosh/sigmaepsilon.math)
@@ -32,7 +32,7 @@ The most important features:
 
 ## **Documentation**
 
-The documentation is hosted on [ReadTheDocs](https://sigmaepsilon.math.readthedocs.io/en/latest/).
+The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hosted on ReadTheDocs.
 
 ## **Installation**
 
@@ -110,9 +110,11 @@ Find the minimizer of the Rosenbrock function:
 
 ```python
 >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
+>>>
 >>> def Rosenbrock(x):
 ...     a, b = 1, 100
 ...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
+>>>
 >>> ranges = [[-10, 10], [-10, 10]]
 >>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
 >>> BGA.solve()

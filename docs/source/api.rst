@@ -1,12 +1,13 @@
-=============
 API Reference
 =============
 
 .. toctree::
-    api_linalg
-    api_function
-    api_lp
-    api_ga
-    api_array
-    api_graph
-    api_approx
+    :maxdepth: 6
+    
+    /api/api_linalg
+    /api/api_function
+    /api/api_lp
+    /api/api_ga
+    /api/api_array
+    /api/api_graph
+    /api/api_approx
