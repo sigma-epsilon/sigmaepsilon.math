@@ -25,10 +25,9 @@ class TestBGA(unittest.TestCase):
         BGA.evolver()
         BGA.evolve()
         BGA.genotypes = BGA.genotypes
-        BGA.fittness()
-        BGA.fittness(BGA.phenotypes)
-        BGA.best_phenotype(lastknown=False)
-        BGA.best_phenotype(lastknown=True)
+        BGA.fittness
+        BGA.best_phenotype()
+        BGA.best_candidate()
         BGA.random_parents_generator(BGA.genotypes)
         BGA.reset()
 
