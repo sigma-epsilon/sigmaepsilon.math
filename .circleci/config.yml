@@ -24,7 +24,7 @@ jobs:
           name: Build wheel
           command: |
             pip install wheel twine
-            pip install . ['test', 'dev']
+            pip install . [test, dev]
             pip install 'build<0.10.0'
             python -m build
       - run:
@@ -86,7 +86,7 @@ jobs:
           pkg-manager: pip
           pip-dependency-file: requirements-test.txt
       - run:
-          command: pip install . ['test', 'dev']
+          command: pip install . [test, dev]
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
