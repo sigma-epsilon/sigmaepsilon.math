@@ -34,7 +34,7 @@ generate_examples_gallery_rst(
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = library.__project_name__
+project = library.__pkg_name__
 copyright = "2014-%s, Bence Balogh" % date.today().year
 author = "Bence Balogh"
 
@@ -119,7 +119,6 @@ intersphinx_mapping = {
     "matplotlib": (r"https://matplotlib.org/stable", None),
     "sphinx": (r"https://www.sphinx-doc.org/en/master", None),
     "pandas": (r"https://pandas.pydata.org/pandas-docs/stable/", None),
-    "awkward": (r"https://awkward-array.readthedocs.io/en/latest/", None),
     "sigmaepsilon.core": (r"https://sigmaepsiloncore.readthedocs.io/en/latest/", None),
     "linkeddeepdict": (r"https://linkeddeepdict.readthedocs.io/en/latest/", None),
 }
