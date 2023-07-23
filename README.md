@@ -51,7 +51,13 @@ gh repo clone sigma-epsilon/sigmaepsilon.math
 and install from source by typing
 
 ```console
->>> python install setup.py
+>>> pip install .
+```
+
+If you want to run the tests, you can install the package along with the necessary optional dependencies like this
+
+```console
+>>> pip install ".[test]"
 ```
 
 ## **Motivating Examples**
