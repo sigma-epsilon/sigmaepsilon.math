@@ -15,3 +15,6 @@ class LinalgInvalidTensorOperationError(Exception):
     Tensors don't support this operation. Try to call this using
     the arrays of the tensorial inputs.
     """
+
+class LinalgError(Exception):
+    """General linear algebra error"""
