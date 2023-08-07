@@ -7,15 +7,17 @@ from numpy import ndarray
 from sigmaepsilon.core.typing import issequence
 
 from .utils import (
-    is_rectangular_frame,
-    is_orthonormal_frame,
-    is_normal_frame,
     normalize_frame,
     Gram,
     dual_frame,
     transpose_axes,
     show_frame,
     rotation_matrix,
+)
+from .logical import (
+    is_rectangular_frame,
+    is_orthonormal_frame,
+    is_normal_frame,
 )
 from ..utils import repeat
 from .meta import FrameLike, TensorLike, ArrayWrapper

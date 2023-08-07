@@ -21,16 +21,9 @@ __all__ = [
     "permutation_tensor",
     "dot",
     "cross",
-    "is_rectangular_frame",
-    "is_normal_frame",
-    "is_orthonormal_frame",
-    "is_independent_frame",
-    "is_hermitian",
     "normalize_frame",
     "Gram",
     "dual_frame",
-    "is_pos_def",
-    "is_pos_semidef",
     "random_pos_semidef_matrix",
     "random_posdef_matrix",
     "inv_sym_3x3",
@@ -565,67 +558,6 @@ def transpose_axes(arr: ndarray) -> ndarray:
         return np.transpose(arr, indices)
 
 
-def is_rectangular_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is Cartesian.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    assert len(axes.shape) == 2, "Input is not a matrix!"
-    assert axes.shape[0] == axes.shape[1], "Input is not a square matrix!"
-    agram = np.abs(axes @ axes.T)
-    return np.isclose(np.trace(agram), np.sum(agram))
-
-
-def is_normal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is normal, meaning, that it's base vectors
-    are all of unit length.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return np.allclose(np.linalg.norm(axes, axis=1), 1.0)
-
-
-def is_orthonormal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is orthonormal.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return is_rectangular_frame(axes) and is_normal_frame(axes)
-
-
-def is_independent_frame(axes: ndarray, tol: float = 0) -> bool:
-    """
-    Returns True if a the base vectors of a frame are linearly independent.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return np.linalg.det(Gram(axes)) > tol
-
-
-def is_hermitian(arr: ndarray) -> bool:
-    """
-    Returns True if the input is a hermitian array.
-    """
-    shp = arr.shape
-    s0 = shp[0]
-    return all([s == s0 for s in shp[1:]])
-
-
 def normalize_frame(axes: ndarray) -> ndarray:
     """
     Returns the frame with normalized base vectors.
@@ -660,20 +592,6 @@ def dual_frame(axes: ndarray) -> ndarray:
         A matrix where the i-th row is the i-th basis vector.
     """
     return transpose_axes(np.linalg.inv(axes))
-
-
-def is_pos_def(arr) -> bool:
-    """
-    Returns True if the input is positive definite.
-    """
-    return np.all(np.linalg.eigvals(arr) > 0)
-
-
-def is_pos_semidef(arr) -> bool:
-    """
-    Returns True if the input is positive semi definite.
-    """
-    return np.all(np.linalg.eigvals(arr) >= 0)
 
 
 def random_pos_semidef_matrix(N) -> ndarray:
@@ -964,11 +882,11 @@ def generalized_left_inverse(matrix: ndarray) -> ndarray:
 
     .. math::
         :nowrap:
-        
+
         \\begin{equation}
             \left( \mathbf{A}^{T} \mathbf{A} \\right)^{-1} \mathbf{A}^{T}
         \\end{equation}
-        
+
     """
     return np.linalg.inv(matrix.T @ matrix) @ matrix.T
 
@@ -978,11 +896,11 @@ def generalized_right_inverse(matrix: ndarray) -> ndarray:
 
     .. math::
         :nowrap:
-        
+
         \\begin{equation}
             \mathbf{A}^{T} \left( \mathbf{A} \mathbf{A}^{T} \\right)^{-1}
         \\end{equation}
-        
+
     """
     return matrix.T @ np.linalg.inv(matrix @ matrix.T)
 
