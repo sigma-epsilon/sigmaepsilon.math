@@ -24,7 +24,7 @@ class Genom(BaseModel):
     genotype: List[int] = Field(default_factory=list)
     fittness: float
     age: int = Field(default=0)
-    _index: int = Field(default=-1)
+    index: int = Field(default=-1)
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Genom):
@@ -314,7 +314,7 @@ class GeneticAlgorithm:
             phenotype=self.phenotypes[index],
             genotype=self.genotypes[index],
             fittness=fittness[index],
-            _index=index,
+            index=index,
         )
 
     def celebrate(self, genom: Genom) -> None:
