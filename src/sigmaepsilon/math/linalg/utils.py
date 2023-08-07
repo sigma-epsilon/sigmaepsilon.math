@@ -12,7 +12,7 @@ from sympy.physics.vector import ReferenceFrame as SymPyFrame
 from sigmaepsilon.core.alphabet import latinrange
 
 from .meta import TensorLike, ArrayWrapper, FrameLike
-from .exceptions import LinalgOperationInputError, LinalgMissingInputError
+from .exceptions import LinalgOperationInputError, LinalgMissingInputError, LinalgError
 
 __cache = True
 
@@ -54,6 +54,9 @@ __all__ = [
     "show_vector",
     "show_frame",
     "rotation_matrix",
+    "generalized_left_inverse",
+    "generalized_right_inverse",
+    "generalized_inverse",
 ]
 
 
@@ -954,3 +957,53 @@ def linspace1d(start, stop, N) -> ndarray:
     for i in prange(N):
         res[i] = start + i * di
     return res
+
+
+def generalized_left_inverse(matrix: ndarray) -> ndarray:
+    """Returns the generalized left inverse
+
+    .. math::
+        :nowrap:
+
+        \left( \mathbf{N}^{T} \mathbf{N} \\right)^{-1} \mathbf{N}^{T}
+
+    of the input matrix."""
+    return np.linalg.inv(matrix.T @ matrix) @ matrix.T
+
+
+def generalized_right_inverse(matrix: ndarray) -> ndarray:
+    """Returns the generalized right inverse
+
+    .. math::
+        :nowrap:
+
+        \mathbf{N}^{T} \left( \mathbf{N} \mathbf{N}^{T} \\right)^{-1}
+
+    of the input matrix."""
+    return matrix.T @ np.linalg.inv(matrix @ matrix.T)
+
+
+def generalized_inverse(matrix: ndarray) -> ndarray:
+    """
+    Returns the generalized inverse of the input matrix, in any of the following
+    cases:
+    1) The matrix is square and has full rank. In this case the returned matrix
+    is the usual inverse.
+    2) The matrix has more columns than rows and has full row rank. In this case
+    the generalized right inverse is returned.
+    3) The matrix has more rows than columns and has full column rank. In this case
+    the generalized left inverse is returned.
+    """
+    if not len(matrix.shape) == 2:
+        raise LinalgOperationInputError("The input must be a matrix")
+
+    num_rows, num_columns = matrix.shape
+    rank = np.linalg.matrix_rank(matrix)
+    if (num_rows == num_columns) and rank == num_columns == num_rows:
+        return np.linalg.inv(matrix)
+    elif (num_rows > num_columns) and rank == num_columns:
+        return generalized_left_inverse(matrix)
+    elif (num_rows < num_columns) and rank == num_rows:
+        return generalized_right_inverse(matrix)
+    else:
+        raise LinalgError("The matrix has no inverse")
