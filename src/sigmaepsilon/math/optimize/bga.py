@@ -36,7 +36,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         Probability of mutation, 0 <= p_m <= 1. Default is 0.2.
     nPop: int, Optional
         Number of members in the population. Default is 100.
-    elitism: float or integer, Optional
+    elitism: float or int, Optional
         Value to control elitism. Default is 1.
 
     Examples
