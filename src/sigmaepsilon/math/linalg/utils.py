@@ -157,15 +157,15 @@ def dot(
 
     Parameters
     ----------
-    a: TensorLike or ArrayLike
+    a: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
        A tensor or an array.
-    b: TensorLike or ArrayLike
+    b: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
        A tensor or an array.
     out: ArrayLike, Optional
         Output argument. This must have the exact kind that would be returned if it was
         not used. See `numpy.dot` for the details. Only if all inputs are ArrayLike.
         Default is None.
-    frame: FrameLike, Optinal
+    frame: FrameLike, Optional
         The target frame of the output. Only if all inputs are TensorLike. If not specified,
         the returned tensor migh be returned in an arbitrary frame, depending on the inputs.
         Default is None.
@@ -175,7 +175,7 @@ def dot(
 
     Returns
     -------
-    TensorLike or numpy.ndarray or scalar
+    :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or numpy.ndarray or scalar
         An array or a tensor, depending on the inputs.
 
     Notes
@@ -269,9 +269,9 @@ def cross(
     ----------
     *args : Tuple, Optional
         Positional arguments forwarded to NumPy, if all input objects are arrays.
-    a: TensorLike or ArrayLike
+    a: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
         A tensor or an array.
-    b: TensorLike or ArrayLike
+    b: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
         A tensor or an array.
     frame: FrameLike, Optional
         The target frame of the output. Only if all inputs are TensorLike. If not specified,
@@ -284,7 +284,7 @@ def cross(
 
     Returns
     -------
-    numpy.ndarray or TensorLike
+    numpy.ndarray or :class:`~sigmaepsilon.math.linalg.meta.TensorLike`
         An 1d or 2d array, or an 1d or 2d tensor, depending on the inputs.
 
     References
@@ -964,10 +964,12 @@ def generalized_left_inverse(matrix: ndarray) -> ndarray:
 
     .. math::
         :nowrap:
-
-        \left( \mathbf{N}^{T} \mathbf{N} \\right)^{-1} \mathbf{N}^{T}
-
-    of the input matrix."""
+        
+        \\begin{equation}
+            \left( \mathbf{A}^{T} \mathbf{A} \\right)^{-1} \mathbf{A}^{T}
+        \\end{equation}
+        
+    """
     return np.linalg.inv(matrix.T @ matrix) @ matrix.T
 
 
@@ -976,10 +978,12 @@ def generalized_right_inverse(matrix: ndarray) -> ndarray:
 
     .. math::
         :nowrap:
-
-        \mathbf{N}^{T} \left( \mathbf{N} \mathbf{N}^{T} \\right)^{-1}
-
-    of the input matrix."""
+        
+        \\begin{equation}
+            \mathbf{A}^{T} \left( \mathbf{A} \mathbf{A}^{T} \\right)^{-1}
+        \\end{equation}
+        
+    """
     return matrix.T @ np.linalg.inv(matrix @ matrix.T)
 
 
