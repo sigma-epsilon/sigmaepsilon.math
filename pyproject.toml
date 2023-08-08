@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sigmaepsilon.math"
-version = "0.0.1"
+version = "1.0.0"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
 classifiers=[
         "Development Status :: 5 - Production/Stable",
