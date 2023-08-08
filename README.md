@@ -32,11 +32,11 @@ The most important features:
 
 ## **Documentation**
 
-The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hosted on ReadTheDocs.
+The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hosted on ReadTheDocs. You can find examples there.
 
 ## **Installation**
 
-`sigmaepsilon.math` can be installed (either in a virtual enviroment or globally) from PyPI using `pip` on Python >= 3.7:
+sigmaepsilon.math can be installed from PyPI using `pip` on Python >= 3.7:
 
 ```console
 >>> pip install sigmaepsilon.math
@@ -60,73 +60,37 @@ If you want to run the tests, you can install the package along with the necessa
 >>> pip install ".[test]"
 ```
 
-## **Motivating Examples**
+### Development mode
 
-### Linear Algebra
+If you are a developer and want to install the library in development mode, the suggested way is by using this command:
 
-Define a reference frame $\mathbf{B}$ relative to the frame $\mathbf{A}$:
-
-```python
->>> from sigmaepsilon.math.linalg import ReferenceFrame, Vector, Tensor
->>> A = ReferenceFrame(name='A', axes=np.eye(3))
->>> B = A.orient_new('Body', [0, 0, 90*np.pi/180], 'XYZ', name='B')
+```console
+>>> pip install "-e .[test, dev]"
 ```
 
-Get the *DCM matrix* of the transformation between two frames:
+## How to contribute?
 
-```python
->>> B.dcm(target=A)
-```
+Contributions are currently expected in any the following ways:
 
-Define a vector $\mathbf{v}$ in frame $\mathbf{A}$ and show the components of it in frame $\mathbf{B}$:
+* finding bugs
+  If you run into trouble when using the library and you think it is a bug, feel free to raise an issue.
+* feedback
+  All kinds of ideas are welcome. For instance if you feel like something is still shady (after reading the user guide), we want to know. Be gentle though, the development of the library is financially not supported yet.
+* feature requests
+  Tell us what you think is missing (with realistic expectations).
+* examples
+  If you've done something with the library and you think that it would make for a good example, get in touch with the developers and we will happily inlude it in the documention.
+* sharing is caring
+  If you like the library, share it with your friends or colleagues so they can like it too.
 
-```python
->>> v = Vector([0.0, 1.0, 0.0], frame=A)
->>> v.show(B)
-```
+## Acknowledgements
 
-Define the same vector in frame $\mathbf{B}$:
+Although `sigmaepsilon.math` heavily builds on `NumPy`, `Scipy`, `Numba` and `Awkward` and it also has functionality related to `networkx` and other third party libraries. Whithout these libraries the concept of writing performant, yet elegant Python code would be much more difficult.
 
-```python
->>> v = Vector(v.show(B), frame=B)
->>> v.show(A)
-```
+**A lot of the packages mentioned on this document here and the introduction have a citable research paper. If you use them in your work through sigmaepsilon.mesh, take a moment to check out their documentations and cite their papers.**
 
-### Linear Programming
-
-Solve the following Linear Programming Problem (LPP) with one unique solution:
-
-```python
->>> from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
->>> from sigmaepsilon.math.function import Function, Equality
->>> import sympy as sy
->>> variables = ['x1', 'x2', 'x3', 'x4']
->>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
->>> obj1 = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
->>> eq11 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
->>> eq12 = Equality(x2 + x3 - x4 - 2, variables=syms)
->>> problem = LPP(cost=obj1, constraints=[eq11, eq12], variables=syms)
->>> problem.solve()['x']
-array([0., 6., 0., 4.])
-```
-
-### NonLinear Programming
-
-Find the minimizer of the Rosenbrock function:
-
-```python
->>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
->>>
->>> def Rosenbrock(x):
-...     a, b = 1, 100
-...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
->>>
->>> ranges = [[-10, 10], [-10, 10]]
->>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
->>> BGA.solve()
-...
-```
+Also, funding of these libraries is partly based on the size of the community they are able to support. If what you are doing strongly relies on these libraries, don't forget to press the :star: button to show your support.
 
 ## **License**
 
-This package is licensed under the MIT license.
+This package is licensed under the [MIT license](https://opensource.org/license/mit/).
