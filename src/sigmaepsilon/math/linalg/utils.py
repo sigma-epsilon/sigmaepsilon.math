@@ -12,7 +12,7 @@ from sympy.physics.vector import ReferenceFrame as SymPyFrame
 from sigmaepsilon.core.alphabet import latinrange
 
 from .meta import TensorLike, ArrayWrapper, FrameLike
-from .exceptions import LinalgOperationInputError, LinalgMissingInputError
+from .exceptions import LinalgOperationInputError, LinalgMissingInputError, LinalgError
 
 __cache = True
 
@@ -21,16 +21,9 @@ __all__ = [
     "permutation_tensor",
     "dot",
     "cross",
-    "is_rectangular_frame",
-    "is_normal_frame",
-    "is_orthonormal_frame",
-    "is_independent_frame",
-    "is_hermitian",
     "normalize_frame",
     "Gram",
     "dual_frame",
-    "is_pos_def",
-    "is_pos_semidef",
     "random_pos_semidef_matrix",
     "random_posdef_matrix",
     "inv_sym_3x3",
@@ -54,6 +47,9 @@ __all__ = [
     "show_vector",
     "show_frame",
     "rotation_matrix",
+    "generalized_left_inverse",
+    "generalized_right_inverse",
+    "generalized_inverse",
 ]
 
 
@@ -154,15 +150,15 @@ def dot(
 
     Parameters
     ----------
-    a: TensorLike or ArrayLike
+    a: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
        A tensor or an array.
-    b: TensorLike or ArrayLike
+    b: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
        A tensor or an array.
     out: ArrayLike, Optional
         Output argument. This must have the exact kind that would be returned if it was
         not used. See `numpy.dot` for the details. Only if all inputs are ArrayLike.
         Default is None.
-    frame: FrameLike, Optinal
+    frame: FrameLike, Optional
         The target frame of the output. Only if all inputs are TensorLike. If not specified,
         the returned tensor migh be returned in an arbitrary frame, depending on the inputs.
         Default is None.
@@ -172,7 +168,7 @@ def dot(
 
     Returns
     -------
-    TensorLike or numpy.ndarray or scalar
+    :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or numpy.ndarray or scalar
         An array or a tensor, depending on the inputs.
 
     Notes
@@ -266,9 +262,9 @@ def cross(
     ----------
     *args : Tuple, Optional
         Positional arguments forwarded to NumPy, if all input objects are arrays.
-    a: TensorLike or ArrayLike
+    a: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
         A tensor or an array.
-    b: TensorLike or ArrayLike
+    b: :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or ArrayLike
         A tensor or an array.
     frame: FrameLike, Optional
         The target frame of the output. Only if all inputs are TensorLike. If not specified,
@@ -281,7 +277,7 @@ def cross(
 
     Returns
     -------
-    numpy.ndarray or TensorLike
+    numpy.ndarray or :class:`~sigmaepsilon.math.linalg.meta.TensorLike`
         An 1d or 2d array, or an 1d or 2d tensor, depending on the inputs.
 
     References
@@ -562,67 +558,6 @@ def transpose_axes(arr: ndarray) -> ndarray:
         return np.transpose(arr, indices)
 
 
-def is_rectangular_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is Cartesian.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    assert len(axes.shape) == 2, "Input is not a matrix!"
-    assert axes.shape[0] == axes.shape[1], "Input is not a square matrix!"
-    agram = np.abs(axes @ axes.T)
-    return np.isclose(np.trace(agram), np.sum(agram))
-
-
-def is_normal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is normal, meaning, that it's base vectors
-    are all of unit length.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return np.allclose(np.linalg.norm(axes, axis=1), 1.0)
-
-
-def is_orthonormal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is orthonormal.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return is_rectangular_frame(axes) and is_normal_frame(axes)
-
-
-def is_independent_frame(axes: ndarray, tol: float = 0) -> bool:
-    """
-    Returns True if a the base vectors of a frame are linearly independent.
-
-    Parameters
-    ----------
-    axes: numpy.ndarray
-        A matrix where the i-th row is the i-th basis vector.
-    """
-    return np.linalg.det(Gram(axes)) > tol
-
-
-def is_hermitian(arr: ndarray) -> bool:
-    """
-    Returns True if the input is a hermitian array.
-    """
-    shp = arr.shape
-    s0 = shp[0]
-    return all([s == s0 for s in shp[1:]])
-
-
 def normalize_frame(axes: ndarray) -> ndarray:
     """
     Returns the frame with normalized base vectors.
@@ -657,20 +592,6 @@ def dual_frame(axes: ndarray) -> ndarray:
         A matrix where the i-th row is the i-th basis vector.
     """
     return transpose_axes(np.linalg.inv(axes))
-
-
-def is_pos_def(arr) -> bool:
-    """
-    Returns True if the input is positive definite.
-    """
-    return np.all(np.linalg.eigvals(arr) > 0)
-
-
-def is_pos_semidef(arr) -> bool:
-    """
-    Returns True if the input is positive semi definite.
-    """
-    return np.all(np.linalg.eigvals(arr) >= 0)
 
 
 def random_pos_semidef_matrix(N) -> ndarray:
@@ -954,3 +875,57 @@ def linspace1d(start, stop, N) -> ndarray:
     for i in prange(N):
         res[i] = start + i * di
     return res
+
+
+def generalized_left_inverse(matrix: ndarray) -> ndarray:
+    """Returns the generalized left inverse
+
+    .. math::
+        :nowrap:
+
+        \\begin{equation}
+            \left( \mathbf{A}^{T} \mathbf{A} \\right)^{-1} \mathbf{A}^{T}
+        \\end{equation}
+
+    """
+    return np.linalg.inv(matrix.T @ matrix) @ matrix.T
+
+
+def generalized_right_inverse(matrix: ndarray) -> ndarray:
+    """Returns the generalized right inverse
+
+    .. math::
+        :nowrap:
+
+        \\begin{equation}
+            \mathbf{A}^{T} \left( \mathbf{A} \mathbf{A}^{T} \\right)^{-1}
+        \\end{equation}
+
+    """
+    return matrix.T @ np.linalg.inv(matrix @ matrix.T)
+
+
+def generalized_inverse(matrix: ndarray) -> ndarray:
+    """
+    Returns the generalized inverse of the input matrix, in any of the following
+    cases:
+    1) The matrix is square and has full rank. In this case the returned matrix
+    is the usual inverse.
+    2) The matrix has more columns than rows and has full row rank. In this case
+    the generalized right inverse is returned.
+    3) The matrix has more rows than columns and has full column rank. In this case
+    the generalized left inverse is returned.
+    """
+    if not len(matrix.shape) == 2:
+        raise LinalgOperationInputError("The input must be a matrix")
+
+    num_rows, num_columns = matrix.shape
+    rank = np.linalg.matrix_rank(matrix)
+    if (num_rows == num_columns) and rank == num_columns == num_rows:
+        return np.linalg.inv(matrix)
+    elif (num_rows > num_columns) and rank == num_columns:
+        return generalized_left_inverse(matrix)
+    elif (num_rows < num_columns) and rank == num_rows:
+        return generalized_right_inverse(matrix)
+    else:
+        raise LinalgError("The matrix has no inverse")

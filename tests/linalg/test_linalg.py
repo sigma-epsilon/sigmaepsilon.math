@@ -10,7 +10,10 @@ import sympy as sy
 
 from sigmaepsilon.math.linalg.testing import LinalgTestCase
 
-from sigmaepsilon.math.linalg.utils import random_pos_semidef_matrix, random_posdef_matrix
+from sigmaepsilon.math.linalg.utils import (
+    random_pos_semidef_matrix,
+    random_posdef_matrix,
+)
 from sigmaepsilon.math.logical import ispossemidef, isposdef
 from sigmaepsilon.math.linalg import (
     ReferenceFrame,
@@ -856,14 +859,12 @@ class TestPosDef(LinalgTestCase):
         Tests the creation of random, positive semidefinite matrices.
         """
         self.assertTrue(ispossemidef(random_pos_semidef_matrix(N)))
-        self.assertTrue(lautils.is_pos_semidef(random_pos_semidef_matrix(N)))
 
     def test_random_posdef(self, N=2):
         """
         Tests the creation of random, positive definite matrices.
         """
         self.assertTrue(isposdef(random_posdef_matrix(N)))
-        self.assertTrue(lautils.is_pos_def(random_posdef_matrix(N)))
 
 
 class TestUtils(LinalgTestCase):
@@ -878,10 +879,6 @@ class TestUtils(LinalgTestCase):
         lautils.Gram(A)
         lautils.normalize_frame(A)
         lautils.dual_frame(A)
-        lautils.is_independent_frame(A)
-        lautils.is_orthonormal_frame(A)
-        lautils.is_normal_frame(A)
-        lautils.is_rectangular_frame(A)
 
         # miscellanous operations
         lautils.vpath(a1, a2, 3)

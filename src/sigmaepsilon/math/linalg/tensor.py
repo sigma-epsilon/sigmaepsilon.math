@@ -9,7 +9,8 @@ from .frame import ReferenceFrame as Frame
 from .abstract import AbstractTensor
 from .tr import _tr_tensors2, _tr_tensors4x3
 from .exceptions import TensorShapeMismatchError
-from .utils import is_hermitian, transpose_axes
+from .utils import transpose_axes
+from .logical import is_hermitian
 
 __all__ = [
     "Tensor",
