@@ -1,19 +1,15 @@
+from typing import List, Any, Tuple, Optional, Union, Iterable
+from collections import defaultdict
+from enum import Enum, auto, unique
+from time import time
+from copy import copy, deepcopy
+from contextlib import suppress
+
 import numpy as np
 from numpy import ndarray
 from numpy.linalg import LinAlgError
 import sympy as sy
 from sympy.utilities.iterables import multiset_permutations
-from copy import copy, deepcopy
-from contextlib import suppress
-
-try:
-    from collections.abc import Iterable
-except ImportError:  # pragma: no cover
-    from collections import Iterable
-from collections import defaultdict
-from typing import Tuple
-from enum import Enum, auto, unique
-from time import time
 
 from sigmaepsilon.core.kwargtools import getasany
 
@@ -139,7 +135,7 @@ class LinearProgrammingProblem:
         variables=None,
         positive=None,
         standardform=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.obj = None
@@ -153,7 +149,7 @@ class LinearProgrammingProblem:
             variables=variables,
             positive=positive,
             standardform=standardform,
-            **kwargs
+            **kwargs,
         )
 
     def _update(self, *args, variables=None, positive=None, **kwargs):
@@ -220,7 +216,7 @@ class LinearProgrammingProblem:
         )
         return P
 
-    def add_constraint(self, *args, **kwargs):
+    def add_constraint(self, *args, **kwargs) -> None:
         """
         Adds a new constraint to the system.
         """
@@ -236,17 +232,17 @@ class LinearProgrammingProblem:
         self.constraints.append(c)
 
     @property
-    def variables(self):
+    def variables(self) -> List[Any]:
         return self.vmanager.target()
 
-    def _sync_variables(self):
+    def _sync_variables(self) -> None:
         s = set()
         s.update(self.obj.variables)
         for c in self.constraints:
             s.update(c.variables)
         self.vmanager.add_variables(s)
 
-    def _shift_variables(self):
+    def _shift_variables(self) -> None:
         """
         Handle variables not restricted in sign.
         """
@@ -461,7 +457,9 @@ class LinearProgrammingProblem:
             return all(c)
 
     @staticmethod
-    def basic_solution(A=None, b=None, order=None) -> Tuple[ndarray]:
+    def basic_solution(
+        A: ndarray, b: ndarray, order: Optional[Union[Iterable[int], None]] = None
+    ) -> Tuple[ndarray]:
         """
         Returns a basic solution to a problem the form
 
@@ -484,7 +482,7 @@ class LinearProgrammingProblem:
         b: numpy.ndarray
             Right-hand sides. :math:`\mathbf{b} \in \mathbf{R}^m`
         order: Iterable[int], Optional
-            An arbitrary permutation of the indices.
+            An arbitrary permutation of the indices to start with.
 
         Returns
         -------
@@ -548,7 +546,11 @@ class LinearProgrammingProblem:
 
     @staticmethod
     def solve_standard_form(
-        A: ndarray, b: ndarray, c: ndarray, order=None, tol: float = 1e-10
+        A: ndarray,
+        b: ndarray,
+        c: ndarray,
+        order: Optional[Union[Iterable[int], None]] = None,
+        tol: Optional[float] = 1e-10,
     ):
         """Solves a linear problem in standard form:
 
@@ -558,15 +560,15 @@ class LinearProgrammingProblem:
 
         Parameters
         ----------
-        A : numpy.ndarray
+        A: numpy.ndarray
             2d float array.
-        b : numpy.ndarray
+        b: numpy.ndarray
             1d float array.
-        c : numpy.ndarray
+        c: numpy.ndarray
             1d float array.
-        order : Iterable, Optional
+        order: Iterable, Optional
             The order of the variables.
-        tol : float, Optional
+        tol: float, Optional
             Floating point tolerance. Default is 1e-10.
 
         Returns
@@ -650,10 +652,10 @@ class LinearProgrammingProblem:
             xB[i_leave], xN[i_enter] = xN[i_enter], xB[i_leave]
             return True
 
-        def unique_result():
+        def unique_result() -> ndarray:
             return np.concatenate((xB, xN))[np.argsort(order)]
 
-        def multiple_results():
+        def multiple_results() -> ndarray:
             assert np.all(reduced_costs >= 0)
             assert reduced_costs.min() <= tol
             inds = np.where(reduced_costs <= tol)[0]
@@ -711,7 +713,9 @@ class LinearProgrammingProblem:
                 degenerate = False
                 break
 
-    def to_numpy(self, maximize: bool = False, return_coeffs: bool = False):
+    def to_numpy(
+        self, maximize: Optional[bool] = False, return_coeffs: Optional[bool] = False
+    ) -> Tuple[ndarray, ndarray, Optional[List]]:
         """
         Returns the complete numerical representation of the standard
         form of the problem:
@@ -765,28 +769,28 @@ class LinearProgrammingProblem:
 
     def solve(
         self,
-        order=None,
-        return_all: bool = True,
-        maximize: bool = False,
-        as_dict: bool = False,
-        raise_errors: bool = False,
-        tol: float = 1e-10,
+        order: Optional[Union[Iterable[int], None]] = None,
+        return_all: Optional[bool] = True,
+        maximize: Optional[bool] = False,
+        as_dict: Optional[bool] = False,
+        raise_errors: Optional[bool] = False,
+        tol: Optional[float] = 1e-10,
     ):
         """
         Solves the problem and returns the solution(s) if there are any.
 
         Parameters
         ----------
-        order : Iterable, Optional
+        order: Iterable, Optional
             The order of the variables. This might speed up finding the
             basic solution. Default is None.
         as_dict: bool
             If `True`, the results are returned as a dictionary, where the
             keys are sympy symbols of the variables of the problem.
-        raise_errors : bool
+        raise_errors: bool
             If `True`, the solution raises the actual errors on exception events,
             otherwise they get returned within the result, under key `e`.
-        tol : float, Optional
+        tol: float, Optional
             Floating point tolerance. Default is 1e-10.
 
         Notes
@@ -801,11 +805,11 @@ class LinearProgrammingProblem:
         -------
         dict
             A dictionary with the following items:
-            x : numpy.ndarray or dict
+            x: numpy.ndarray or dict
                 The solution as an array or a dictionary, depending on your input.
-            e : Iterable
+            e: Iterable
                 A list of errors that occured during solution.
-            time : dict
+            time: dict
                 A dictionary with information of execution times of the main stages
                 of the calculation.
         """
