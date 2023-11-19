@@ -34,25 +34,33 @@ class Genom(BaseModel):
     def __hash__(self):
         arr_string = "".join(str(i) for i in self.genotype)
         return hash(arr_string)
-    
+
     def __gt__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness > other.fittness)
-    
+
     def __lt__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness < other.fittness)
-    
+
     def __gte__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness >= other.fittness)
-    
+
     def __lte__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness <= other.fittness)
 
 
@@ -116,7 +124,7 @@ class GeneticAlgorithm:
         maxiter: int = 200,
         miniter: int = 100,
         elitism: int = 1,
-        maxage: int = 5
+        maxage: int = 5,
     ):
         super().__init__()
         self.fnc = fnc
@@ -140,11 +148,7 @@ class GeneticAlgorithm:
         self._champion: Genom = None
         self.reset()
         self._set_solution_params(
-            maxiter=maxiter,
-            miniter=miniter,
-            elitism=elitism,
-            maxage=maxage
-            
+            maxiter=maxiter, miniter=miniter, elitism=elitism, maxage=maxage
         )
 
     @property
@@ -153,7 +157,7 @@ class GeneticAlgorithm:
         Returnes the genotypes of the population.
         """
         return self._champion
-    
+
     @property
     def genotypes(self) -> Iterable:
         """
@@ -203,11 +207,7 @@ class GeneticAlgorithm:
         return self
 
     def _set_solution_params(
-        self,
-        maxiter: int = 200,
-        miniter: int = 100,
-        elitism: int = 1,
-        maxage: int = 5
+        self, maxiter: int = 200, miniter: int = 100, elitism: int = 1, maxage: int = 5
     ) -> "GeneticAlgorithm":
         self.maxiter = np.max([miniter, maxiter])
         self.miniter = np.min([miniter, maxiter])
@@ -396,14 +396,14 @@ class GeneticAlgorithm:
             parent2 = genotypes[pair[1]]
             pool[pair] = False
             yield parent1, parent2
-            
+
     @abstractmethod
     def stopping_criteria(self) -> bool:
         """
         Implements a simple stopping criteria that evaluates to `True` if the
         current chanpion is thought ti bee the best solution and no further progress
         can be made, or at lest with a bad rate.
-        
+
         The default implementation considers a champion as the winner, if it is the champion
         for for at least 5 times in a row. This can be dontrolled with the `maxage` parameter
         when instantiating an instance.

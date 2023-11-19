@@ -22,22 +22,22 @@ class Function(MetaFunction):
 
     Parameters
     ----------
-    f0 : Callable
+    f0: Callable
         A callable object that returns function evaluations.
-    f1 : Callable
+    f1: Callable
         A callable object that returns evaluations of the
         gradient of the function.
-    f2 : Callable
+    f2: Callable
         A callable object that returns evaluations of the
         Hessian of the function.
-    variables : List, Optional
+    variables: List, Optional
         Symbolic variables. Only required if the function is defined by
         a string or `SymPy` expression.
-    value : Callable, Optional
+    value: Callable, Optional
         Same as `f0`.
-    gradient : Callable, Optional
+    gradient: Callable, Optional
         Same as `f1`.
-    Hessian : Callable, Optional
+    Hessian: Callable, Optional
         Same as `f2`.
     dimension or dim or d : int, Optional
         The number of dimensions of the domain of the function. Required only when
@@ -138,7 +138,7 @@ class Function(MetaFunction):
         f0: FuncionLike = None,
         f1: Callable = None,
         f2: Callable = None,
-        *args,
+        *_,
         variables=None,
         **kwargs
     ):

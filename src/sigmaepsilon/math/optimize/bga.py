@@ -98,13 +98,13 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         """
         Decodes the genotypes to phenotypes and returns them as an array.
         """
-        span = 2**self.length - 2**0
+        span = 2 ** self.length - 2 ** 0
         genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
         precisions = [
             (self.ranges[d, -1] - self.ranges[d, 0]) / span for d in range(self.dim)
         ]
         phenotypes = np.sum(
-            [genotypes[:, :, i] * 2**i for i in range(self.length)], axis=0
+            [genotypes[:, :, i] * 2 ** i for i in range(self.length)], axis=0
         ).astype(float)
         for d in range(self.dim):
             phenotypes[:, d] *= precisions[d]

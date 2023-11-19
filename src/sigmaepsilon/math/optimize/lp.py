@@ -45,11 +45,11 @@ class LinearProgrammingProblem:
 
     Parameters
     ----------
-    constraints : Iterable[Function]
+    constraints: Iterable[Function]
         List of constraint functions.
-    variables : Iterable
+    variables: Iterable
         List of variables of the system.
-    positive : bool, Optional
+    positive: bool, Optional
         A `True` value indicated that all variables are expected to take
         only positive values. Default is `True`.
     'obj', 'cost', 'payoff', 'fittness', 'f' : Function
@@ -341,9 +341,9 @@ class LinearProgrammingProblem:
 
         Parameters
         ----------
-        maximize : bool
+        maximize: bool
             Set this true if the problem is a maximization. Default is False.
-        inplace : bool
+        inplace: bool
             If `True`, transformation happend in place, changing the internal structure
             ob the instance it is invoked by. In this case, `self` gets returned for
             possible continuation.
@@ -479,11 +479,11 @@ class LinearProgrammingProblem:
 
         Parameters
         ----------
-        A : numpy.ndarray
+        A: numpy.ndarray
             An :math:`m \times n` matrix with :math:`n>m`
-        b : numpy.ndarray
+        b: numpy.ndarray
             Right-hand sides. :math:`\mathbf{b} \in \mathbf{R}^m`
-        order : Iterable[int], Optional
+        order: Iterable[int], Optional
             An arbitrary permutation of the indices.
 
         Returns
@@ -624,7 +624,7 @@ class LinearProgrammingProblem:
                 # step size could be indefinitely increased in this
                 # direction without violating feasibility, there is
                 # no solution to the problem
-                raise NoSolutionError("There is not solution to this problem!")
+                raise NoSolutionError("There is no solution to this problem!")
 
             vanishing_ratios = xB[i_leaving] / w_enter[i_leaving]
             # the variable that vanishes first is the one with the smallest

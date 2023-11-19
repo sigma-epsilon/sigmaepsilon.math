@@ -147,7 +147,7 @@ def weighted_least_squares(points, values, *args, deg=1, order=2, w=None, **kwar
         if dim == 1:
 
             def b(x):
-                return np.array([1, x, x**2])
+                return np.array([1, x, x ** 2])
 
             if grad:
 

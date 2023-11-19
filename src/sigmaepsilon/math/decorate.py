@@ -9,7 +9,7 @@ def _squeeze_if_array(arr: Any) -> Any:
     return np.squeeze(arr) if isinstance(arr, np.ndarray) else arr
 
 
-def squeeze(default:bool=True) -> Callable:
+def squeeze(default: bool = True) -> Callable:
     """
     A decorator that squeezes outputs of a function if
     * the result is a NumPy array
@@ -46,4 +46,3 @@ def squeeze(default:bool=True) -> Callable:
         return inner
 
     return decorator
-
