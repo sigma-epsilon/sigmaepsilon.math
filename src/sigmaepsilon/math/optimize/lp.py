@@ -767,6 +767,15 @@ class LinearProgrammingProblem:
         kwargs["maximize"] = True
         return self.solve(*args, **kwargs)
 
+    def minimize(self, *args, **kwargs) -> dict:
+        """
+        Solves the LPP as a minimization. For the possible arguments, and
+        return types see `solve`.
+
+        .. versionadded:: 1.1.0
+        """
+        return self.solve(*args, **kwargs)
+
     def solve(
         self,
         order: Optional[Union[Iterable[int], None]] = None,
@@ -777,7 +786,7 @@ class LinearProgrammingProblem:
         tol: Optional[float] = 1e-10,
     ):
         """
-        Solves the problem and returns the solution(s) if there are any.
+        Solves the problem as a minimization and returns the solution(s) if there are any.
 
         Parameters
         ----------
