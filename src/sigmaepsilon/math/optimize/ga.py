@@ -3,6 +3,7 @@ from typing import Iterable, Callable, Tuple, List, Iterable
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
+from joblib import Parallel, delayed
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
@@ -98,6 +99,15 @@ class GeneticAlgorithm:
         Default is 1
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
+    maxage: int, Optional
+        The age is the number of generations a candidate spends at the top 
+        (being the best candidate). Setting an upper limit to this value is a kind
+        of stopping criterion. Default is 5.
+    num_proc: int, Optional
+        The number of workers used to evaluate the population. Use a value of `-1` to use 
+        all cores. Default is 1.
+        
+        .. versionadded:: 1.1.0
 
     Note
     ----
@@ -125,6 +135,7 @@ class GeneticAlgorithm:
         miniter: int = 100,
         elitism: int = 1,
         maxage: int = 5,
+        num_proc: int = 1,
     ):
         super().__init__()
         self.fnc = fnc
@@ -148,7 +159,11 @@ class GeneticAlgorithm:
         self._champion: Genom = None
         self.reset()
         self._set_solution_params(
-            maxiter=maxiter, miniter=miniter, elitism=elitism, maxage=maxage
+            maxiter=maxiter,
+            miniter=miniter,
+            elitism=elitism,
+            maxage=maxage,
+            num_proc=num_proc,
         )
 
     @property
@@ -207,12 +222,18 @@ class GeneticAlgorithm:
         return self
 
     def _set_solution_params(
-        self, maxiter: int = 200, miniter: int = 100, elitism: int = 1, maxage: int = 5
+        self,
+        maxiter: int = 200,
+        miniter: int = 100,
+        elitism: int = 1,
+        maxage: int = 5,
+        num_proc: int = 1,
     ) -> "GeneticAlgorithm":
         self.maxiter = np.max([miniter, maxiter])
         self.miniter = np.min([miniter, maxiter])
         self.elitism = elitism
         self.maxage = maxage
+        self.num_proc = num_proc
         return self
 
     def evolver(self) -> Iterable:
@@ -281,7 +302,11 @@ class GeneticAlgorithm:
             Default is None.
         """
         phenotypes = self.phenotypes if phenotypes is None else phenotypes
-        return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        if self.num_proc == 1:
+            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        else:
+            results = Parallel(n_jobs=-1)(delayed(self.fnc)(x) for x in phenotypes)
+            return np.array(results, dtype=float)
 
     def best_phenotype(self) -> ndarray:
         """
