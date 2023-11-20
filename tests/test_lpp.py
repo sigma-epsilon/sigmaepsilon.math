@@ -178,5 +178,18 @@ class TestLPP(unittest.TestCase):
         assert len(e) == 0
 
 
+class TestDietaryPlanningProblem(unittest.TestCase):
+    def test_main(self):
+        variables = ["x1", "x2", "x3"]
+        x1, x2, x3 = syms = sy.symbols(variables, positive=True)
+        obj = Function(2*x1 + 3*x2 + 4*x3, variables=syms)
+        ieq1 = InEquality(20*x1 + 25*x2 + 30*x3 - 150, op=">=", variables=syms)
+        ieq2 = InEquality(30*x1 + 35*x2 + 40*x3 - 200, op=">=", variables=syms)
+        lpp = LPP(cost=obj, constraints=[ieq1, ieq2], variables=syms)
+        solution = atleast2d(lpp.minimize(raise_errors=True)["x"])
+        self.assertTrue(len(solution)==1)
+        self.assertTrue(np.allclose(solution[0], [7.5, 0, 0]))
+
+
 if __name__ == "__main__":
     unittest.main()
