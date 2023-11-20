@@ -53,7 +53,7 @@ class LinearProgrammingProblem:
 
     Examples
     --------
-    The examples requires `sympy` to be installed.
+    The examples require `sympy` to be installed.
 
     (1) Example for unique solution.
 
@@ -784,7 +784,7 @@ class LinearProgrammingProblem:
         as_dict: Optional[bool] = False,
         raise_errors: Optional[bool] = False,
         tol: Optional[float] = 1e-10,
-    ):
+    ) -> dict:
         """
         Solves the problem as a minimization and returns the solution(s) if there are any.
 
