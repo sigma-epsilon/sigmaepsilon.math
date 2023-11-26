@@ -1,6 +1,7 @@
+from collections.abc import Iterable
+
 import numpy as np
 from numpy.linalg import norm
-from collections.abc import Iterable
 
 from ..function import Function
 

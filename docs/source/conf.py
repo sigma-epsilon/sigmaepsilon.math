@@ -120,7 +120,7 @@ intersphinx_mapping = {
     "sphinx": (r"https://www.sphinx-doc.org/en/master", None),
     "pandas": (r"https://pandas.pydata.org/pandas-docs/stable/", None),
     "sigmaepsilon.core": (r"https://sigmaepsiloncore.readthedocs.io/en/latest/", None),
-    "linkeddeepdict": (r"https://linkeddeepdict.readthedocs.io/en/latest/", None),
+    "sigmaepsilon.deepdict": (r"https://sigmaepsilondeepdict.readthedocs.io/en/latest/", None),
 }
 
 # -- bibtex configuration -------------------------------------------------

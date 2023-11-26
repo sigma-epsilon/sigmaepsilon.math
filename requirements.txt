@@ -1,5 +1,5 @@
 sigmaepsilon.core>=1.1.1
-linkeddeepdict>=1.1.0
+sigmaepsilon.deepdict>=1.2.2
 numba>=0.56.4
 numpy==1.23.5
 scipy>=1.9.3
