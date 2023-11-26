@@ -226,7 +226,7 @@ def _get_polynomial(deg: int, dim: int):
         if dim == 1:
 
             def b(x):
-                return np.array([1, x, x**2])
+                return np.array([1, x, x ** 2])
 
             def bdx(x):
                 return np.array([0, 1, 2 * x[0]])

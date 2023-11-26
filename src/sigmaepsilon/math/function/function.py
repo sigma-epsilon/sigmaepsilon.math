@@ -58,18 +58,18 @@ class Function(MetaFunction):
     >>> f = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
     >>> f([0, 6, 0, 4])
     10
-    
+
     An equivalent definition can be given without using SymPy explicitly:
-    
+
     >>> f = Function("3*x1 + 9*x3 + x2 + x4", variables=['x1', 'x2', 'x3', 'x4'])
     >>> f([0, 6, 0, 4])
     10
-    
+
     In both cases, providing the argument 'variables' is optional, but it determines the
     order of the arguments. If the function is defined without the variables being provided,
     it is derived from the input, but the order of the arguments may differ from what you would
     expect.
-    
+
     >>> f = Function("3*x1 + 9*x3 + x2 + x4")
     >>> f.variables
     (x3, x1, x4, x2)
@@ -143,7 +143,7 @@ class Function(MetaFunction):
         f1: Callable = None,
         f2: Callable = None,
         *args,
-        variables:Optional[Union[Iterable, None]]=None,
+        variables: Optional[Union[Iterable, None]] = None,
         **kwargs
     ):
         super().__init__()
@@ -155,7 +155,7 @@ class Function(MetaFunction):
         f1: Callable = None,
         f2: Callable = None,
         *_,
-        variables: Iterable=None,
+        variables: Iterable = None,
         **kwargs
     ):
         self.from_str = None
@@ -195,7 +195,9 @@ class Function(MetaFunction):
         else:
             return self.f2 is None
 
-    def linear_coefficients(self, normalize: Optional[bool] = False) -> Union[Iterable, None]:
+    def linear_coefficients(
+        self, normalize: Optional[bool] = False
+    ) -> Union[Iterable, None]:
         """
         Returns the linear coeffiecients, if the function is symbolic.
         """
@@ -242,10 +244,10 @@ class Function(MetaFunction):
         """
         if not self.symbolic:
             raise TypeError("This is exclusive to symbolic functions.")
-        
+
         expr = substitute(self.expr, values, variables, as_string=self.from_str)
         kwargs = self._sympy_to_func(expr=expr, variables=variables)
-        
+
         if not inplace:
             return Function(None, None, None, **kwargs)
         else:
