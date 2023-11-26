@@ -2,5 +2,5 @@
 Approximation
 =============
 
-.. automodule:: sigmaepsilon.math.approx.lagrange
+.. automodule:: sigmaepsilon.math.approx
     :members: 
