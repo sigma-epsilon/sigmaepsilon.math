@@ -47,9 +47,7 @@ def least_squares(
     error functional
 
     .. math::
-        :nowrap:
-
-        \\sum_{i} \[ || f \( \mathbf{x}_i - f_i \) || \] ^2
+        \sum_{i} \\biggr[ || f \left( \mathbf{x}_i \\right) - f_i || \\biggr] ^2
 
     where :math:`f` is taken from :math:`\Pi_{m}^d`, the space of polynomials of
     total degree :math:`m` in :math:`d` spatial dimensions.
