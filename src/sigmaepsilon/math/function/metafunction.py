@@ -31,7 +31,7 @@ class MetaFunction(metaclass=ABCMeta_MetaFunction):
     __slots__ = ("f0", "f1", "f2", "dimension", "domain", "expr", "variables", "vmap")
 
     def __call__(self, *args, **kwargs):
-        return self.f0(*args, **kwargs)
+        return self.f(*args, **kwargs)
 
     def f(self, *args, **kwargs):
         """
