@@ -1,8 +1,9 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Tuple, List, Iterable
+from typing import Iterable, Callable, Tuple, List, Iterable, Optional, Union, Generator
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
+from joblib import Parallel, delayed
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
@@ -34,25 +35,33 @@ class Genom(BaseModel):
     def __hash__(self):
         arr_string = "".join(str(i) for i in self.genotype)
         return hash(arr_string)
-    
+
     def __gt__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness > other.fittness)
-    
+
     def __lt__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness < other.fittness)
-    
+
     def __gte__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness >= other.fittness)
-    
+
     def __lte__(self, other):
         if not isinstance(other, Genom):
-            raise TypeError(f"This operation is not supported between instances of {type(other)} and {type(self)}.")
+            raise TypeError(
+                f"This operation is not supported between instances of {type(other)} and {type(self)}."
+            )
         return np.all(self.fittness <= other.fittness)
 
 
@@ -90,6 +99,15 @@ class GeneticAlgorithm:
         Default is 1
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
+    maxage: int, Optional
+        The age is the number of generations a candidate spends at the top
+        (being the best candidate). Setting an upper limit to this value is a kind
+        of stopping criterion. Default is 5.
+    num_proc: int, Optional
+        The number of workers used to evaluate the population. Use a value of `-1` to use
+        all cores. Default is 1.
+
+        .. versionadded:: 1.1.0
 
     Note
     ----
@@ -109,14 +127,15 @@ class GeneticAlgorithm:
         fnc: Callable,
         ranges: Iterable,
         *,
-        length: int = 5,
-        p_c: float = 1,
-        p_m: float = 0.2,
-        nPop: int = 100,
-        maxiter: int = 200,
-        miniter: int = 100,
-        elitism: int = 1,
-        maxage: int = 5
+        length: Optional[int] = 5,
+        p_c: Optional[float] = 1,
+        p_m: Optional[float] = 0.2,
+        nPop: Optional[int] = 100,
+        maxiter: Optional[int] = 200,
+        miniter: Optional[int] = 0,
+        elitism: Optional[int] = 1,
+        maxage: Optional[int] = 5,
+        num_proc: Optional[int] = 1,
     ):
         super().__init__()
         self.fnc = fnc
@@ -143,9 +162,12 @@ class GeneticAlgorithm:
             maxiter=maxiter,
             miniter=miniter,
             elitism=elitism,
-            maxage=maxage
-            
+            maxage=maxage,
+            num_proc=num_proc,
         )
+
+        if self.miniter > self.maxiter:
+            raise ValueError("'maxiter' must be greater than 'miniter'")
 
     @property
     def champion(self) -> Genom:
@@ -153,7 +175,7 @@ class GeneticAlgorithm:
         Returnes the genotypes of the population.
         """
         return self._champion
-    
+
     @property
     def genotypes(self) -> Iterable:
         """
@@ -204,15 +226,23 @@ class GeneticAlgorithm:
 
     def _set_solution_params(
         self,
-        maxiter: int = 200,
-        miniter: int = 100,
-        elitism: int = 1,
-        maxage: int = 5
+        *,
+        maxiter: Optional[Union[int, None]] = None,
+        miniter: Optional[Union[int, None]] = None,
+        elitism: Optional[Union[int, None]] = None,
+        maxage: Optional[Union[int, None]] = None,
+        num_proc: Optional[Union[int, None]] = None,
     ) -> "GeneticAlgorithm":
-        self.maxiter = np.max([miniter, maxiter])
-        self.miniter = np.min([miniter, maxiter])
-        self.elitism = elitism
-        self.maxage = maxage
+        if maxiter is not None:
+            self.maxiter = maxiter
+        if miniter is not None:
+            self.miniter = miniter
+        if elitism is not None:
+            self.elitism = elitism
+        if maxage is not None:
+            self.maxage = maxage
+        if num_proc is not None:
+            self.num_proc = num_proc
         return self
 
     def evolver(self) -> Iterable:
@@ -228,7 +258,7 @@ class GeneticAlgorithm:
             )
             yield self._genotypes
 
-    def evolve(self, cycles: int = 1) -> Iterable:
+    def evolve(self, cycles: Optional[int] = 1) -> Iterable:
         """
         Performs a certain number of cycles of evolution and returns the
         genotypes.
@@ -237,7 +267,7 @@ class GeneticAlgorithm:
             next(self._evolver)
         return self.genotypes
 
-    def solve(self, recycle: bool = False, **kwargs) -> Genom:
+    def solve(self, recycle: Optional[bool] = False, **kwargs) -> Genom:
         """
         Solves the problem and returns the best phenotype.
 
@@ -267,7 +297,7 @@ class GeneticAlgorithm:
         self.nIter = nIter
         return self.champion
 
-    def evaluate(self, phenotypes: Iterable = None) -> ndarray:
+    def evaluate(self, phenotypes: Optional[Union[Iterable, None]] = None) -> ndarray:
         """
         Evaluates the objective for a list of phenotypes.
 
@@ -281,7 +311,13 @@ class GeneticAlgorithm:
             Default is None.
         """
         phenotypes = self.phenotypes if phenotypes is None else phenotypes
-        return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        if self.num_proc == 1:
+            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        else:
+            results = Parallel(n_jobs=self.num_proc)(
+                delayed(self.fnc)(x) for x in phenotypes
+            )
+            return np.array(results, dtype=float)
 
     def best_phenotype(self) -> ndarray:
         """
@@ -331,7 +367,7 @@ class GeneticAlgorithm:
                 self._champion.age = 0
         self._champion.age += 1
 
-    def divide(self, fittness: ndarray = None) -> Tuple[List]:
+    def divide(self, fittness: Optional[Union[ndarray, None]] = None) -> Tuple[List]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.
@@ -365,7 +401,9 @@ class GeneticAlgorithm:
         return list(elit), others
 
     @classmethod
-    def random_parents_generator(cls, genotypes: ndarray = None):
+    def random_parents_generator(
+        cls, genotypes: Optional[Union[ndarray, None]] = None
+    ) -> Generator:
         """
         Yields random pairs from a list of genotypes.
 
@@ -396,14 +434,14 @@ class GeneticAlgorithm:
             parent2 = genotypes[pair[1]]
             pool[pair] = False
             yield parent1, parent2
-            
+
     @abstractmethod
     def stopping_criteria(self) -> bool:
         """
         Implements a simple stopping criteria that evaluates to `True` if the
         current chanpion is thought ti bee the best solution and no further progress
         can be made, or at lest with a bad rate.
-        
+
         The default implementation considers a champion as the winner, if it is the champion
         for for at least 5 times in a row. This can be dontrolled with the `maxage` parameter
         when instantiating an instance.
@@ -411,21 +449,21 @@ class GeneticAlgorithm:
         return self.champion.age > self.maxage
 
     @abstractmethod
-    def encode(self, phenotypes: ndarray = None) -> ndarray:
+    def encode(self, phenotypes: Optional[Union[ndarray, None]] = None) -> ndarray:
         """
         Turns phenotypes into genotypes.
         """
         return phenotypes
 
     @abstractmethod
-    def decode(self, genotypes: ndarray = None) -> ndarray:
+    def decode(self, genotypes: Optional[Union[ndarray, None]] = None) -> ndarray:
         """
         Turns genotypes into phenotypes.
         """
         return genotypes
 
     @abstractmethod
-    def populate(self, genotypes: ndarray = None):
+    def populate(self, genotypes: Optional[Union[ndarray, None]] = None):
         """
         Ought to produce a pool of phenotypes.
         """
@@ -433,7 +471,9 @@ class GeneticAlgorithm:
 
     @abstractmethod
     def crossover(
-        self, parent1: ndarray = None, parent2: ndarray = None
+        self,
+        parent1: Optional[Union[ndarray, None]] = None,
+        parent2: Optional[Union[ndarray, None]] = None,
     ) -> Tuple[ndarray]:
         """
         Takes in two parents, returns two offspring. You'd probably want to use it inside
@@ -442,14 +482,18 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def mutate(self, child: ndarray = None) -> ndarray:
+    def mutate(self, child: Optional[Union[ndarray, None]] = None) -> ndarray:
         """
         Takes a child in, returns a mutant.
         """
         ...
 
     @abstractmethod
-    def select(self, genotypes: ndarray = None, phenotypes: ndarray = None):
+    def select(
+        self,
+        genotypes: Optional[Union[ndarray, None]] = None,
+        phenotypes: Optional[Union[ndarray, None]] = None,
+    ):
         """
         Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
         tournament or other.

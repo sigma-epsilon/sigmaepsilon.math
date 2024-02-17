@@ -19,5 +19,6 @@ class LinalgInvalidTensorOperationError(SigmaEpsilonException):
     the arrays of the tensorial inputs.
     """
 
+
 class LinalgError(SigmaEpsilonException):
     """General linear algebra error"""

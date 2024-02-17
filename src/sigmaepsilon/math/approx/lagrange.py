@@ -1,9 +1,10 @@
 from typing import Iterable, Callable
+
 import sympy as sy
 from sympy import latex
 import numpy as np
 
-from linkeddeepdict import LinkedDeepDict
+from sigmaepsilon.deepdict import DeepDict
 
 
 __all__ = ["gen_Lagrange_1d", "approx_Lagrange_1d"]
@@ -108,7 +109,7 @@ def gen_Lagrange_1d(
     """
     xsym = xsym if xsym is not None else r"x"
     fsym = fsym if fsym is not None else r"\phi"
-    module_data = LinkedDeepDict() if not isinstance(out, dict) else out
+    module_data = DeepDict() if not isinstance(out, dict) else out
 
     xvar = sy.symbols(xsym)
     if not isinstance(N, int):

@@ -4,8 +4,8 @@ from numpy import ndarray
 from .utils import Gram
 
 __all__ = [
-    "has_full_row_rank", 
-    "has_full_column_rank", 
+    "has_full_row_rank",
+    "has_full_column_rank",
     "has_full_rank",
     "is_rectangular_frame",
     "is_normal_frame",
@@ -96,7 +96,7 @@ def has_full_row_rank(matrix: ndarray) -> bool:
     """
     Returns `True` if the input matrix has full row rank, ie
     if all its rows are linearly independent.
-    
+
     See also
     --------
     :func:`numpy.linalg.matrix_rank`
@@ -112,7 +112,7 @@ def has_full_column_rank(matrix: ndarray) -> bool:
     """
     Returns `True` if the input matrix has full column rank, ie
     if all its columns are linearly independent.
-    
+
     See also
     --------
     :func:`numpy.linalg.matrix_rank`
@@ -127,7 +127,7 @@ def has_full_column_rank(matrix: ndarray) -> bool:
 def has_full_rank(matrix: ndarray) -> bool:
     """
     Returns `True` if the input matrix has full rank.
-    
+
     See also
     --------
     :func:`numpy.linalg.matrix_rank`

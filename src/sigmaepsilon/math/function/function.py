@@ -1,9 +1,10 @@
-from typing import TypeVar, Callable
+from typing import TypeVar, Callable, Iterable, Optional, Union
+from collections import OrderedDict
+
 import sympy as sy
 from sympy import Expr, degree, latex, lambdify
 from sympy.core.numbers import One
 import numpy as np
-from collections import OrderedDict
 
 from sigmaepsilon.core.kwargtools import getasany
 
@@ -22,22 +23,22 @@ class Function(MetaFunction):
 
     Parameters
     ----------
-    f0 : Callable
+    f0: Callable
         A callable object that returns function evaluations.
-    f1 : Callable
+    f1: Callable
         A callable object that returns evaluations of the
         gradient of the function.
-    f2 : Callable
+    f2: Callable
         A callable object that returns evaluations of the
         Hessian of the function.
-    variables : List, Optional
+    variables: List, Optional
         Symbolic variables. Only required if the function is defined by
         a string or `SymPy` expression.
-    value : Callable, Optional
+    value: Callable, Optional
         Same as `f0`.
-    gradient : Callable, Optional
+    gradient: Callable, Optional
         Same as `f1`.
-    Hessian : Callable, Optional
+    Hessian: Callable, Optional
         Same as `f2`.
     dimension or dim or d : int, Optional
         The number of dimensions of the domain of the function. Required only when
@@ -57,6 +58,21 @@ class Function(MetaFunction):
     >>> f = Function(3*x1 + 9*x3 + x2 + x4, variables=syms)
     >>> f([0, 6, 0, 4])
     10
+
+    An equivalent definition can be given without using SymPy explicitly:
+
+    >>> f = Function("3*x1 + 9*x3 + x2 + x4", variables=['x1', 'x2', 'x3', 'x4'])
+    >>> f([0, 6, 0, 4])
+    10
+
+    In both cases, providing the argument 'variables' is optional, but it determines the
+    order of the arguments. If the function is defined without the variables being provided,
+    it is derived from the input, but the order of the arguments may differ from what you would
+    expect.
+
+    >>> f = Function("3*x1 + 9*x3 + x2 + x4")
+    >>> f.variables
+    (x3, x1, x4, x2)
 
     Define a numerical function. In this case the dimension of the input must be specified
     explicitly.
@@ -127,7 +143,7 @@ class Function(MetaFunction):
         f1: Callable = None,
         f2: Callable = None,
         *args,
-        variables=None,
+        variables: Optional[Union[Iterable, None]] = None,
         **kwargs
     ):
         super().__init__()
@@ -138,8 +154,8 @@ class Function(MetaFunction):
         f0: FuncionLike = None,
         f1: Callable = None,
         f2: Callable = None,
-        *args,
-        variables=None,
+        *_,
+        variables: Iterable = None,
         **kwargs
     ):
         self.from_str = None
@@ -159,7 +175,7 @@ class Function(MetaFunction):
         self.vmap = kwargs.get("vmap", None)
 
     @property
-    def symbolic(self):
+    def symbolic(self) -> bool:
         """
         Returns True if the function is a fit subject of symbolic manipulation.
         This is probably only true if the object was created from a string or
@@ -168,7 +184,7 @@ class Function(MetaFunction):
         return self.expr is not None
 
     @property
-    def linear(self):
+    def linear(self) -> bool:
         """
         Returns True if the function is at most linear in all of its variables.
         """
@@ -179,7 +195,9 @@ class Function(MetaFunction):
         else:
             return self.f2 is None
 
-    def linear_coefficients(self, normalize: bool = False):
+    def linear_coefficients(
+        self, normalize: Optional[bool] = False
+    ) -> Union[Iterable, None]:
         """
         Returns the linear coeffiecients, if the function is symbolic.
         """
@@ -210,7 +228,7 @@ class Function(MetaFunction):
         except Exception:
             return None
 
-    def to_latex(self):
+    def to_latex(self) -> str:
         """
         Returns the LaTeX code of the symbolic expression of the object.
         Only for simbolic functions.
@@ -220,14 +238,16 @@ class Function(MetaFunction):
         else:
             raise TypeError("This is exclusive to symbolic functions.")
 
-    def subs(self, values, variables=None, inplace=False):
+    def subs(self, values, variables=None, inplace=False) -> "Function":
         """
         Substitites values for variables.
         """
         if not self.symbolic:
             raise TypeError("This is exclusive to symbolic functions.")
+
         expr = substitute(self.expr, values, variables, as_string=self.from_str)
         kwargs = self._sympy_to_func(expr=expr, variables=variables)
+
         if not inplace:
             return Function(None, None, None, **kwargs)
         else:

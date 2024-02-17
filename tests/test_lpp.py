@@ -174,7 +174,7 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
         lpp = LPP(cost=f, constraints=[ieq1, ieq2, ieq3], variables=syms)
-        e = lpp.solve(return_all=True, raise_errors=True, as_dict=True)["e"]
+        e = lpp.minimize(return_all=True, raise_errors=True, as_dict=True)["e"]
         assert len(e) == 0
 
 
