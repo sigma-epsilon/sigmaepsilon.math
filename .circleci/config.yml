@@ -48,11 +48,11 @@ jobs:
             poetry install
             poetry build
       - run:
-          name: Deploy to test-PyPI
+          name: Deploy to TestPyPI
           command: |
             poetry config repositories.testpypi https://test.pypi.org/legacy/
-            poetry config pypi-token.pypi $TEST_PYPI_TOKEN
-            poetry publish -r testpypi
+            poetry config pypi-token.testpypi $TEST_PYPI_TOKEN
+            poetry publish -r testpypi --skip-existing
   
   deploy_to_pypi:
     executor: my-executor
