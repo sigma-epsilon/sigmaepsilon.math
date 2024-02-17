@@ -11,8 +11,7 @@ executors:
 
 jobs:
   run_tests:
-    docker:
-      - image: cimg/python:3.10
+    executor: my-executor
     steps:
       - checkout
       - python/install-packages:
@@ -26,14 +25,19 @@ jobs:
           name: Run tests and generate coverage report
           command: |
             poetry run pytest --cov --cov-config=.coveragerc --cov sigmaepsilon.math
+      - run:
+          name: List working directory contents
+          command: ls -al
+      - run:
+          name: List home directory contents
+          command: ls -a ~
       - codecov/upload
       - store_artifacts:
           name: Store coverage report as artifact
           path: htmlcov
 
   deploy_to_test_pypi:
-    docker:
-      - image: cimg/python:3.10
+    executor: my-executor
     steps:
       - checkout
       - run:
@@ -44,8 +48,7 @@ jobs:
             poetry publish -r testpypi
   
   deploy_to_pypi:
-    docker:
-      - image: cimg/python:3.10
+    executor: my-executor
     steps:
       - checkout
       - run:
