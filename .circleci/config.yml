@@ -1,52 +1,33 @@
-# Python CircleCI 2.1 configuration file
 version: 2.1
 
 orbs:
-  # The python orb contains a set of prepackaged circleci configuration you can use repeatedly in your configurations files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@2.1.1
-  codecov: codecov/codecov@3
+  codecov: codecov/codecov@4.0.1
 
 jobs:
-  build_test:
+  run_tests:
     docker:
       - image: cimg/python:3.10
     steps:
       - checkout  # checkout source code to working directory
       - python/install-packages:
-          pkg-manager: pip
-          pip-dependency-file: requirements-test.txt
+          pkg-manager: poetry
       - run:
-          command: pip install pytest pytest-cov
-      - run:
-          name: Build wheel
+          name: Build project
           command: |
-            pip install wheel twine
-            pip install ".[test, dev]"
-            pip install 'build<0.10.0'
-            python -m build
+            poetry install --with test
+            poetry build
       - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: python -m pytest
-  
-  test_pypi_publish:
-    docker:
-      - image: cimg/python:3.10
-    steps:
-      - checkout  # checkout source code to working directory
-      - run:
-          name: Deploy to testpypi
+          name: Run tests and generate coverage report
           command: |
-            pip install wheel twine
-            pip install .
-            pip install 'build<0.10.0'
-            python -m build
-            python -m twine upload --repository testpypi --skip-existing dist/*
+            chmod +x ./run_pytest_cov.sh
+            ./run_pytest_cov.sh
+      - codecov/upload
+      - store_artifacts:
+          name: Store coverage report as artifact
+          path: htmlcov
 
-  pypi_publish:
+  deploy_to_test_pypi:
     docker:
       - image: cimg/python:3.10
     steps:
@@ -54,99 +35,40 @@ jobs:
       - run:
           name: Deploy to pypi
           command: |
-            pip install wheel twine
-            pip install .
-            pip install 'build<0.10.0'
-            python -m build
-            python -m twine upload --skip-existing dist/*
-
-  test310:  # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.9 container
-    # Change the version below to your required version of python
+            poetry config repositories.testpypi https://test.pypi.org/legacy/
+            poetry config pypi-token.pypi $TEST_PYPI_TOKEN
+            poetry publish -r testpypi
+  
+  deploy_to_pypi:
     docker:
       - image: cimg/python:3.10
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
-    
-    working_directory: ~/project
-    
     steps:
-      - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
-      - python/install-packages:
-          pkg-manager: pip
-          pip-dependency-file: requirements-test.txt
+      - checkout  # checkout source code to working directory
       - run:
-          command: pip install ".[test, dev]"
-      - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: pytest --cov
-      - run:
-          name: Generate Artifact
-          command: pytest --cov-report html
-      #- codecov/upload
-      - store_artifacts:
-          path: ~/project/htmlcov
-
-  tox-test:  # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.9 container
-    # Change the version below to your required version of python
-    docker:
-      - image: fkrull/multi-python
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
-    
-    working_directory: ~/project
-    
-    steps:
-      - checkout
-      - run:
-          name: Test
-          command: tox
+          name: Deploy to pypi
+          command: |
+            python -m twine upload --skip-existing dist/*
 
 workflows:
-  version: 2
-
-  main:  # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows
+  test_and_deploy_to_test_pypi:
     jobs:
-      #- tox-test
-      - test310
+      - run_tests
 
-  build_test_publish:
-    jobs:
-      - build_test
-      - test_pypi_publish:
+      - deploy_to_test_pypi:
           context:
             - TestPyPI deploy
           requires:
-            - build_test
+            - run_tests
           filters:
             branches:
               only:
-                - main
-      - pypi_publish:
+                - test
+
+      - deploy_to_pypi:
           context:
             - PyPI deploy
           requires:
-            - test_pypi_publish
+            - run_tests
           filters:
             branches:
               only:

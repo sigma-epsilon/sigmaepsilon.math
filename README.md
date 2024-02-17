@@ -4,7 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/sigmaepsilonmath/badge/?version=latest)](https://sigmaepsilonmath.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://badge.fury.io/py/sigmaepsilon.math.svg)](https://pypi.org/project/sigmaepsilon.math)
-[![codecov](https://codecov.io/gh/dewloosh/sigmaepsilon.math/branch/main/graph/badge.svg?token=TBI6GG4ECG)](https://codecov.io/gh/dewloosh/sigmaepsilon.math)
+[![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math/graph/badge.svg?token=GP9FSFQW34)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math)
 [![Python 3.7-3.10](https://img.shields.io/badge/python-3.7%E2%80%923.10-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
