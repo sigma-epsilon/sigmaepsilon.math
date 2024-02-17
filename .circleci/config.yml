@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Run tests and generate coverage report
           command: |
-            poetry run pytest --cov --cov-report=html:htmlcov --cov-config=.coveragerc --cov=sigmaepsilon.math
+            poetry run pytest --cov --cov-report=xml:htmlcov --cov-config=.coveragerc --cov=sigmaepsilon.math
       - run:
           name: List working directory contents
           command: ls -al
