@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Tuple, List, Iterable, Optional, Union
+from typing import Iterable, Callable, Tuple, List, Iterable, Optional, Union, Generator
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
@@ -403,7 +403,7 @@ class GeneticAlgorithm:
     @classmethod
     def random_parents_generator(
         cls, genotypes: Optional[Union[ndarray, None]] = None
-    ) -> Tuple[ndarray, ndarray]:
+    ) -> Generator[ndarray, ndarray]:
         """
         Yields random pairs from a list of genotypes.
 

@@ -26,4 +26,5 @@ def generate_examples_gallery_rst(
         f.write("\n")
 
         for nb in notebook_names:
-            f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")
+            if not nb.startswith("_"):
+                f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")

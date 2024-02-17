@@ -1,7 +1,7 @@
 sigmaepsilon.core>=1.1.1
 sigmaepsilon.deepdict>=1.2.2
 numba>=0.56.4
-numpy==1.23.5
+numpy>=1.23.5
 scipy>=1.9.3
 awkward>=2.0.8
 sympy>=1.11.1
