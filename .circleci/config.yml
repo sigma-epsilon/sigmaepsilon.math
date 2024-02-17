@@ -17,7 +17,7 @@ jobs:
       - python/install-packages:
           pkg-manager: poetry
       - run:
-          name: Build project
+          name: Install project
           command: |
             poetry install --with test
       - run:
@@ -31,6 +31,9 @@ jobs:
       - run:
           name: List home directory contents
           command: ls -a ~
+      - run:
+          name: List contents of htmlcov directory
+          command: ls -al htmlcov
       - codecov/upload
       - store_artifacts:
           name: Store coverage report as artifact
