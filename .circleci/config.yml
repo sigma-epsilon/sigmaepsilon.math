@@ -40,6 +40,12 @@ jobs:
     executor: my-executor
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: poetry
+      - run:
+          name: Build project
+          command: |
+            poetry install --build
       - run:
           name: Deploy to pypi
           command: |
@@ -51,6 +57,12 @@ jobs:
     executor: my-executor
     steps:
       - checkout
+      - python/install-packages:
+          pkg-manager: poetry
+      - run:
+          name: Build project
+          command: |
+            poetry install --build
       - run:
           name: Deploy to pypi
           command: |
