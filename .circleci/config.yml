@@ -31,7 +31,7 @@ jobs:
       - run:
           name: List home directory contents
           command: ls -a ~
-      - codecov/upload
+      #- codecov/upload
       - store_artifacts:
           name: Store coverage report as artifact
           path: htmlcov
