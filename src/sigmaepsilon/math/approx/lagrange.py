@@ -125,7 +125,7 @@ def gen_Lagrange_1d(
         else:
             symbols = [xsym + "_{}".format(i + 1) for i in range(N)]
             x = sy.symbols(", ".join(symbols))
-    poly = sum([c * xvar ** i for i, c in enumerate(coeffs)])
+    poly = sum([c * xvar**i for i, c in enumerate(coeffs)])
 
     evals = [poly.subs({xsym: x[i]}) for i in range(N)]
     A = sy.zeros(N, N)

@@ -68,6 +68,20 @@ If you are a developer and want to install the library in development mode, the 
 >>> pip install "-e .[test, dev]"
 ```
 
+## Testing and coverage
+
+The following command runs all tests and creates a html report in a folder named `htmlcov` (the settings are governed by the `.coveragerc` file):
+
+```console
+python -m pytest --cov-report html --cov-config=.coveragerc --cov sigmaepsilon.math
+```
+
+## Changes and versioning
+
+See the [changelog](CHANGELOG.md), for the most notable changes between releases.
+
+The project adheres to [semantic versioning](https://semver.org/).
+
 ## How to contribute?
 
 Contributions are currently expected in any the following ways:
@@ -83,6 +97,8 @@ Contributions are currently expected in any the following ways:
 * sharing is caring
   If you like the library, share it with your friends or colleagues so they can like it too.
 
+In all cases, read the [contributing guidelines](CONTRIBUTING.md) before you do anything.
+
 ## Acknowledgements
 
 Although `sigmaepsilon.math` heavily builds on `NumPy`, `Scipy`, `Numba` and `Awkward` and it also has functionality related to `networkx` and other third party libraries. Whithout these libraries the concept of writing performant, yet elegant Python code would be much more difficult.
@@ -93,4 +109,4 @@ Also, funding of these libraries is partly based on the size of the community th
 
 ## **License**
 
-This package is licensed under the [MIT license](https://opensource.org/license/mit/).
+This package is licensed under the [MIT license](LICENSE.txt).

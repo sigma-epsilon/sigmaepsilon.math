@@ -92,7 +92,6 @@ try:
             """
             return pseudo_peripheral_nodes(csr_matrix(adjacency_matrix(self)))
 
-
 except:  # pragma: no cover
     Graph = None
 

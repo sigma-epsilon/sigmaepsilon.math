@@ -86,7 +86,7 @@ class SingularWeightFunction(MLSWeightFunction):
 
     def value(self, x: Iterable[Number]):
         super().value(x)
-        return 1 / (norm(np.subtract(self.core, x)) ** 2 + self.eps ** 2)
+        return 1 / (norm(np.subtract(self.core, x)) ** 2 + self.eps**2)
 
 
 class CubicWeightFunction(MLSWeightFunction):
@@ -131,12 +131,12 @@ class CubicWeightFunction(MLSWeightFunction):
             drdY = (difY / abs(difY)) / dmY
 
         if rX <= 0.5:
-            wX = 2 / 3 - 4 * rX ** 2 + 4 * rX ** 3
-            dwXdX = (-8 * rX + 12 * rX ** 2) * drdX
+            wX = 2 / 3 - 4 * rX**2 + 4 * rX**3
+            dwXdX = (-8 * rX + 12 * rX**2) * drdX
             dwXdXX = (-8 + 24 * rX) * drdX * drdX
         elif rX > 0.5 and rX <= 1:
-            wX = 4 / 3 - 4 * rX + 4 * rX ** 2 - (4 / 3) * rX ** 3
-            dwXdX = (-4 + 8 * rX - 4 * rX ** 2) * drdX
+            wX = 4 / 3 - 4 * rX + 4 * rX**2 - (4 / 3) * rX**3
+            dwXdX = (-4 + 8 * rX - 4 * rX**2) * drdX
             dwXdXX = (8 - 8 * rX) * drdX * drdX
         else:
             wX = 0
@@ -144,12 +144,12 @@ class CubicWeightFunction(MLSWeightFunction):
             dwXdXX = 0
 
         if rY <= 0.5:
-            wY = 2 / 3 - 4 * rY ** 2 + 4 * rY ** 3
-            dwYdY = (-8 * rY + 12 * rY ** 2) * drdY
+            wY = 2 / 3 - 4 * rY**2 + 4 * rY**3
+            dwYdY = (-8 * rY + 12 * rY**2) * drdY
             dwYdYY = (-8 + 24 * rY) * drdY * drdY
         elif rY > 0.5 and rY <= 1:
-            wY = 4 / 3 - 4 * rY + 4 * rY ** 2 - (4 / 3) * rY ** 3
-            dwYdY = (-4 + 8 * rY - 4 * rY ** 2) * drdY
+            wY = 4 / 3 - 4 * rY + 4 * rY**2 - (4 / 3) * rY**3
+            dwYdY = (-4 + 8 * rY - 4 * rY**2) * drdY
             dwYdYY = (8 - 8 * rY) * drdY * drdY
         else:
             wY = 0
