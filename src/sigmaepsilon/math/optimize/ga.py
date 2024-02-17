@@ -403,7 +403,7 @@ class GeneticAlgorithm:
     @classmethod
     def random_parents_generator(
         cls, genotypes: Optional[Union[ndarray, None]] = None
-    ) -> Generator[ndarray, ndarray]:
+    ) -> Generator:
         """
         Yields random pairs from a list of genotypes.
 
