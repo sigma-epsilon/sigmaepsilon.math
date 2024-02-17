@@ -42,7 +42,7 @@ jobs:
             # Options are `alpine`, `linux`, `macos`, `windows`
             curl -Os https://uploader.codecov.io/latest/linux/codecov
             chmod +x codecov
-            ./htmlcov -t ${CODECOV_TOKEN}
+            ./codecov -t ${CODECOV_TOKEN}
       - store_artifacts:
           name: Store coverage report as artifact
           path: htmlcov
