@@ -24,14 +24,14 @@ jobs:
       - run:
           name: Run tests and generate coverage report
           command: |
-            poetry run pytest --cov --cov-config=.coveragerc --cov sigmaepsilon.math
+            poetry run pytest --cov-config=.coveragerc --cov=sigmaepsilon.math
       - run:
           name: List working directory contents
           command: ls -al
       - run:
           name: List home directory contents
           command: ls -a ~
-      #- codecov/upload
+      - codecov/upload
       - store_artifacts:
           name: Store coverage report as artifact
           path: htmlcov
@@ -68,7 +68,8 @@ jobs:
       - run:
           name: Deploy to PyPI
           command: |
-            python -m twine upload --skip-existing dist/*
+            poetry config pypi-token.pypi $TEST_PYPI_TOKEN
+            poetry publish -r pypi --skip-existing
 
 workflows:
   test_and_deploy_to_test_pypi:
