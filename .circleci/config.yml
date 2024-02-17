@@ -4,12 +4,17 @@ orbs:
   python: circleci/python@2.1.1
   codecov: codecov/codecov@4.0.1
 
+executors:
+  my-executor:
+    docker:
+      - image: cimg/python:3.10
+
 jobs:
   run_tests:
     docker:
       - image: cimg/python:3.10
     steps:
-      - checkout  # checkout source code to working directory
+      - checkout
       - python/install-packages:
           pkg-manager: poetry
       - run:
@@ -20,8 +25,7 @@ jobs:
       - run:
           name: Run tests and generate coverage report
           command: |
-            chmod +x ./run_pytest_cov.sh
-            ./run_pytest_cov.sh
+            poetry run pytest --cov --cov-config=.coveragerc --cov sigmaepsilon.math
       - codecov/upload
       - store_artifacts:
           name: Store coverage report as artifact
@@ -31,7 +35,7 @@ jobs:
     docker:
       - image: cimg/python:3.10
     steps:
-      - checkout  # checkout source code to working directory
+      - checkout
       - run:
           name: Deploy to pypi
           command: |
@@ -43,7 +47,7 @@ jobs:
     docker:
       - image: cimg/python:3.10
     steps:
-      - checkout  # checkout source code to working directory
+      - checkout
       - run:
           name: Deploy to pypi
           command: |
