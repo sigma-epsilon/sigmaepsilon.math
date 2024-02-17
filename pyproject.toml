@@ -54,7 +54,6 @@ networkx = "^3.2.1"
 flake8 = "^7.0.0"
 coverage = "^7.4.1"
 
-
 [tool.poetry.group.docs.dependencies]
 ipython = "^8.21.0"
 myst-parser = "^2.0.0"
@@ -69,7 +68,3 @@ sphinx-inline-tabs = "^2023.4.21"
 pydata-sphinx-theme = "^0.15.2"
 networkx = "^3.2.1"
 plotly = "^5.19.0"
-
-
-[tool.poetry.extras]
-
