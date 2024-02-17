@@ -34,7 +34,15 @@ jobs:
       - run:
           name: List contents of htmlcov directory
           command: ls -al htmlcov
-      - codecov/upload
+      #- codecov/upload
+      - run:
+          name: Upload coverage reports to Codecov
+          command: |  
+            # Replace `linux` below with the appropriate OS
+            # Options are `alpine`, `linux`, `macos`, `windows`
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            chmod +x codecov
+            ./htmlcov -t ${CODECOV_TOKEN}
       - store_artifacts:
           name: Store coverage report as artifact
           path: htmlcov
