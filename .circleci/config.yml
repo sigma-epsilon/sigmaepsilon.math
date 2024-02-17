@@ -54,7 +54,7 @@ jobs:
             poetry config repositories.testpypi https://test.pypi.org/legacy/
             poetry config pypi-token.testpypi $TEST_PYPI_TOKEN
             poetry publish -r testpypi --skip-existing
-  
+
   deploy_to_pypi:
     executor: my-executor
     steps:
@@ -70,7 +70,7 @@ jobs:
           name: Deploy to PyPI
           command: |
             poetry config pypi-token.pypi $PYPI_TOKEN
-            poetry publish -r pypi --skip-existing
+            poetry publish --skip-existing
 
 workflows:
   test_and_deploy_to_test_pypi:
