@@ -24,15 +24,15 @@ jobs:
           command: |
             chmod +x ./run_pytest_cov.sh
             ./run_pytest_cov.sh
+      - store_artifacts:
+          name: Store coverage report as artifact
+          path: htmlcov
       - run:
           name: Upload coverage reports to Codecov
           command: |
             curl -Os https://uploader.codecov.io/latest/linux/codecov
             chmod +x codecov
             ./codecov -t ${CODECOV_TOKEN}
-      - store_artifacts:
-          name: Store coverage report as artifact
-          path: htmlcov
       - store_test_results:
           name: Store test results
           path: test-results
