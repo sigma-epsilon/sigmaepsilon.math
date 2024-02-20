@@ -1103,13 +1103,13 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "identify"
-version = "2.5.34"
+version = "2.5.35"
 description = "File identification library for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "identify-2.5.34-py2.py3-none-any.whl", hash = "sha256:a4316013779e433d08b96e5eabb7f641e6c7942e4ab5d4c509ebd2e7a8994aed"},
-    {file = "identify-2.5.34.tar.gz", hash = "sha256:ee17bc9d499899bc9eaec1ac7bf2dc9eedd480db9d88b96d123d3b64a9d34f5d"},
+    {file = "identify-2.5.35-py2.py3-none-any.whl", hash = "sha256:c4de0081837b211594f8e877a6b4fad7ca32bbfc1a9307fdd61c28bfe923f13e"},
+    {file = "identify-2.5.35.tar.gz", hash = "sha256:10a7ca245cfcd756a554a7288159f72ff105ad233c7c4b9c6f0f4d108f5f6791"},
 ]
 
 [package.extras]
@@ -1956,13 +1956,13 @@ test = ["flaky", "ipykernel (>=6.19.3)", "ipython", "ipywidgets", "nbconvert (>=
 
 [[package]]
 name = "nbconvert"
-version = "7.16.0"
-description = "Converting Jupyter Notebooks"
+version = "7.16.1"
+description = "Converting Jupyter Notebooks (.ipynb files) to other formats.  Output formats include asciidoc, html, latex, markdown, pdf, py, rst, script.  nbconvert can be used both as a Python library (`import nbconvert`) or as a command line tool (invoked as `jupyter nbconvert ...`)."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "nbconvert-7.16.0-py3-none-any.whl", hash = "sha256:ad3dc865ea6e2768d31b7eb6c7ab3be014927216a5ece3ef276748dd809054c7"},
-    {file = "nbconvert-7.16.0.tar.gz", hash = "sha256:813e6553796362489ae572e39ba1bff978536192fb518e10826b0e8cadf03ec8"},
+    {file = "nbconvert-7.16.1-py3-none-any.whl", hash = "sha256:3188727dffadfdc9c6a1c7250729063d7bc78b355ad7aa023138afa030d1cd07"},
+    {file = "nbconvert-7.16.1.tar.gz", hash = "sha256:e79e6a074f49ba3ed29428ed86487bf51509d9aab613bd8522ac08f6d28fd7fd"},
 ]
 
 [package.dependencies]
@@ -2438,13 +2438,13 @@ poetry-core = ">=1.7.0,<2.0.0"
 
 [[package]]
 name = "pre-commit"
-version = "3.6.1"
+version = "3.6.2"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pre_commit-3.6.1-py2.py3-none-any.whl", hash = "sha256:9fe989afcf095d2c4796ce7c553cf28d4d4a9b9346de3cda079bcf40748454a4"},
-    {file = "pre_commit-3.6.1.tar.gz", hash = "sha256:c90961d8aa706f75d60935aba09469a6b0bcb8345f127c3fbee4bdc5f114cf4b"},
+    {file = "pre_commit-3.6.2-py2.py3-none-any.whl", hash = "sha256:ba637c2d7a670c10daedc059f5c49b5bd0aadbccfcd7ec15592cf9665117532c"},
+    {file = "pre_commit-3.6.2.tar.gz", hash = "sha256:c3ef34f463045c88658c5b99f38c1e297abdcc0ff13f98d3370055fbbfabc67e"},
 ]
 
 [package.dependencies]
@@ -3367,13 +3367,13 @@ files = [
 
 [[package]]
 name = "sigmaepsilon-core"
-version = "1.2.0"
+version = "1.2.1"
 description = "Common developer utilities for Python projects."
 optional = false
-python-versions = "<3.11,>=3.8"
+python-versions = ">=3.10,<4.0"
 files = [
-    {file = "sigmaepsilon.core-1.2.0-py3-none-any.whl", hash = "sha256:b2f51cf9f2166f0e0371dfba7edcf7cb62d2ed10d895c61107421e1fc9ce2317"},
-    {file = "sigmaepsilon.core-1.2.0.tar.gz", hash = "sha256:27560aeed519fe0994a613b91e8b2458db8b97ce60de76e8c6a34c681c64424e"},
+    {file = "sigmaepsilon_core-1.2.1-py3-none-any.whl", hash = "sha256:b7007b488c3956551dfe35885ec03f033c2a264dd9a4f62d0319514c36018591"},
+    {file = "sigmaepsilon_core-1.2.1.tar.gz", hash = "sha256:06d492b03715b4ecb8e17245b61199cdd8f0cbc3b43e25e9c70540f782b8524e"},
 ]
 
 [package.dependencies]
@@ -3381,32 +3381,19 @@ appdirs = "*"
 six = "*"
 toml = "*"
 
-[package.extras]
-dev = ["black", "flake8", "ipykernel", "numpy"]
-docs = ["ipython", "myst-parser", "numpy", "pydata-sphinx-theme", "sphinx", "sphinx-copybutton", "sphinx-design", "sphinx-inline-tabs"]
-test = ["coverage (==4.4.2)", "numpy", "pytest", "pytest-cov"]
-
 [[package]]
 name = "sigmaepsilon-deepdict"
-version = "1.2.2"
-description = "Linked deep dictionaries in Python."
+version = "1.2.4"
+description = "Common developer utilities for Python projects."
 optional = false
-python-versions = "<3.11,>=3.7"
+python-versions = ">=3.10,<4.0"
 files = [
-    {file = "sigmaepsilon.deepdict-1.2.2-py3-none-any.whl", hash = "sha256:9f4189ae327e9da494163fc53bb69bda92bd8b65b0d2c5f4fdc38759fe4d42c2"},
-    {file = "sigmaepsilon.deepdict-1.2.2.tar.gz", hash = "sha256:a0073184afa7053601388b4df21c743d6306fda30ccdcb1f6aea1fe533303984"},
+    {file = "sigmaepsilon_deepdict-1.2.4-py3-none-any.whl", hash = "sha256:85061c7ba21b7723431da6b47a486116647936b3775b942c09d848a36991b54b"},
+    {file = "sigmaepsilon_deepdict-1.2.4.tar.gz", hash = "sha256:a3f7b26d6ee258796bda7b33bd39a296ab18e7f7ea10b8053e5f5a05e0814ec0"},
 ]
 
 [package.dependencies]
-setuptools = ">=65.5.1"
-"sigmaepsilon.core" = ">=1.2.0,<2.0.0"
-six = "*"
-wheel = ">=0.38.0"
-
-[package.extras]
-dev = ["asciitree", "flake8", "ipykernel", "ipython (>=8.10.0)", "setuptools (>=65.5.1)", "tornado (>=6.3.3)"]
-docs = ["ipython (>=8.10.0)", "myst-parser", "nbsphinx", "pydata-sphinx-theme", "setuptools (>=65.5.1)", "sphinx", "sphinx-copybutton", "sphinx-design", "sphinx-inline-tabs", "tornado (>=6.3.3)"]
-test = ["asciitree", "coverage", "pytest", "pytest-cov", "sphinx"]
+sigmaepsilon-core = ">=1.2.1,<2.0.0"
 
 [[package]]
 name = "six"
@@ -3898,20 +3885,6 @@ files = [
 ]
 
 [[package]]
-name = "wheel"
-version = "0.42.0"
-description = "A built-package format for Python"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "wheel-0.42.0-py3-none-any.whl", hash = "sha256:177f9c9b0d45c47873b619f5b650346d632cdc35fb5e4d25058e09c9e581433d"},
-    {file = "wheel-0.42.0.tar.gz", hash = "sha256:c45be39f7882c9d34243236f2d63cbd58039e360f85d0913425fbd7ceea617a8"},
-]
-
-[package.extras]
-test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
-
-[[package]]
 name = "xattr"
 version = "0.10.1"
 description = "Python wrapper for extended filesystem attributes"
@@ -4013,4 +3986,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "d68de6e34c8e9526531a4e9fc7efd60795b93111e3beddae30431f62419ea44c"
+content-hash = "00faf429061d256bad0ba91cd86ce92f3fa80efacc62ef9ca9db9329781ff99e"
