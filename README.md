@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://badge.fury.io/py/sigmaepsilon.math.svg)](https://pypi.org/project/sigmaepsilon.math)
 [![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math/graph/badge.svg?token=GP9FSFQW34)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math)
-[![Python](https://img.shields.io/badge/python-3.10%E2%80%923.11-blue)](https://www.python.org)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%923.*-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 `SigmaEpsilon.Math` is a Python library that provides tools to formulate and solve problems related to all kinds of scientific disciplines. It is a part of the SigmaEpsilon ecosystem, which is designed mainly to solve problems related to computational solid mechanics, but if something is general enough, it ends up here. A good example is the included vector and tensor algebra modules, or the various optimizers, which are applicable in a much broader context than they were originally designed for.
@@ -36,7 +36,7 @@ The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hoste
 
 ## **Installation**
 
-sigmaepsilon.math can be installed from PyPI using wither `pip` or `Poetry` on Python 3.10:
+sigmaepsilon.math can be installed from PyPI using wither `pip` or `Poetry` on Python >=3.10:
 
 ### Install using pip
 
