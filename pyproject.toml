@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sigmaepsilon.math"
-version = "1.1.0"
+version = "1.1.1"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
 classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -29,8 +29,8 @@ packages = [{ include = "sigmaepsilon", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-sigmaepsilon-core = ">=1.1.1"
-sigmaepsilon-deepdict = ">=1.2.2"
+sigmaepsilon-core = ">=1.2.1"
+sigmaepsilon-deepdict = ">=1.2.4"
 numba = ">=0.56.4"
 numpy = "^1.26.4"
 scipy = "^1.12.0"
@@ -45,6 +45,7 @@ black = "^24.2.0"
 ipython = "^8.21.0"
 poetry-plugin-export = "^1.6.0"
 pre-commit = "^3.6.1"
+matplotlib = "^3.8.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.1"
