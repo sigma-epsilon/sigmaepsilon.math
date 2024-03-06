@@ -29,10 +29,7 @@ class MLSWeightFunction(Function):
         super().__init__(d=dim)
         self.core = core
 
-    def value(self, x: Iterable[Number]) -> float:
-        """
-        Evaluates the function.
-        """
+    def preproc_evaluation(self, x: Iterable[Number]):
         if not isinstance(x, np.ndarray):
             if isinstance(x, Iterable):
                 x = np.array(x)
@@ -40,6 +37,12 @@ class MLSWeightFunction(Function):
                 raise ValueError(
                     f"Expected a NumPy ndarray, or an Iterable, got {type(x)}"
                 )
+
+    def value(self, x: Iterable[Number]) -> float:
+        """
+        Evaluates the function.
+        """
+        raise NotImplementedError
 
 
 def isMLSWeightFunction(f: Any) -> bool:
@@ -85,7 +88,7 @@ class SingularWeightFunction(MLSWeightFunction):
         return
 
     def value(self, x: Iterable[Number]):
-        super().value(x)
+        self.preproc_evaluation(x)
         return 1 / (norm(np.subtract(self.core, x)) ** 2 + self.eps**2)
 
 
@@ -163,16 +166,16 @@ class CubicWeightFunction(MLSWeightFunction):
         return val, grad, Hessian
 
     def value(self, x: Iterable[Number]) -> float:
-        super().value(x)
+        self.preproc_evaluation(x)
         res, _, _ = self.evaluator(x)
         return res
 
     def gradient(self, x: Iterable[Number]) -> ndarray:
-        super().value(x)
+        self.preproc_evaluation(x)
         _, res, _ = self.evaluator(x)
         return res
 
     def Hessian(self, x: Iterable[Number]) -> ndarray:
-        super().value(x)
+        self.preproc_evaluation(x)
         _, _, res = self.evaluator(x)
         return res
