@@ -1,5 +1,4 @@
-from typing import Callable, Tuple, Optional, Union
-from typing import Iterable
+from typing import Callable, Tuple, Optional, Union, Iterable
 
 import numpy as np
 from numpy import outer, ndarray
@@ -25,7 +24,9 @@ def moving_least_squares(
             if isinstance(x, Iterable):
                 x = np.array(x)
             else:
-                raise TypeError
+                raise TypeError(
+                    f"Invalid input type. Expected a numpy array or an iterable, got {type(x)}"
+                )
         w.core = x
         f = weighted_least_squares(points, values, w=w, **kwargs)
         return f(x)
