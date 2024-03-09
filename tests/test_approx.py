@@ -4,7 +4,7 @@ import numpy as np
 import sympy as sy
 
 from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d, approx_Lagrange_1d
-from sigmaepsilon.math.approx.func import CubicWeightFunction
+from sigmaepsilon.math.approx.functions import CubicWeightFunction
 from sigmaepsilon.math.approx import least_squares
 
 
