@@ -11,7 +11,7 @@ def _mls_approx(*args, dim: int = None, **kwargs):
         return _mls_approx_2d(*args, **kwargs)
     elif dim == 3:
         return _mls_approx_3d(*args, **kwargs)
-    else:
+    else: # pragma: no cover
         raise NotImplementedError(
             "Only 1, 2 and 3 dimensional pointclouds are supported."
         )

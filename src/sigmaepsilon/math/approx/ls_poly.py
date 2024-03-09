@@ -9,7 +9,7 @@ def _get_polynomial(deg: int, dim: int):
             return _get_poly_1_2()
         elif dim == 3:
             return _get_poly_1_3()
-        else:
+        else: # pragma: no cover
             raise NotImplementedError
     elif deg == 2:
         if dim == 1:
@@ -18,9 +18,9 @@ def _get_polynomial(deg: int, dim: int):
             return _get_poly_2_2()
         elif dim == 3:
             return _get_poly_2_3()
-        else:
+        else:  # pragma: no cover
             raise NotImplementedError
-    else:
+    else: # pragma: no cover
         raise NotImplementedError
 
 

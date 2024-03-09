@@ -23,7 +23,7 @@ def _mls_preproc(
         return _mls_preproc_2d(points, values, deg, w, b, g, H)
     elif dim == 3:
         return _mls_preproc_3d(points, values, deg, w, b, g, H)
-    else:
+    else: # pragma: no cover
         raise NotImplementedError(
             "Only 1, 2 and 3 dimensional pointclouds are supported."
         )
