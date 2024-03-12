@@ -31,19 +31,10 @@ def _get_poly_1_1():
     def bdx(x):
         return np.array([0, 1])
 
-    def bdy(x):
-        return None
-
     def bdxx(x):
         return np.array([0, 0])
 
-    def bdyy(x):
-        return None
-
-    def bdxy(x):
-        return None
-
-    return b, bdx, bdy, bdxx, bdyy, bdxy
+    return b, bdx, bdxx
 
 
 def _get_poly_1_2():
@@ -107,21 +98,12 @@ def _get_poly_2_1():
         return np.array([1, x, x**2])
 
     def bdx(x):
-        return np.array([0, 1, 2 * x[0]])
-
-    def bdy(x):
-        return None
+        return np.array([0, 1, 2 * x])
 
     def bdxx(x):
         return np.array([0, 0, 2])
 
-    def bdyy(x):
-        return None
-
-    def bdxy(x):
-        return None
-
-    return b, bdx, bdy, bdxx, bdyy, bdxy
+    return b, bdx, bdxx
 
 
 def _get_poly_2_2():

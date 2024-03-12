@@ -18,18 +18,19 @@ def moving_least_squares(
     w: Callable | None = None,
     **kwargs,
 ) -> Callable:
+    dim = 1 if len(points.shape) == 1 else points.shape[1]
     if not isMLSWeightFunction(w):
-        dim = points.shape[1]
-        w = ConstantWeightFunction(dim)
+        w = ConstantWeightFunction(dim=dim)
 
     def inner(x):
         if not isinstance(x, np.ndarray):
             if isinstance(x, Iterable):
                 x = np.array(x)
             else:
-                raise TypeError(
-                    f"Invalid input type. Expected a numpy array or an iterable, got {type(x)}"
-                )
+                if dim > 1:
+                    raise TypeError(
+                        f"Invalid input type. Expected a numpy array or an iterable, got {type(x)}"
+                    )
         w.core = x
         f = weighted_least_squares(points, values, w=w, **kwargs)
         return f(x)
@@ -136,12 +137,12 @@ def weighted_least_squares(
     if len(values.shape) == 1:
         values = values.reshape(len(values), 1)
 
-    dim = points.shape[1]
+    dim = 1 if len(points.shape) == 1 else points.shape[1]
 
     if isMLSWeightFunction(w):
         assert dim == w.dimension
     else:
-        w = ConstantWeightFunction(dim)
+        w = ConstantWeightFunction(dim=dim)
 
     grad = True if order > 0 else False
     hess = True if order > 1 else False

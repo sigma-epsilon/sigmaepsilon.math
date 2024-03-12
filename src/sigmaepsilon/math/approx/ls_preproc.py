@@ -39,8 +39,8 @@ def _mls_preproc_1d(
     H: bool = True,
 ) -> Tuple[ndarray]:
     nData = points.shape[0]
-    nDim = points.shape[1]
-    nRec = values.shape[1]
+    nDim = 1 if len(points.shape) == 1 else points.shape[1]
+    nRec = 1 if len(values.shape) == 1 else values.shape[1]
 
     k = int(fact(deg + nDim) / fact(deg) / fact(nDim))
     A = np.zeros([k, k])

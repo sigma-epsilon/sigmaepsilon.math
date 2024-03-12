@@ -42,23 +42,23 @@ class TestLagrange(unittest.TestCase):
 
 class TestMLSWeightFunctions(unittest.TestCase):
     def test_cubic_weight_function(self):
-        w = CubicWeightFunction([0.0, 0.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[0.0, 0.0], supportdomain=[0.5, 0.5])
         self.assertTrue(isMLSWeightFunction(w))
         self.assertTrue(isinstance(w([0.0, 0.0]), float))
         self.assertTrue(np.isclose(w([0.0, 0.0]), 0.444444444444))
 
     def test_singular_weight_function(self):
-        w = SingularWeightFunction([0.0, 0.0])
+        w = SingularWeightFunction(core=[0.0, 0.0])
         self.assertTrue(isMLSWeightFunction(w))
         self.assertTrue(isinstance(w([0.0, 0.0]), float))
 
     def test_constant_weight_function(self):
-        w = ConstantWeightFunction(2, 1.0)
+        w = ConstantWeightFunction(dim=2, value=1.0)
         self.assertTrue(isMLSWeightFunction(w))
         self.assertTrue(isinstance(w([0.0, 0.0]), float))
         self.assertTrue(np.isclose(w([0.0, 0.0]), 1.0))
 
-        w = ConstantWeightFunction(2, 10.0)
+        w = ConstantWeightFunction(dim=2, value=10.0)
         self.assertTrue(isMLSWeightFunction(w))
         self.assertTrue(isinstance(w([0.0, 0.0]), float))
         self.assertTrue(np.isclose(w([0.0, 0.0]), 10.0))
@@ -79,7 +79,7 @@ class TestMLSApprox2d(unittest.TestCase):
         self.values = values
 
     def test_mls_2d_deg1_order0(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=1, order=0, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
@@ -90,7 +90,7 @@ class TestMLSApprox2d(unittest.TestCase):
         assert fdxy is None
 
     def test_mls_2d_deg1_order1(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=1, order=1, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
@@ -101,7 +101,7 @@ class TestMLSApprox2d(unittest.TestCase):
         assert fdxy is None
 
     def test_mls_2d_deg1_order2(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=1, order=2, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
@@ -112,7 +112,7 @@ class TestMLSApprox2d(unittest.TestCase):
         assert isinstance(fdxy, ndarray)
 
     def test_mls_2d_deg2_order0(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=2, order=0, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
@@ -123,7 +123,7 @@ class TestMLSApprox2d(unittest.TestCase):
         assert fdxy is None
 
     def test_mls_2d_deg2_order1(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=2, order=1, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
@@ -134,7 +134,7 @@ class TestMLSApprox2d(unittest.TestCase):
         assert fdxy is None
 
     def test_mls_2d_deg2_order2(self):
-        w = CubicWeightFunction([5.0, 5.0], [0.5, 0.5])
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
         approx = moving_least_squares(self.points, self.values, deg=2, order=2, w=w)
         f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
         assert isinstance(f, ndarray)
