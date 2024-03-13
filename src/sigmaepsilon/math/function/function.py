@@ -1,4 +1,4 @@
-from typing import TypeVar, Callable, Iterable, Optional, Union
+from typing import TypeVar, Callable, Iterable, Union
 from collections import OrderedDict
 
 from sympy import Expr, degree, latex
@@ -138,11 +138,11 @@ class Function(MetaFunction):
 
     def __init__(
         self,
-        f0: FunctionLike = None,
-        f1: Callable = None,
-        f2: Callable = None,
+        f0: FunctionLike | None = None,
+        f1: Callable | None = None,
+        f2: Callable | None = None,
         *args,
-        variables: Optional[Union[Iterable, None]] = None,
+        variables: Iterable | None = None,
         **kwargs
     ):
         super().__init__()
@@ -150,11 +150,11 @@ class Function(MetaFunction):
 
     def update(
         self,
-        f0: FunctionLike = None,
-        f1: Callable = None,
-        f2: Callable = None,
+        f0: FunctionLike | None = None,
+        f1: Callable | None = None,
+        f2: Callable | None = None,
         *_,
-        variables: Iterable = None,
+        variables: Iterable | None = None,
         **kwargs
     ):
         self.from_str = None
@@ -194,9 +194,7 @@ class Function(MetaFunction):
         else:
             return self.f2 is None
 
-    def linear_coefficients(
-        self, normalize: Optional[bool] = False
-    ) -> Union[Iterable, None]:
+    def linear_coefficients(self, normalize: bool = False) -> Union[Iterable, None]:
         """
         Returns the linear coeffiecients, if the function is symbolic.
         """
@@ -237,7 +235,9 @@ class Function(MetaFunction):
         else:
             raise TypeError("This is exclusive to symbolic functions.")
 
-    def subs(self, values, variables=None, inplace=False) -> "Function":
+    def subs(
+        self, values: Iterable, variables: Iterable | None = None, inplace: bool = False
+    ) -> "Function":
         """
         Substitites values for variables.
         """

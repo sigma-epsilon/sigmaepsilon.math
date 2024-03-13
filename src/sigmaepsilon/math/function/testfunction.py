@@ -38,11 +38,7 @@ class TestMaxFunction(TestFunction):
         super().__init__(*args, **kwargs, optText="max")
 
 
-class TestMinFunction2D(TestMinFunction):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, d=2)
+class TestMinFunction2D(TestMinFunction, TestFunction2D): ...
 
 
-class TestMaxFunction2D(TestMaxFunction):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, d=2)
+class TestMaxFunction2D(TestMaxFunction, TestFunction2D): ...

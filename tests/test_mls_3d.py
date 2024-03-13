@@ -4,7 +4,6 @@ import numpy as np
 
 from sigmaepsilon.math.approx import moving_least_squares
 from sigmaepsilon.math.approx.functions import (
-    CubicWeightFunction,
     SingularWeightFunction,
     ConstantWeightFunction,
 )
