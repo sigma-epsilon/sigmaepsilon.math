@@ -174,7 +174,7 @@ def _mls_approx_3d(
         fdx, fdy, fdz = _mls_g_3d(gamma, gammadx, gammady, gammadz, B, Bdx, Bdy, Bdz, V)
 
     if H:
-        fdxx, fdyy, fdxy = _mls_H_3d(
+        fdxx, fdyy, fdzz, fdxy, fdxz, fdyz = _mls_H_3d(
             invA,
             bdxx,
             bdyy,

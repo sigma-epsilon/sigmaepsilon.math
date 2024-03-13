@@ -39,14 +39,14 @@ class TestMLSApprox1d(unittest.TestCase):
 
         self.coords_approx = np.linspace(0, 1, 16)
 
-    def _approximate(self, appriximator: Callable):
+    def _approximate(self, approximator: Callable):
         coords_approx = self.coords_approx
-        data_approx = [appriximator(x)[0][0] for x in coords_approx]
-        Ddata_Dx_approx = [appriximator(x)[1][0] for x in coords_approx]
-        Ddata_Dxx_approx = [appriximator(x)[2][0] for x in coords_approx]
-        _control_data = [appriximator(x)[0][0] for x in self.coords]
-        _control_data_dx = [appriximator(x)[1][0] for x in self.coords]
-        _control_data_dxx = [appriximator(x)[2][0] for x in self.coords]
+        data_approx = [approximator(x)[0][0] for x in coords_approx]
+        Ddata_Dx_approx = [approximator(x)[1][0] for x in coords_approx]
+        Ddata_Dxx_approx = [approximator(x)[2][0] for x in coords_approx]
+        _control_data = [approximator(x)[0][0] for x in self.coords]
+        _control_data_dx = [approximator(x)[1][0] for x in self.coords]
+        _control_data_dxx = [approximator(x)[2][0] for x in self.coords]
         error = np.sum((_control_data - self.data) ** 2)
         error_dx = np.sum((_control_data_dx - self.Ddata_Dx) ** 2)
         error_dxx = np.sum((_control_data_dxx - self.Ddata_Dxx) ** 2)
