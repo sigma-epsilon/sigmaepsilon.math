@@ -4,7 +4,7 @@ from .testfunction import TestMinFunction2D
 from .metafunction import symbolize, substitute
 
 
-def Rosenbrock(a=1, b=100):
+def Rosenbrock(a=1, b=100) -> TestMinFunction2D:
     """
     Implements the Rosenbrock function, aka. Banana function.
 
@@ -20,7 +20,7 @@ def Rosenbrock(a=1, b=100):
     return TestMinFunction2D(**symbolize(expr=expr), optimums=[(1.0, 1.0)])
 
 
-def Himmelblau():
+def Himmelblau() -> TestMinFunction2D:
     """
     Creates the Himmelblau's function object.
 
@@ -42,7 +42,7 @@ def Himmelblau():
     )
 
 
-def GoldsteinPrice():
+def GoldsteinPrice() -> TestMinFunction2D:
     """
     Creates the Goldstein-Price function object.
 
@@ -65,7 +65,7 @@ def GoldsteinPrice():
     return TestMinFunction2D(**symbolize(str_expr=str_expr), optimums=[(0.0, -1.0)])
 
 
-def Beale():
+def Beale() -> TestMinFunction2D:
     """
     Creates the Beale function object.
 
@@ -87,7 +87,7 @@ def Beale():
     return TestMinFunction2D(**symbolize(str_expr=str_expr), optimums=[(3.0, 0.5)])
 
 
-def Matyas():
+def Matyas() -> TestMinFunction2D:
     """
     Creates the Matyas function object.
 

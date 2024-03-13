@@ -1,10 +1,17 @@
 import unittest
 
 import numpy as np
+from numpy import ndarray
 import sympy as sy
 
+from sigmaepsilon.math.approx import moving_least_squares
 from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d, approx_Lagrange_1d
-from sigmaepsilon.math.approx.func import CubicWeightFunction
+from sigmaepsilon.math.approx.functions import (
+    CubicWeightFunction,
+    SingularWeightFunction,
+    ConstantWeightFunction,
+    isMLSWeightFunction,
+)
 from sigmaepsilon.math.approx import least_squares
 
 
@@ -33,10 +40,109 @@ class TestLagrange(unittest.TestCase):
         self.assertTrue(np.isclose(v, 10))
 
 
-class TestMLS(unittest.TestCase):
+class TestMLSWeightFunctions(unittest.TestCase):
     def test_cubic_weight_function(self):
-        w = CubicWeightFunction([0.0, 0.0], [0.5, 0.5])
-        w([0.0, 0.0])
+        w = CubicWeightFunction(core=[0.0, 0.0], supportdomain=[0.5, 0.5])
+        self.assertTrue(isMLSWeightFunction(w))
+        self.assertTrue(isinstance(w([0.0, 0.0]), float))
+        self.assertTrue(np.isclose(w([0.0, 0.0]), 0.444444444444))
+
+    def test_singular_weight_function(self):
+        w = SingularWeightFunction(core=[0.0, 0.0])
+        self.assertTrue(isMLSWeightFunction(w))
+        self.assertTrue(isinstance(w([0.0, 0.0]), float))
+
+    def test_constant_weight_function(self):
+        w = ConstantWeightFunction(dim=2, value=1.0)
+        self.assertTrue(isMLSWeightFunction(w))
+        self.assertTrue(isinstance(w([0.0, 0.0]), float))
+        self.assertTrue(np.isclose(w([0.0, 0.0]), 1.0))
+
+        w = ConstantWeightFunction(dim=2, value=10.0)
+        self.assertTrue(isMLSWeightFunction(w))
+        self.assertTrue(isinstance(w([0.0, 0.0]), float))
+        self.assertTrue(np.isclose(w([0.0, 0.0]), 10.0))
+
+
+class TestMLSApprox2d(unittest.TestCase):
+    def setUp(self):
+        x = np.linspace(0, 10, 50)
+        y = np.linspace(0, 10, 50)
+        X, Y = np.meshgrid(x, y)
+        X = X.flatten()
+        Y = Y.flatten()
+        points = np.zeros((len(X), 2), dtype=float)
+        points[:, 0] = X
+        points[:, 1] = Y
+        values = np.random.rand(len(X), 2)
+        self.points = points
+        self.values = values
+
+    def test_mls_2d_deg1_order0(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=1, order=0, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert fdx is None
+        assert fdy is None
+        assert fdxx is None
+        assert fdyy is None
+        assert fdxy is None
+
+    def test_mls_2d_deg1_order1(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=1, order=1, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert isinstance(fdx, ndarray)
+        assert isinstance(fdy, ndarray)
+        assert fdxx is None
+        assert fdyy is None
+        assert fdxy is None
+
+    def test_mls_2d_deg1_order2(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=1, order=2, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert isinstance(fdx, ndarray)
+        assert isinstance(fdy, ndarray)
+        assert isinstance(fdxx, ndarray)
+        assert isinstance(fdyy, ndarray)
+        assert isinstance(fdxy, ndarray)
+
+    def test_mls_2d_deg2_order0(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=2, order=0, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert fdx is None
+        assert fdy is None
+        assert fdxx is None
+        assert fdyy is None
+        assert fdxy is None
+
+    def test_mls_2d_deg2_order1(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=2, order=1, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert isinstance(fdx, ndarray)
+        assert isinstance(fdy, ndarray)
+        assert fdxx is None
+        assert fdyy is None
+        assert fdxy is None
+
+    def test_mls_2d_deg2_order2(self):
+        w = CubicWeightFunction(core=[5.0, 5.0], supportdomain=[0.5, 0.5])
+        approx = moving_least_squares(self.points, self.values, deg=2, order=2, w=w)
+        f, fdx, fdy, fdxx, fdyy, fdxy = approx([0, 0])
+        assert isinstance(f, ndarray)
+        assert isinstance(fdx, ndarray)
+        assert isinstance(fdy, ndarray)
+        assert isinstance(fdxx, ndarray)
+        assert isinstance(fdyy, ndarray)
+        assert isinstance(fdxy, ndarray)
 
 
 class TestLS(unittest.TestCase):
@@ -63,7 +169,7 @@ class TestLS(unittest.TestCase):
 
         approx = least_squares(points, values, deg=2, order=1)
         approx([0, 0])
-        
+
     def test_least_squares_approximation(self):
         # the coordinates of the known values
         points = [
