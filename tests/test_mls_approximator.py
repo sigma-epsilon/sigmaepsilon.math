@@ -47,6 +47,18 @@ class TestMLSApproximator(unittest.TestCase):
         values_approx_head = approximator.approximate(points[:10])
         self.assertTrue(np.allclose(np.ones_like(values_approx_head), values_approx_head))
         
+    def test_constant_field_nd_bulk(self):
+        values = np.ones_like(self.values)
+        values = np.ones((len(values), 3, 3))  # bulkify
+        points = self.points
+        approximator = MLSApproximator()
+        approximator.fit(points, values, points)
+        values_approx = approximator.approximate(points)
+        self.assertTrue(np.allclose(np.ones_like(values_approx), values_approx))
+        
+        values_approx_head = approximator.approximate(points[:10])
+        self.assertTrue(np.allclose(np.ones_like(values_approx_head), values_approx_head))
+        
     def test_constant_field_1d(self):
         values = np.ones_like(self.values)
         points = self.points
