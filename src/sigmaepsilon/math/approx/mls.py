@@ -19,7 +19,6 @@ def _approximate_2d(values: ndarray, neighbours: ndarray, factors: ndarray) -> n
                 res[i, j] += values[neighbours[i, k], j] * factors[i, k]
     return res
 
-
 @njit(parallel=True, cache=True)
 def _approximate_nd(
     values: ndarray, neighbours: ndarray, factors: ndarray, out: ndarray
@@ -29,7 +28,6 @@ def _approximate_nd(
             for j in range(nN):
                 out[i] += values[neighbours[i, j]] * factors[i, j]
 
-
 class MLSApproximator:
     """
     Object oriented, high performance implementation of a specific version of the
@@ -37,7 +35,7 @@ class MLSApproximator:
     but performes well for extremely large datasets as well. If you want to experiment
     with the hyperparameters of the MLS as a method, it is suggested to use the other
     ways offered by the library.
-
+    
     Parameters
     ----------
     knn_backend: {"scipy", "sklearn"}, Optional
@@ -122,6 +120,7 @@ class MLSApproximator:
         """
         neighbours: ndarray = self.neighbours
         factors: ndarray = self.factors
+          
         if neighbours is None or factors is None:
             neighbours = MLSApproximator._get_neighbours(self.X_S, X, **kwargs)
             factors = np.ones_like(neighbours) / neighbours.shape[-1]
