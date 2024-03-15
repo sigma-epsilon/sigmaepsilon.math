@@ -9,7 +9,7 @@ __all__ = ["MLSApproximator"]
 
 
 @njit(parallel=True, cache=True)
-def _approximate(values: ndarray, neighbours: ndarray, factors: ndarray) -> ndarray:
+def _approximate_2d(values: ndarray, neighbours: ndarray, factors: ndarray) -> ndarray:
     nT, nN = neighbours.shape
     nD = values.shape[-1]
     res = np.zeros((nT, nD), dtype=values.dtype)
@@ -20,6 +20,16 @@ def _approximate(values: ndarray, neighbours: ndarray, factors: ndarray) -> ndar
     return res
 
 
+@njit(parallel=True, cache=True)
+def _approximate_nd(
+    values: ndarray, neighbours: ndarray, factors: ndarray, out: ndarray
+) -> ndarray:
+    nT, nN = neighbours.shape
+    for i in prange(nT):
+        for j in range(nN):
+            out[i] += values[neighbours[i, j]] * factors[i, j]
+
+
 class MLSApproximator:
     """
     Object oriented, high performance implementation of a specific version of the
@@ -27,7 +37,7 @@ class MLSApproximator:
     but performes well for extremely large datasets as well. If you want to experiment
     with the hyperparameters of the MLS as a method, it is suggested to use the other
     ways offered by the library.
-    
+
     Parameters
     ----------
     knn_backend: {"scipy", "sklearn"}, Optional
@@ -106,14 +116,24 @@ class MLSApproximator:
         k = 4 if not k else k
         return k_nearest_neighbours(X_S, X_T, k=k, max_distance=max_distance)
 
-    def approximate(self, X: ndarray, **kwargs) -> ndarray:
+    def approximate(self, X: ndarray, data: ndarray | None = None, **kwargs) -> ndarray:
         """
         Estimates the value of the function at the given points.
         """
         neighbours: ndarray = self.neighbours
         factors: ndarray = self.factors
+
         if neighbours is None or factors is None:
             neighbours = MLSApproximator._get_neighbours(self.X_S, X, **kwargs)
             factors = np.ones_like(neighbours) / neighbours.shape[-1]
-        
-        return np.squeeze(_approximate(self.Y, neighbours, factors))
+
+        data = data if data is not None else self.Y
+        if len(data.shape) == 1:
+            data = atleast2d(data, back=True)
+        if len(data.shape) == 2:
+            res = _approximate_2d(data, neighbours, factors)
+        else:
+            res = np.zeros((len(neighbours),) + data.shape[1:], dtype=data.dtype)
+            _approximate_nd(data, neighbours, factors, out=res)
+
+        return np.squeeze(res)
