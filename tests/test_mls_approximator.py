@@ -58,7 +58,7 @@ class TestMLSApproximator(unittest.TestCase):
         
         values_approx_head = approximator.approximate(points[:10])
         self.assertTrue(np.allclose(np.ones_like(values_approx_head), values_approx_head))
-        
+
     def test_constant_field_1d(self):
         values = np.ones_like(self.values)
         points = self.points
