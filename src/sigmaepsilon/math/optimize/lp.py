@@ -33,10 +33,10 @@ class LinearProgrammingResult(Enum):
 
 class LinearProgrammingProblem:
     """
-    A lightweight class to handle general linear programming problems. It gaps the 
-    bridge between the general form and the standard form. The class accepts
-    symbolic expressions, but this should not be expected to be too fast. 
-    For problems starting from medium size, it is suggested to use the 
+    A lightweight class to handle general real valued linear programming problems. 
+    It gaps the bridge between the general form and the standard form. 
+    The class accepts symbolic expressions, but this should not be expected 
+    to be too fast. For problems starting from medium size, it is suggested to use the 
     `solve_standard_form` method of the class.
 
     Parameters
@@ -46,7 +46,7 @@ class LinearProgrammingProblem:
     variables: Iterable
         List of variables of the system.
     positive: bool, Optional
-        A `True` value indicated that all variables are expected to take
+        A `True` value indicates that all variables are expected to take
         only positive values. Default is `True`.
     'obj', 'cost', 'payoff', 'fittness', 'f' : Function
         The objective function.
@@ -100,7 +100,7 @@ class LinearProgrammingProblem:
     >>> eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
     >>> P3 = LPP(cost=obj3, constraints=[eq31, eq32], variables=syms)
     >>> P3.solve()['e']
-    [NoSolutionError('There is not solution to this problem!')]
+    [NoSolutionError('There is no solution to this problem!')]
     
     If you want the actual error to be raised, call `solve` with the option
     `raise_errors=True`.
@@ -131,10 +131,10 @@ class LinearProgrammingProblem:
     def __init__(
         self,
         *args,
-        constraints=None,
-        variables=None,
-        positive=None,
-        standardform=False,
+        constraints: Iterable | None = None,
+        variables: Iterable | None = None,
+        positive: bool | None = None,
+        standardform: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -152,31 +152,49 @@ class LinearProgrammingProblem:
             **kwargs,
         )
 
-    def _update(self, *args, variables=None, positive=None, **kwargs):
+    def _update(
+        self,
+        *args,
+        variables: Iterable | None = None,
+        positive: bool | None = None,
+        **kwargs,
+    ) -> None:
         self.standardform = kwargs.get("standardform", self.standardform)
+
         if len(args) > 0:
             obj = None
+
             if isinstance(args[0], Function):
                 obj = args[0]
+
             if obj is not None:
                 self.obj = obj
+
         if self.obj is None:
             self.obj = getasany(
                 ["obj", "cost", "payoff", "fittness", "f"], None, **kwargs
             )
+
         assert self.obj is not None, "Objective must be set on instance creation!"
+
         self.constraints = kwargs.get("constraints", self.constraints)
+
         if self.constraints is None:
             self.constraints = []
+
         if variables is not None:
             if isinstance(positive, bool):
                 self.vmanager = VariableManager(variables, positive=positive)
             else:
                 self.vmanager = VariableManager(variables)
+
         self._hook = kwargs.get("_hook", self._hook)
 
     @property
-    def vm(self):
+    def vm(self) -> VariableManager:
+        """
+        Returns the variable manager of the problem.
+        """
         return self.vmanager
 
     @staticmethod
@@ -229,10 +247,14 @@ class LinearProgrammingProblem:
             c = args[0]
         else:
             c = Relation(*args, **kwargs)
+            
         self.constraints.append(c)
 
     @property
     def variables(self) -> List[Any]:
+        """
+        Returns the variables of the problem.
+        """
         return self.vmanager.target()
 
     def _sync_variables(self) -> None:
@@ -266,9 +288,14 @@ class LinearProgrammingProblem:
             s.update(c.variables)
         return list(s)
 
-    def get_slack_variables(self, template=None) -> list:
+    def get_slack_variables(self, template:str|None=None) -> list:
         """
         Returns the slack variables of the inequality constraints of the problem.
+        
+        Parameters
+        ----------
+        template: str, Optional
+            The template for the slack variables. Default is None.
         """
         tmpl = self.__class__.__tmpl_slack__ if template is None else template
         c = self.constraints
@@ -299,7 +326,9 @@ class LinearProgrammingProblem:
         all_pos = all([v.is_positive for v in self.get_system_variables()])
         return all_pos and all_eq
 
-    def simplify(self, maximize=False, inplace=False) -> "LinearProgrammingProblem":
+    def simplify(
+        self, maximize: bool = False, inplace: bool = False
+    ) -> "LinearProgrammingProblem":
         """
         Simplifies the problem so that it admits the standard form.
 
@@ -423,6 +452,7 @@ class LinearProgrammingProblem:
         constraints = []
         eq = list(map(redefine_equality, filter(lambda c: isinstance(c, Equality), _c)))
         constraints += eq
+        
         if len(smap) > 0:
             ieq = list(
                 map(
@@ -430,6 +460,7 @@ class LinearProgrammingProblem:
                 )
             )
             constraints += ieq
+        
         if inplace:
             self._update(constraints=constraints, variables=x, positive=True, _hook=P)
         else:
@@ -458,10 +489,10 @@ class LinearProgrammingProblem:
 
     @staticmethod
     def basic_solution(
-        A: ndarray, b: ndarray, order: Optional[Union[Iterable[int], None]] = None
+        A: ndarray, b: ndarray, order: Iterable[int] | None = None
     ) -> Tuple[ndarray]:
         """
-        Returns a basic solution to a problem the form
+        Returns a basic solution to a problem in the form
 
         .. math::
             :nowrap:
@@ -551,8 +582,9 @@ class LinearProgrammingProblem:
         c: ndarray,
         order: Optional[Union[Iterable[int], None]] = None,
         tol: Optional[float] = 1e-10,
-    ):
-        """Solves a linear problem in standard form:
+    ) -> ndarray:
+        """
+        Solves a linear problem in standard form:
 
         :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
 
@@ -574,8 +606,7 @@ class LinearProgrammingProblem:
         Returns
         -------
         numpy.ndarray
-            Results as a 1d (unique solution) or a 2d (multiple solutions)
-            numpy array.
+            A 1d (unique solution) or a 2d (multiple solutions) numpy array.
 
         Notes
         -----
@@ -585,7 +616,7 @@ class LinearProgrammingProblem:
 
         2) The line between the unique, the degenerate situation and having no solution at all may
         be very thin in some settings. In such a scenario, repeated solutions might return a
-        a solution, a `NoSolutionError` or a `DegenerateProblemError` as well. Problems
+        a solution, a `NoSolutionError` or a `DegenerateProblemError`. Problems
         with this behaviour are all considered degenerate, and suggest an ill-posed setup.
 
         Raises
@@ -598,6 +629,7 @@ class LinearProgrammingProblem:
         m, n = A.shape
         r = n - m
         assert r > 0
+
         basic = LinearProgrammingProblem.basic_solution(A, b, order=order)
         if basic:
             B, B_inv, N, xB, xN, order = basic
@@ -608,7 +640,9 @@ class LinearProgrammingProblem:
         else:
             raise NoSolutionError("Failed to find basic solution!")
 
-        def unit_basis_vector(length, index=0, value=1.0):
+        def unit_basis_vector(
+            length: int, index: int = 0, value: float = 1.0
+        ) -> ndarray:
             return value * np.bincount([index], None, length)
 
         def enter(i_enter):
@@ -801,6 +835,8 @@ class LinearProgrammingProblem:
             otherwise they get returned within the result, under key `e`.
         tol: float, Optional
             Floating point tolerance. Default is 1e-10.
+        maximize: bool
+            Set this to `True` if the problem is a maximization. Default is `False`.
 
         Notes
         -----
