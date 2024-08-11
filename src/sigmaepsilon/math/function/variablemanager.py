@@ -65,7 +65,7 @@ class VariableManager(object):
             s.update(expr.free_symbols)
         return list(s)
 
-    def add_variables(self, variables: Iterable, overwrite:bool=True) -> None:
+    def add_variables(self, variables: Iterable, overwrite: bool = True) -> None:
         if overwrite:
             self.vmap.update({v: v for v in variables})
         else:

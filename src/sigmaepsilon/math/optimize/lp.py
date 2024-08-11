@@ -247,7 +247,7 @@ class LinearProgrammingProblem:
             c = args[0]
         else:
             c = Relation(*args, **kwargs)
-            
+
         self.constraints.append(c)
 
     @property
@@ -288,10 +288,10 @@ class LinearProgrammingProblem:
             s.update(c.variables)
         return list(s)
 
-    def get_slack_variables(self, template:str|None=None) -> list:
+    def get_slack_variables(self, template: str | None = None) -> list:
         """
         Returns the slack variables of the inequality constraints of the problem.
-        
+
         Parameters
         ----------
         template: str, Optional
@@ -452,7 +452,7 @@ class LinearProgrammingProblem:
         constraints = []
         eq = list(map(redefine_equality, filter(lambda c: isinstance(c, Equality), _c)))
         constraints += eq
-        
+
         if len(smap) > 0:
             ieq = list(
                 map(
@@ -460,7 +460,7 @@ class LinearProgrammingProblem:
                 )
             )
             constraints += ieq
-        
+
         if inplace:
             self._update(constraints=constraints, variables=x, positive=True, _hook=P)
         else:
