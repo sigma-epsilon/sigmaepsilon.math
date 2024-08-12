@@ -67,7 +67,8 @@ class Function(MetaFunction):
     In both cases, providing the argument 'variables' is optional, but it determines the
     order of the arguments. If the function is defined without the variables being provided,
     it is derived from the input, but the order of the arguments may differ from what you would
-    expect.
+    expect. Also defining the variables with SymPy might be important if you want to indicate
+    something about their nature, eg. that they are positive, as in the example above.
 
     >>> f = Function("3*x1 + 9*x3 + x2 + x4")
     >>> f.variables

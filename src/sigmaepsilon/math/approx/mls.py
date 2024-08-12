@@ -34,9 +34,9 @@ class MLSApproximator:
     """
     Object oriented, high performance implementation of a specific version of the
     moving least squares method. This implementation is less flexible than the others,
-    but performes well for extremely large datasets as well. If you want to experiment
+    but performes well for extremely large datasets too. If you want to experiment
     with the hyperparameters of the MLS as a method, it is suggested to use the other
-    ways offered by the library.
+    solutions offered by the library.
     
     Parameters
     ----------
@@ -137,9 +137,3 @@ class MLSApproximator:
             _approximate_nd(data, neighbours, factors, out=res)
 
         return np.squeeze(res)
-
-        if neighbours is None or factors is None:
-            neighbours = MLSApproximator._get_neighbours(self.X_S, X, **kwargs)
-            factors = np.ones_like(neighbours) / neighbours.shape[-1]
-        
-        return np.squeeze(_approximate(self.Y, neighbours, factors))
