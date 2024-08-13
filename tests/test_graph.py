@@ -1,5 +1,5 @@
 import unittest
-from sigmaepsilon.math.topology import Graph
+from sigmaepsilon.math.graph import Graph
 import networkx as nx
 
 

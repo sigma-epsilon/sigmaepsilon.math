@@ -12,13 +12,14 @@ __all__ = ["moving_least_squares", "least_squares", "weighted_least_squares"]
 
 
 def moving_least_squares(
-    points: ndarray,
-    values: ndarray,
+    points: ndarray | Iterable,
+    values: ndarray | Iterable,
     *,
     w: Callable | None = None,
     **kwargs,
 ) -> Callable:
     dim = 1 if len(points.shape) == 1 else points.shape[1]
+    
     if not isMLSWeightFunction(w):
         w = ConstantWeightFunction(dim=dim)
 
@@ -39,8 +40,8 @@ def moving_least_squares(
 
 
 def least_squares(
-    points: ndarray,
-    values: ndarray,
+    points: ndarray | Iterable,
+    values: ndarray | Iterable,
     *,
     deg: int = 1,
     order: int = 2,
@@ -83,8 +84,8 @@ def least_squares(
 
 
 def weighted_least_squares(
-    points: ndarray,
-    values: ndarray,
+    points: ndarray | Iterable,
+    values: ndarray | Iterable,
     *,
     deg: int = 1,
     order: int = 2,

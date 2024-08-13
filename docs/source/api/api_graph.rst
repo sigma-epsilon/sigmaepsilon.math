@@ -2,5 +2,5 @@
 Graphs and Graph Routines
 =========================
 
-.. automodule:: sigmaepsilon.math.topology.graph
-    :members: 
+.. automodule:: sigmaepsilon.math.graph.graph
+   :members: 

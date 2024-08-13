@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit
 
 from ..sparse import CSR
-from ...topology.graph import pseudo_peripheral_nodes
+from ...graph.graph import pseudo_peripheral_nodes
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)

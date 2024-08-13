@@ -42,10 +42,13 @@ an :math:`m \times n` matrix with :math:`n>m` and typically :math:`n` much
 greater than :math:`m`.
 
 .. autoclass:: sigmaepsilon.math.optimize.LinearProgrammingProblem
-    :members:
+   :members:
 
 .. autoclass:: sigmaepsilon.math.optimize.DegenerateProblemError
-    :members:
+   :members:
 
 .. autoclass:: sigmaepsilon.math.optimize.NoSolutionError
-    :members:
+   :members:
+
+.. autoclass:: sigmaepsilon.math.optimize.lp.LinearProgrammingResult
+   :members:

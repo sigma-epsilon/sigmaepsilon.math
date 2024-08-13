@@ -21,16 +21,16 @@ __all__ = ["k_nearest_neighbours"]
 
 def k_nearest_neighbours(
     X: ndarray,
-    Y: ndarray = None,
+    Y: ndarray | None = None,
     *,
     backend: str = "scipy",
     k: int = 1,
     workers: int = -1,
-    tree_kwargs: dict = None,
-    query_kwargs: dict = None,
+    tree_kwargs: dict | None = None,
+    query_kwargs: dict | None = None,
     leaf_size: int = 30,
     return_distance: bool = False,
-    max_distance: float = None,
+    max_distance: float | None = None,
 ):
     """
     Returns the k nearest neighbours (KNN) of a KDTree for a pointcloud using `scipy`

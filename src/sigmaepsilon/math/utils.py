@@ -492,7 +492,7 @@ def _to_range_1d_(vals: ndarray, source: ndarray, target: ndarray):
 
 
 def to_range_1d(
-    vals: ndarray,
+    vals: ndarray | Iterable,
     *_,
     source: ndarray,
     target: ndarray = None,

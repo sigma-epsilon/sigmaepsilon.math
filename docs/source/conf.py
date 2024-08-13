@@ -25,12 +25,6 @@ from sphinx.config import Config
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../../src"))
 
-from doc_utils import generate_examples_gallery_rst
-
-generate_examples_gallery_rst(
-    title="Examples", filename="examples_gallery", foldername="examples", reversed=True
-)
-
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -154,8 +148,36 @@ warnings.filterwarnings(
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
-
+html_theme_options = {
+    "show_prev_next": True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": f"https://github.com/sigma-epsilon/{project}",
+            "icon": "fab fa-github",
+            "type": "fontawesome",
+        },
+        {
+            "name": "PyPi",
+            "url": f"https://pypi.org/project/{project}/",
+            "icon": "fas fa-box-open",
+            "type": "fontawesome",
+        },
+    ],
+    "logo": {
+        # Because the logo is also a homepage link, including "home" in the alt text is good practice
+        "text": "SigmaEpsilon.Math",
+    },
+}
+html_js_files = [
+    "require.min.js",
+    "custom.js",
+]
+html_css_files = ["custom.css"]
+html_context = {"default_mode": "light"}
 html_static_path = ["_static"]
+
+# -- nbsphinx configuration -------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""

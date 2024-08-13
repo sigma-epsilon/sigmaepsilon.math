@@ -4,7 +4,7 @@ from awkward import Array as akarray
 from numba import njit
 from numba.core import types
 from numba.typed import Dict
-from typing import Union
+from typing import Union, Any
 import awkward as ak
 
 from .utils import flatten2dC
@@ -23,7 +23,7 @@ i64A2 = types.int64[:, :]
 
 
 def unique2d(
-    arr: ArrayLike,
+    arr: ArrayLike | Any,
     return_index: bool = False,
     return_inverse: bool = False,
     return_counts: bool = False,
