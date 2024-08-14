@@ -58,7 +58,7 @@ def flatind_sym(row: int, col: int, base: int = 0):
 def flatind_bulk(rows: np.ndarray, cols: np.ndarray, base: int = 0):
     ncols = np.max(cols) - base
     ncase, ndata = cols.shape
-    res = np.zeros((ncase, ndata), 0, dtype=rows.dtype)
+    res = np.zeros((ncase, ndata), dtype=rows.dtype)
     for i in range(ncase):
         for j in range(ndata):
             res[i, j] = flatind(rows[i, j], cols[i, j], ncols, base)
@@ -69,7 +69,7 @@ def flatind_bulk(rows: np.ndarray, cols: np.ndarray, base: int = 0):
 def flatind_flattened(rows: np.ndarray, cols: np.ndarray, base: int = 0):
     ncols = np.max(cols) - base
     ndata = len(cols)
-    res = np.zeros(ndata, 0, dtype=rows.dtype)
+    res = np.zeros(ndata, dtype=rows.dtype)
     for i in range(ndata):
         res[i] = flatind(rows[i], cols[i], ncols, base)
     return res
