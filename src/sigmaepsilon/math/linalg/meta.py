@@ -422,7 +422,7 @@ class TensorLike(ArrayWrapper):
             f = _new_and_init_(self._frame_cls_, value)
         else:
             raise TypeError(f"Value must be a {ndarray} or a {FrameLike} instance")
-        
+
         array = self.show(f)
         self.array.frame._unregister_tensorial_(self)
         self.array = array
