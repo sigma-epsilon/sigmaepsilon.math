@@ -74,7 +74,7 @@ class GeneticAlgorithm:
     a working genetic algorithm. These are :func:`populate`, :func:`decode`,
     :func:`crossover`, :func:`mutate` and :func:`select`. It is also possible to
     use a custom stopping criteria by implementing :func:`stopping_criteria`.
-    See :class:`~sigmaepsilon.math.optimize.ga.BinaryGeneticAlgorithm` for an example.
+    See :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` for an example.
 
     Parameters
     ----------

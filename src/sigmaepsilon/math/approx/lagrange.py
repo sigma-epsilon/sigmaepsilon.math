@@ -24,14 +24,14 @@ def _diff(xvar, fnc: sy.Expr):
 
 def gen_Lagrange_1d(
     *_,
-    x: Iterable = None,
+    x: Iterable | None = None,
     i: Iterable[int] = None,
-    xsym: str = None,
-    fsym: str = None,
+    xsym: str | None = None,
+    fsym: str | None = None,
     sym: bool = False,
-    N: int = None,
+    N: int | None = None,
     lambdify: bool = False,
-    out: dict = None
+    out: dict | None = None
 ) -> dict:
     """
     Generates Lagrange polynomials and their derivatives up to 3rd, for approximation
@@ -155,6 +155,9 @@ def gen_Lagrange_1d(
             for j in range(4):
                 fnc = module_data[ind][j]
                 module_data[ind]["fnc"][j] = sy.lambdify(xvar, fnc, "numpy")
+
+    if isinstance(out, DeepDict):
+        module_data.lock()
 
     return module_data
 

@@ -19,10 +19,10 @@ class MLSWeightFunction(Function):
         core: int | Iterable[Number] | ndarray | None = None,
         supportdomain: Iterable[Number] | None = None,
         sd: Iterable[Number] | None = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
-        
+
         dim = None
         if not isinstance(core, ndarray):
             if isinstance(core, Iterable):
@@ -33,16 +33,16 @@ class MLSWeightFunction(Function):
                 core = np.zeros([dim])
         else:
             dim = core.shape[0]
-        
+
         if dim is not None:
             self.dimension = dim
-        
+
         if not any([sd is None, supportdomain is None]):
             raise ValueError(
                 "`supportdomain` and `sd` cannot be both specified at the same time."
             )
         sd = sd if sd is not None else supportdomain
-        
+
         self._core = core
         self._supportdomain = sd
 
@@ -148,7 +148,7 @@ class SingularWeightFunction(MLSWeightFunction):
     def value(self, x: Iterable[Number]):
         self.preproc_evaluation(x)
         return 1 / (norm(np.subtract(self.core, x)) ** 2 + self.eps**2)
-    
+
     def gradient(self, x: Iterable[Number]) -> ndarray:
         return np.zeros(self.dimension, dtype=float)
 
@@ -167,7 +167,7 @@ class CubicWeightFunction(MLSWeightFunction):
     >>> w([0.0, 0.0])
     0.4444444444444444
     """
-    
+
     def evaluate(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:
         if self.dimension == 1:
             return self._evaluate_1d(x)
@@ -175,7 +175,7 @@ class CubicWeightFunction(MLSWeightFunction):
             return self._evaluate_2d(x)
 
         raise NotImplementedError
-    
+
     def _evaluate_1d(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:
         d = np.subtract(self.core, x)
         difX = d[0]
@@ -205,7 +205,7 @@ class CubicWeightFunction(MLSWeightFunction):
         Hessian = np.array([[dwXdXX]])
 
         return val, grad, Hessian
-    
+
     def _evaluate_2d(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:
         d = np.subtract(self.core, x)
         difX = d[0]

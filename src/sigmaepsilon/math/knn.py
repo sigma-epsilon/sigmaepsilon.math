@@ -21,16 +21,16 @@ __all__ = ["k_nearest_neighbours"]
 
 def k_nearest_neighbours(
     X: ndarray,
-    Y: ndarray = None,
+    Y: ndarray | None = None,
     *,
     backend: str = "scipy",
     k: int = 1,
     workers: int = -1,
-    tree_kwargs: dict = None,
-    query_kwargs: dict = None,
+    tree_kwargs: dict | None = None,
+    query_kwargs: dict | None = None,
     leaf_size: int = 30,
     return_distance: bool = False,
-    max_distance: float = None,
+    max_distance: float | None = None,
 ):
     """
     Returns the k nearest neighbours (KNN) of a KDTree for a pointcloud using `scipy`
@@ -111,7 +111,7 @@ def k_nearest_neighbours(
             d, i = tree.query(Y, k=k, **query_kwargs)
         else:
             d, i = tree.query(Y, k=k, workers=workers)
-    elif backend == "sklearn": # pragma: no cover
+    elif backend == "sklearn":  # pragma: no cover
         if not __has_sklearn__:
             raise ImportError("'sklearn' must be installed for this!")
 
@@ -121,6 +121,6 @@ def k_nearest_neighbours(
         else:
             r = max_distance
             d, i = tree.query_radius(Y, r, k=k, **query_kwargs)
-    else: # pragma: no cover
+    else:  # pragma: no cover
         raise ImportError("Either `sklearn` or `scipy` must be present for this!")
     return (d, i) if return_distance else i
