@@ -2,7 +2,6 @@ import numbers
 from copy import deepcopy
 import numpy as np
 from numpy import array_repr, array_str
-from typing import Type, Any
 
 from .meta import TensorLike
 from .exceptions import (
