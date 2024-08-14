@@ -13,7 +13,8 @@ are found in the :doc:`api`.
     :maxdepth: 1
     :caption: Getting started
     
-    user_guide/getting_started
+    user_guide/what_is_this
+    user_guide/installation
 
 .. toctree::
     :maxdepth: 2

@@ -35,71 +35,9 @@ The most important features:
 
 The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hosted on ReadTheDocs. You can find examples there.
 
-## **Installation**
+## **Installation and Testing**
 
-sigmaepsilon.math can be installed from PyPI using wither `pip` or `Poetry` on Python >=3.10:
-
-### Install using pip
-
-```console
->>> pip install sigmaepsilon.math
-```
-
-or chechkout with the following command using GitHub CLI
-
-```console
-gh repo clone sigma-epsilon/sigmaepsilon.math
-```
-
-and install from source by typing
-
-```console
->>> pip install .
-```
-
-If you want to run the tests, you can install the package along with the necessary optional dependencies like this
-
-```console
->>> pip install ".[test]"
-```
-
-If you are a developer and want to install the library in development mode, the suggested way is by using this command:
-
-```console
->>> pip install "-e .[test, dev]"
-```
-
-### Install using Poetry
-
-```console
->>> poetry install sigmaepsilon.math
-```
-
-If you want to run the tests, you can install the package along with the necessary optional dependencies like this
-
-```console
->>> poetry install sigmaepsilon.math --with test
-```
-
-If you are a developer and want to install the library in development mode, the suggested way is by using this command:
-
-```console
->>> poetry install sigmaepsilon.math --with test,dev
-```
-
-## Testing and coverage
-
-The following command runs all tests and creates a html report in a folder named `htmlcov` (the settings are governed by the `.coveragerc` file):
-
-```console
-python -m pytest --cov-report html --cov-config=.coveragerc --cov sigmaepsilon.math
-```
-
-ALternatively, you can use Poetry to test the package:
-
-```console
-poetry run pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.math
-```
+For instructions on installation and testing, please refer to the [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/).
 
 ## Changes and versioning
 
