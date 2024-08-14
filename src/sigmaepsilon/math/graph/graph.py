@@ -1,5 +1,3 @@
-import numpy as np
-
 from ..linalg.sparse import csr_matrix
 from .utils import rooted_level_structure, pseudo_peripheral_nodes
 
@@ -90,5 +88,5 @@ try:
             """
             return pseudo_peripheral_nodes(csr_matrix(adjacency_matrix(self)))
 
-except:  # pragma: no cover
+except ImportError:  # pragma: no cover
     Graph = None
