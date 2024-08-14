@@ -13,6 +13,7 @@ from sigmaepsilon.core import Wrapper
 from sigmaepsilon.core.abstract import ABC_Safe
 
 from ..utils import ascont, minmax
+from ..metautils import _new_and_init_
 from .exceptions import LinalgMissingInputError
 
 
@@ -290,9 +291,9 @@ class TensorLike(ArrayWrapper):
     def __init__(
         self,
         *args,
-        frame: FrameLike = None,
-        bulk: bool = None,
-        rank: int = None,
+        frame: FrameLike | None = None,
+        bulk: bool | None = None,
+        rank: int | None = None,
         **kwargs,
     ):
         if len(args) > 0 and isinstance(args[0], np.ndarray):
@@ -313,16 +314,17 @@ class TensorLike(ArrayWrapper):
 
             arr = args[0]
             if bulk:
-                frame = self.__class__._frame_cls_(dim=arr.shape[1])
+                frame = _new_and_init_(self.__class__._frame_cls_, dim=arr.shape[1])
             else:
-                frame = self.__class__._frame_cls_(dim=arr.shape[0])
+                frame = _new_and_init_(self.__class__._frame_cls_, dim=arr.shape[0])
             cls_params["frame"] = frame
 
         kwargs["cls_params"] = cls_params
         super().__init__(*args, **kwargs)
 
         if self._array._frame is None:
-            self._array._frame = self.__class__._frame_cls_(dim=self._array.shape)
+            frame_cls = self.__class__._frame_cls_
+            self._array._frame = _new_and_init_(frame_cls, dim=self._array.shape)
 
         self.frame._register_tensorial_(self)
 
@@ -343,13 +345,12 @@ class TensorLike(ArrayWrapper):
         cls = type(self)
         copy_function = copy if (memo is None) else partial(deepcopy, memo=memo)
         is_deep = memo is not None
-        frame_cls = cls._frame_cls_
 
         f = self.frame
         if is_deep:
             ax = deepcopy(f.axes)
             memo[id(f.axes)] = ax
-            frame = frame_cls(ax)
+            frame = _new_and_init_(cls._frame_cls_, ax)
         else:
             frame = f
 
@@ -407,7 +408,7 @@ class TensorLike(ArrayWrapper):
         return self.array.frame
 
     @frame.setter
-    def frame(self, value: FrameLike):
+    def frame(self, value: FrameLike | ndarray):
         """
         Sets the frame of the vector.
 
@@ -418,9 +419,10 @@ class TensorLike(ArrayWrapper):
         if isinstance(value, FrameLike):
             f = value
         elif isinstance(value, ndarray):
-            f = self._frame_cls_(value)
+            f = _new_and_init_(self._frame_cls_, value)
         else:
             raise TypeError(f"Value must be a {ndarray} or a {FrameLike} instance")
+
         array = self.show(f)
         self.array.frame._unregister_tensorial_(self)
         self.array = array

@@ -10,7 +10,7 @@ from .exceptions import (
     LinalgOperationInputError,
 )
 from .utils import dot, cross
-
+from ..metautils import _new_and_init_
 
 __all__ = ["AbstractTensor"]
 
@@ -71,7 +71,7 @@ class AbstractTensor(TensorLike):
                 raise TensorShapeMismatchError
             cls = self.__class__
             fcls = cls._frame_cls_
-            frame = fcls(deepcopy(self.frame.axes))
+            frame = _new_and_init_(fcls, deepcopy(self.frame.axes))
             arr = self.array + other.show(self.frame)
             return cls(arr, frame=frame)
         else:
@@ -88,7 +88,7 @@ class AbstractTensor(TensorLike):
                 raise TensorShapeMismatchError
             cls = self.__class__
             fcls = cls._frame_cls_
-            frame = fcls(deepcopy(self.frame.axes))
+            frame = _new_and_init_(fcls, deepcopy(self.frame.axes))
             arr = self.array - other.show(self.frame)
             return cls(arr, frame=frame)
         else:
