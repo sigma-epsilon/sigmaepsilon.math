@@ -2,6 +2,7 @@ import numbers
 from copy import deepcopy
 import numpy as np
 from numpy import array_repr, array_str
+from typing import Type, Any
 
 from .meta import TensorLike
 from .exceptions import (
@@ -33,6 +34,12 @@ def implements(numpy_function, ufunc: bool = False):
         return func
 
     return decorator
+
+
+def _new_and_init(cls: Type, *args, **kwargs) -> Any:
+    obj = cls.__new__(cls)
+    obj.__init__(*args, **kwargs)
+    return obj
 
 
 class AbstractTensor(TensorLike):
@@ -71,7 +78,10 @@ class AbstractTensor(TensorLike):
                 raise TensorShapeMismatchError
             cls = self.__class__
             fcls = cls._frame_cls_
-            frame = fcls(deepcopy(self.frame.axes))
+            
+            frame = _new_and_init(fcls, deepcopy(self.frame.axes))
+            #frame = fcls(deepcopy(self.frame.axes))
+            
             arr = self.array + other.show(self.frame)
             return cls(arr, frame=frame)
         else:
