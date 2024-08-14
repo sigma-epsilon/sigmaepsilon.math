@@ -18,6 +18,10 @@ def moving_least_squares(
     w: Callable | None = None,
     **kwargs,
 ) -> Callable:
+    """
+    Moving least squares approximation. The usage is the same as for the
+    :func:`~sigmaepsilon.math.approx.ls.weighted_least_squares` function.
+    """
     dim = 1 if len(points.shape) == 1 else points.shape[1]
     
     if not isMLSWeightFunction(w):
