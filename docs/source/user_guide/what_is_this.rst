@@ -17,11 +17,14 @@ or to produce industry-grade solutions, but to provide a set of tools that are e
 engineers and scientists. Sometimes a solution makes it into the library because it is a good teaching example, or because
 it is a good starting point for further development.
 
+What can I use it for?
+======================
+
 The main areas of focus are linear algebra, operations research, and graph theory, which
 we will discuss in more detail below.
 
 Linear Algebra
-==============
+--------------
 
 Linear algebra is a branch of mathematics that deals with vectors, vector spaces (also known as linear spaces), 
 linear transformations, and systems of linear equations. It is fundamental to various areas of mathematics and is 
@@ -38,7 +41,7 @@ widely used in fields like physics, computer science, engineering, economics, an
 * **Sparse Data:** We provide a `JaggedArray` and a Numba-jittable `csr_matrix` to handle sparse and irregular data. 
 
 Optimization
-============
+------------
 
 * **Linear Programming:** We provide a `LinearProgrammingProblem` class to define and solve almost  any kind of continuous 
   linear optimization problem. The implementation is suitable to handle small and medium-sized problems.
@@ -49,7 +52,7 @@ Optimization
   The implementation is extendible which allows for further customization.
   
 Graph Theory
-============
+------------
 
 Graph theory is a branch of mathematics that focuses on the study of graphs, which are structures made up of vertices 
 (also called nodes) connected by edges. These structures are used to model relationships between pairs of objects, making 
@@ -60,7 +63,7 @@ and pseudo peripheral nodes of a graph. These algorithms are useful if you want 
 which is a common task in computational mechanics.
 
 Miscellaneous
-=============
+-------------
 
 .. note::
 
