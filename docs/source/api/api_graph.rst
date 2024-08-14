@@ -2,5 +2,8 @@
 Graphs and Graph Routines
 =========================
 
-.. automodule:: sigmaepsilon.math.graph.graph
-   :members: 
+.. toctree::
+    :maxdepth: 1
+    
+    api_graph.graph
+    api_graph.routines

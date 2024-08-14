@@ -19,16 +19,7 @@
 `Issue Tracker <https://github.com/sigma-epsilon/sigmaepsilon.math/issues>`_ | 
 `Source Repository <https://github.com/sigma-epsilon/sigmaepsilon.math>`_
 
-.. _sigmaepsilon.math: https://sigmaepsilon.math.readthedocs.io/en/latest/
-.. _Awkward: https://awkward-array.org/doc/main/
-.. _PyArrow: https://arrow.apache.org/docs/python/index.html
-.. _NumPy: https://numpy.org/doc/stable/index.html
-.. _Numba: https://numba.pydata.org/
-.. _NetworkX: https://networkx.org/documentation/stable/index.html
-.. _SciPy: https://scipy.org/
-.. _scikit-learn: https://scikit-learn.org/stable/
-.. _SymPy: https://www.sympy.org/en/index.html
-
+.. include:: global_refs.rst
 
 The `sigmaepsilon.math`_ library is the mathematical department of the `SigmaEpsilon` project, a collection of 
 Python libraries for computational mechanics and related disciplines.
@@ -38,7 +29,6 @@ Implementations are fast as they rely on the vector math capabilities of `NumPy`
 sensitive calculations are JIT-compiled using `Numba`_.
 
 Here and there we also use `NetworkX`_, `SciPy`_, `SymPy`_ and `scikit-learn`_.
-
 
 Highlights
 ==========
@@ -135,7 +125,7 @@ Contents
 
         +++
 
-        .. button-ref:: examples_gallery
+        .. button-ref:: development
             :expand:
             :color: secondary
             :click-parent:

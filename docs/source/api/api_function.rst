@@ -2,17 +2,23 @@
 Functions and Relations
 =======================
 
+Functions
+=========
+
 .. autoclass:: sigmaepsilon.math.function.Function
-    :members: 
+   :members: 
+
+Relations
+=========
 
 .. autoclass:: sigmaepsilon.math.function.Equality
-    :members: 
+   :members: 
 
 .. autoclass:: sigmaepsilon.math.function.InEquality
-    :members: 
+   :members:
 
-Test Functions
-==============
+Test Functions for Optimization
+===============================
 
 .. automodule:: sigmaepsilon.math.function.functions
-    :members: 
+   :members: 
