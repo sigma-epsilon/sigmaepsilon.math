@@ -23,7 +23,7 @@ def moving_least_squares(
     :func:`~sigmaepsilon.math.approx.ls.weighted_least_squares` function.
     """
     dim = 1 if len(points.shape) == 1 else points.shape[1]
-    
+
     if not isMLSWeightFunction(w):
         w = ConstantWeightFunction(dim=dim)
 

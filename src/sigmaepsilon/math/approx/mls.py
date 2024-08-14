@@ -29,7 +29,7 @@ def _approximate_nd(
         for j in range(nN):
             out[i] += values[neighbours[i, j]] * factors[i, j]
 
-            
+
 class MLSApproximator:
     """
     Object oriented, high performance implementation of a specific version of the
@@ -37,7 +37,7 @@ class MLSApproximator:
     but performes well for extremely large datasets too. If you want to experiment
     with the hyperparameters of the MLS as a method, it is suggested to use the other
     solutions offered by the library.
-    
+
     Parameters
     ----------
     knn_backend: {"scipy", "sklearn"}, Optional
@@ -87,7 +87,7 @@ class MLSApproximator:
     def config(self, **kwargs) -> None:
         """
         Updates the configuration of the instance.
-        
+
         Parameters
         ----------
         knn_backend: {"scipy", "sklearn"}, Optional
@@ -105,7 +105,7 @@ class MLSApproximator:
     ) -> None:
         """
         Records and preprocesses the data if necessary.
-        
+
         Parameters
         ----------
         X_S: ndarray

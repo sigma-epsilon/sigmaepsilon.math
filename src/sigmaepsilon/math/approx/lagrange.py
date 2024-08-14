@@ -158,7 +158,7 @@ def gen_Lagrange_1d(
 
     if isinstance(out, DeepDict):
         module_data.lock()
-    
+
     return module_data
 
 

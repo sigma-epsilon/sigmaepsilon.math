@@ -111,7 +111,7 @@ def k_nearest_neighbours(
             d, i = tree.query(Y, k=k, **query_kwargs)
         else:
             d, i = tree.query(Y, k=k, workers=workers)
-    elif backend == "sklearn": # pragma: no cover
+    elif backend == "sklearn":  # pragma: no cover
         if not __has_sklearn__:
             raise ImportError("'sklearn' must be installed for this!")
 
@@ -121,6 +121,6 @@ def k_nearest_neighbours(
         else:
             r = max_distance
             d, i = tree.query_radius(Y, r, k=k, **query_kwargs)
-    else: # pragma: no cover
+    else:  # pragma: no cover
         raise ImportError("Either `sklearn` or `scipy` must be present for this!")
     return (d, i) if return_distance else i

@@ -14,34 +14,34 @@ def frsolve(
     presc_val: np.ndarray | None = None,
     topology: np.ndarray | None = None,
     epath: np.ndarray | None = None,
-    eorder: np.ndarray | None =None,
+    eorder: np.ndarray | None = None,
 ):
     try:
         nEQ = len(B)
-        
+
         if len(B.shape) == 1:
             B = B.reshape((nEQ, 1))
-        
+
         if epath is None:
             if eorder is not None:
                 epath = order_to_path(eorder)
             else:
                 epath = np.arange(len(A))
-        
+
         pre = presc_val is not None
-        
+
         if not pre:
             presc_bool = np.zeros((nEQ,), dtype=int)
             presc_val = np.zeros((nEQ,), dtype=float)
-        
+
         lhs, rhs, eqpath, glob_to_front, glob_to_width = frontal_sym_bulk_uniform(
             A, topology, B, presc_bool, presc_val, epath
         )
-        
+
         res = backsub_fr(
             lhs, rhs, presc_bool, presc_val, eqpath, glob_to_front, glob_to_width
         )
-        
+
         if pre:
             return res
         else:
