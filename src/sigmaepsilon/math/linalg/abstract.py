@@ -35,6 +35,14 @@ def implements(numpy_function, ufunc: bool = False):
 
     return decorator
 
+def _new_and_init_(cls: Type, *args: Any, **kwargs: Any) -> Any:
+    """
+    Create a new instance of a class and initialize it.
+    """
+    obj = cls.__new__(cls, *args, **kwargs)
+    obj.__init__(*args, **kwargs)
+    return obj
+
 class AbstractTensor(TensorLike):
     _HANDLED_TYPES_ = (numbers.Number,)
 
@@ -70,8 +78,9 @@ class AbstractTensor(TensorLike):
             if not self.array.shape == other.array.shape:
                 raise TensorShapeMismatchError
             cls = self.__class__
-            fcls = cls._frame_cls_.__class__
-            frame = fcls(deepcopy(self.frame.axes))
+            fcls = cls._frame_cls_
+            #frame = fcls(deepcopy(self.frame.axes))
+            frame = _new_and_init_(fcls, deepcopy(self.frame.axes))
             arr = self.array + other.show(self.frame)
             return cls(arr, frame=frame)
         else:
@@ -87,8 +96,9 @@ class AbstractTensor(TensorLike):
             if not self.array.shape == other.array.shape:
                 raise TensorShapeMismatchError
             cls = self.__class__
-            fcls = cls._frame_cls_.__class__
-            frame = fcls(deepcopy(self.frame.axes))
+            fcls = cls._frame_cls_
+            #frame = fcls(deepcopy(self.frame.axes))
+            frame = _new_and_init_(fcls, deepcopy(self.frame.axes))
             arr = self.array - other.show(self.frame)
             return cls(arr, frame=frame)
         else:
