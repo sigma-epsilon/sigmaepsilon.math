@@ -62,7 +62,7 @@ class LinearProgrammingProblem:
 
         \\begin{eqnarray}
             & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
-            & subject \, to& & \\\\
+            & subject \, to& & \\nonumber\\\\
             & & x_1 + 2 x_3 + x_4 \,=\, 4, \\\\
             & & x_2 + x_3 - x_4 \,=\, 2, \\\\
             & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
@@ -207,7 +207,7 @@ class LinearProgrammingProblem:
 
             \\begin{eqnarray}
                 & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
-                & subject \, to& & \\\\
+                & subject \, to& & \\nonumber \\\\
                 & & x_1 + 2 x_3 + x_4 \,=\, 4, \\\\
                 & & x_2 + x_3 - x_4 \,=\, 2, \\\\
                 & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
@@ -754,7 +754,7 @@ class LinearProgrammingProblem:
         Returns the complete numerical representation of the standard
         form of the problem:
 
-            :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
+        :math:`minimize \quad \mathbf{c} \mathbf{x} \quad under \quad \mathbf{A}\mathbf{x} = \mathbf{b}`.
 
         Parameters
         ----------
