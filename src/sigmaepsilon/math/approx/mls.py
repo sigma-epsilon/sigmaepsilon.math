@@ -87,6 +87,12 @@ class MLSApproximator:
     def config(self, **kwargs) -> None:
         """
         Updates the configuration of the instance.
+        
+        Parameters
+        ----------
+        knn_backend: {"scipy", "sklearn"}, Optional
+            The backend to use for the KNN calculation. If None, the default backend
+            of the library is used. Default is None.
         """
         self._config.update(kwargs)
 
@@ -99,6 +105,15 @@ class MLSApproximator:
     ) -> None:
         """
         Records and preprocesses the data if necessary.
+        
+        Parameters
+        ----------
+        X_S: ndarray
+            The source points.
+        Y: ndarray
+            The data at the source points.
+        X_T: ndarray, Optional
+            The target points. Default is None.
         """
         self.X_S = X_S
         self.Y = atleast2d(Y, back=True)
