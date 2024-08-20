@@ -73,7 +73,7 @@ jobs:
             poetry publish --skip-existing
 
 workflows:
-  test_and_deploy_to_test_pypi:
+  test_and_deploy:
     jobs:
       - run_tests
 
