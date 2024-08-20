@@ -84,6 +84,8 @@ class MLSApproximator:
     >>> # check the results
     >>> assert np.allclose(target_values, np.ones_like(target_values))
     """
+    
+    __slots__ = ["X_S", "X_T", "_neighbours", "_factors", "_config"]
 
     def __init__(self, **config) -> None:
         self._config = dict()
