@@ -51,7 +51,7 @@ class MLSWeightFunction(Function):
         return self._core
 
     @core.setter
-    def core(self, val: ndarray | Iterable[Number] | None):
+    def core(self, val: ndarray | Iterable[Number] | Number | None):
         if not isinstance(val, ndarray):
             if isinstance(val, Iterable):
                 val = np.array(val)
