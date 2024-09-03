@@ -36,9 +36,12 @@ class TestFunction(unittest.TestCase):
 
         f = Function(f0, f1, d=2)
         self.assertFalse(f.is_symbolic)
-        # f.to_latex()
-        f.coefficients()
-        f.linear_coefficients()
+
+        with self.assertRaises(TypeError):
+            f.coefficients()
+        
+        with self.assertRaises(TypeError):
+            f.linear_coefficients()
 
         Function(value=f0, gradient=f1, Hessian=None, d=2)
 
@@ -116,10 +119,10 @@ class TestRelations(unittest.TestCase):
         r.operator
         
         r = Relation(
-            x1 + 2 * x3 + x4 - 4, variables=syms, op=lambda x, y: x <= y
+            x1 + 2 * x3 + x4 - 4, variables=syms, op=lambda x, y: x <= y, op_str="<="
         )
         self.assertIsInstance(r, Relation)
-        self.assertIsInstance(r, Equality)
+        self.assertIsInstance(r, InEquality)
         
         
 
@@ -146,7 +149,7 @@ class TestRelations(unittest.TestCase):
         failed_properly = False
         try:
             InEquality("x + y")
-        except ValueError:
+        except Exception:
             failed_properly = True
         finally:
             self.assertTrue(failed_properly)

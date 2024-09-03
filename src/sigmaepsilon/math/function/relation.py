@@ -107,12 +107,22 @@ class Relation(Function):
                 op = Relations.eq
                 op_str = "="
 
-        if op == Relations.eq:
-            return super(Relation, Equality).__new__(Equality)
+        if op:
+            if isinstance(op, Relations):
+                op_str = op.value
+            elif op_str in valid_operators:
+                op = Relations(op_str)
+                
+        if cls is not Relation:
+            instance = super().__new__(cls)
+        elif op == Relations.eq:
+            instance = super().__new__(Equality)
         elif op in {Relations.gt, Relations.ge, Relations.lt, Relations.le}:
-            return super(Relation, InEquality).__new__(InEquality)
+            instance = super().__new__(InEquality)
+        else:
+            instance = super().__new__(cls)
 
-        return super(Relation, cls).__new__(cls)
+        return instance
 
     def __init__(self, *args, op_str: str | None = None, **kwargs):
         self.op = None
@@ -150,7 +160,7 @@ class Relation(Function):
         if op and isinstance(self.op, Relations):
             self.opfunc = self.op.to_opfunc()
             self.op_str = self.op.value
-            
+
         super().__init__(*args, **kwargs)
 
     @property
@@ -203,6 +213,7 @@ class Equality(Relation):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        assert hasattr(self, "op")
         if self.op:
             assert self.op == Relations.eq
 
@@ -226,6 +237,7 @@ class InEquality(Relation):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        assert hasattr(self, "op")
         if self.op:
             assert self.op in {Relations.gt, Relations.ge, Relations.lt, Relations.le}
 
