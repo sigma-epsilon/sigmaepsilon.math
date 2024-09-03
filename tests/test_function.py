@@ -35,7 +35,7 @@ class TestFunction(unittest.TestCase):
             return np.array([2 * x, 1])  # pragma: no cover
 
         f = Function(f0, f1, d=2)
-        self.assertFalse(f.symbolic)
+        self.assertFalse(f.is_symbolic)
         # f.to_latex()
         f.coefficients()
         f.linear_coefficients()
@@ -77,14 +77,14 @@ class TestFunction(unittest.TestCase):
             return np.array([2 * x, 1])  # pragma: no cover
 
         f = Function(f0, f1, d=2)
-        self.assertFalse(f.symbolic)
-        self.assertTrue(f.linear)
+        self.assertFalse(f.is_symbolic)
+        self.assertTrue(f.is_linear)
 
     def test_sym(self):
         f = gen_Lagrange_1d(N=2)
         f1 = Function(f[1][0], f[1][1], f[1][2])
         f2 = Function(f[2][0], f[2][1], f[2][2])
-        assert f1.linear and f2.linear
+        assert f1.is_linear and f2.is_linear
         assert f1.dimension == 1
         assert f2.dimension == 1
         assert np.isclose(f1([-1]), 1.0)
@@ -109,11 +109,19 @@ class TestRelations(unittest.TestCase):
     def test_Relation(self):
         variables = ["x1", "x2", "x3", "x4"]
         x1, _, x3, x4 = syms = sy.symbols(variables, positive=True)
+        
         r = Relation(x1 + 2 * x3 + x4 - 4, variables=syms)
+        self.assertIsInstance(r, Relation)
+        self.assertIsInstance(r, Equality)
         r.operator
+        
         r = Relation(
             x1 + 2 * x3 + x4 - 4, variables=syms, op=lambda x, y: x <= y
-        )  # pragma: no cover
+        )
+        self.assertIsInstance(r, Relation)
+        self.assertIsInstance(r, Equality)
+        
+        
 
     def test_Equality(self):
         variables = ["x1", "x2", "x3", "x4"]
