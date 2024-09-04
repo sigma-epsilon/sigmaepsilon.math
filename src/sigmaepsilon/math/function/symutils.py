@@ -54,6 +54,26 @@ def substitute(
     variables: Iterable[str | Symbol] | None = None,
     as_string: bool = False,
 ) -> Expr:
+    """
+    Substitutes the variables in the expression with the corresponding values.
+    
+    Parameters
+    ----------
+    expr : sympy.Expr
+        The expression to substitute the values in.
+    values : list
+        The values to substitute the variables with.
+    variables : list, optional
+        The variables to substitute. If not provided, the function will attempt to
+        extract the variables from the expression.
+    as_string : bool, optional
+        If True, the variables will be substituted as strings. Default is `False`.
+        This might be important if let say you want to instantiate a Function with
+        the string 'x + y' and you want the expression to have variables that you
+        prepared with `sympy.symbols`. In that case, two SymPy variables with the same
+        name will be treated as different variables. Substituting the variables as strings
+        will help you avoid this issue.
+    """
     if variables is None:
         variables = tuple(expr.free_symbols)
 
