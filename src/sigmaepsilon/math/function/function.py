@@ -8,7 +8,8 @@ import numpy as np
 
 from sigmaepsilon.core.kwargtools import getasany
 
-from .metafunction import MetaFunction, substitute
+from .metafunction import MetaFunction
+from .symutils import substitute
 
 
 __all__ = ["Function", "FunctionLike"]

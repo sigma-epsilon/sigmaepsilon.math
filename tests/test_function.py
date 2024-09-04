@@ -5,7 +5,7 @@ import sympy as sy
 import numpy as np
 
 import sigmaepsilon.math.function as fnc
-from sigmaepsilon.math.function.metafunction import decode, substitute, coefficients
+from sigmaepsilon.math.function.symutils import decode, substitute, coefficients
 from sigmaepsilon.math.function import Function
 from sigmaepsilon.math.function import Equality, InEquality, Relation
 from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
