@@ -16,7 +16,7 @@ from sigmaepsilon.core.kwargtools import getasany
 
 from ..function import Function, InEquality, Equality, VariableManager
 from ..function.relation import Relations, Relation
-from ..function.symutils import coefficients
+from ..function.symutils import coefficients, generate_symbols
 from .errors import DegenerateProblemError, NoSolutionError
 from ..utils import atleast2d
 
@@ -54,8 +54,6 @@ class LinearProgrammingProblem:
 
     Examples
     --------
-    The examples require `sympy` to be installed.
-
     (1) Example for unique solution.
 
     .. math::
@@ -109,7 +107,7 @@ class LinearProgrammingProblem:
     >>> P3.solve(raise_errors=True)
     Traceback (most recent call last):
         ...
-    sigmaepsilon.math.optimize.errors.NoSolutionError: There is not solution to this problem!
+    sigmaepsilon.math.optimize.errors.NoSolutionError: There is no solution to this problem!
 
     (4) Example for multiple solutions. We can ask for all the results
     with the option `return_all=True`. Note that the order of the solutions in the
@@ -256,7 +254,7 @@ class LinearProgrammingProblem:
         """
         return self.vmanager.source()
 
-    def _sync_variables(self) -> None:
+    def _initialize_variable_manager(self) -> None:
         """
         Collect all the variables of the problem and update the variable manager.
         """
@@ -276,7 +274,7 @@ class LinearProgrammingProblem:
                 si, sj = sy.symbols(sym, positive=True)
                 vmap[v] = si - sj
         self.vmanager.substitute(vmap)
-        
+
     def _has_integer_variables(self) -> bool:
         """
         Returns `True` if the problem has at least one integer variable.
@@ -372,11 +370,11 @@ class LinearProgrammingProblem:
         Parameters
         ----------
         maximize: bool
-            Set this true if the problem is a maximization. Default is False.
+            Set this to `True` if the problem is a maximization. Default is `False`.
         inplace: bool
-            If `True`, transformation happend in place, changing the internal structure
-            ob the instance it is invoked by. In this case, `self` gets returned for
-            possible continuation.
+            If `True`, the instance might be altered in the process of getting to the
+            standard form. In this case, the instance gets returned for possible continuation.
+            If `False`, a new instance is returned. Default is `False`.
 
         Notes
         -----
@@ -386,49 +384,51 @@ class LinearProgrammingProblem:
         -------
         LinearProgrammingProblem
             An LPP that admits a standard form.
-        dict, Optional
-            A mapping between variables of the standard and the general form.
-            Only if `return_inverse` is `True`.
 
         Raises
         ------
         NotImplementedError
-            On invalid input.
         """
         P = self if inplace else deepcopy(self)
-        
+
         if P._has_integer_variables():
             raise NotImplementedError("Integer variables are not supported yet!")
 
-        # handle variables
-        P._sync_variables()
+        P._initialize_variable_manager()
+
+        # handle variables not restricted in sign
         P._shift_variables()
+
+        # gather and add slack variables to the variable manager
         slacks = P.get_slack_variables()
         P.vmanager.add_variables(slacks)
-        v = P.vmanager.target()  # can be in arbitrary order
-        n = len(v)
-        x = list(
-            sy.symbols(
-                " ".join(["X_{}".format(i) for i in range(1, n + 1)]), positive=True
-            )
-        )
-        c = list(sy.symbols(" ".join(["c_{}".format(i) for i in range(1, n + 1)])))
-        x_v = {x_: v_ for x_, v_ in zip(x, v)}
-        P.vmanager.substitute(vmap=x_v, inverse=True)
 
-        # for the constant term
-        v.append(1)
-        x.append(1)
-        c.append(sy.symbols("c"))
+        general_variables = P.vmanager.target()
+        number_of_general_variables = len(general_variables)
+        variable_indices = range(1, number_of_general_variables + 1)
+        standard_variables = generate_symbols("X_{}", variable_indices, positive=True)
+        standard_coefficients = generate_symbols("c_{}", variable_indices)
 
-        x_c = {x_: c_ for x_, c_ in zip(x, c)}
-        template = np.inner(c, x)
-        x.pop(-1)
-        v.pop(-1)
+        # substitute the variables of the problem with the general variables
+        standard_to_general = {
+            k: v for k, v in zip(standard_variables, general_variables)
+        }
+        P.vmanager.substitute(vmap=standard_to_general, inverse=True)
 
-        variable_map = P.vmanager.vmap  # == v_x, inverse of x_v
-        slack_map = {x_v[variable_map[slack]]: 1 for slack in slacks}
-        number_of_slacks = len(slacks)
+        # create template for a general linear function
+        general_variables.append(1)
+        standard_variables.append(1)
+        standard_coefficients.append(sy.symbols("c"))
+        standard_to_coeff = {
+            k: v for k, v in zip(standard_variables, standard_coefficients)
+        }
+        template = np.inner(standard_coefficients, standard_variables)
+        standard_variables.pop(-1)
+        general_variables.pop(-1)
+
+        # initialize map for slack variables
+        variable_map = P.vmanager.vmap  # inverse of standard_to_general
+        slack_map = {standard_to_general[variable_map[slack]]: 1 for slack in slacks}
 
         def redefine_expr(fnc, aux: dict = None):
             expr = fnc.expr.subs([(v, expr) for v, expr in variable_map.items()])
@@ -436,19 +436,23 @@ class LinearProgrammingProblem:
             coeffs = defaultdict(lambda: 0)
             if isinstance(aux, dict):
                 coeffs.update(aux)
-            coeffs.update({x_c[x]: c for x, c in fnc_coeffs.items()})
-            return template.subs([(c_, coeffs[c_]) for c_ in c])
+            coeffs.update({standard_to_coeff[x]: c for x, c in fnc_coeffs.items()})
+            return template.subs([(c, coeffs[c]) for c in standard_coefficients])
 
-        def redefine_function(fnc: Function) -> Function:
+        def tr_obj(fnc: Function) -> Function:
             minmax = -1 if maximize else 1
             expr = minmax * redefine_expr(fnc)
-            return Function(expr, variables=x, vmap=x_v)
+            return Function(
+                expr, variables=standard_variables, vmap=standard_to_general
+            )
 
-        def redefine_equality(fnc: Equality) -> Equality:
+        def tr_eq(fnc: Equality) -> Equality:
             expr = redefine_expr(fnc)
-            return Equality(expr, variables=x, vmap=x_v)
+            return Equality(
+                expr, variables=standard_variables, vmap=standard_to_general
+            )
 
-        def redefine_inequality(fnc: InEquality) -> Equality:
+        def tr_ieq(fnc: InEquality) -> Equality:
             expr = redefine_expr(fnc, slack_map)
 
             # bring inequality to the form expr >= 0
@@ -462,35 +466,40 @@ class LinearProgrammingProblem:
 
             # handle inequality in the form of expr >= 0 with slack variable
             expr -= variable_map[fnc.slack]
-            eq = Equality(expr, variables=x, vmap=x_v)
+            eq = Equality(expr, variables=standard_variables, vmap=standard_to_general)
             eq.slack = fnc.slack
 
             return eq
 
         # transform the objective function and the constraints to standard form
-        obj = redefine_function(P.obj)
+        obj = tr_obj(P.obj)
         _c = P.constraints
         constraints = []
-        eq = list(map(redefine_equality, filter(lambda c: isinstance(c, Equality), _c)))
+        eq = list(map(tr_eq, filter(lambda c: isinstance(c, Equality), _c)))
         constraints += eq
 
-        if number_of_slacks > 0:
-            ieq = list(
-                map(
-                    redefine_inequality, filter(lambda c: isinstance(c, InEquality), _c)
-                )
-            )
+        if len(slacks) > 0:
+            ieq = list(map(tr_ieq, filter(lambda c: isinstance(c, InEquality), _c)))
             constraints += ieq
 
         # return equivalent problem in standard form
         if inplace:
-            self._update(constraints=constraints, variables=x, positive=True, _hook=P)
+            self._update(
+                constraints=constraints,
+                variables=standard_variables,
+                positive=True,
+                _hook=P,
+            )
             return self
         else:
             lpp = LinearProgrammingProblem(
-                obj=obj, constraints=constraints, variables=x, positive=True, _hook=P
+                obj=obj,
+                constraints=constraints,
+                variables=standard_variables,
+                positive=True,
+                _hook=P,
             )
-            lpp.vmanager.inv = x_v
+            lpp.vmanager.inv = standard_to_general
             return lpp
 
     def eval_constraints(self, x: Iterable) -> Iterable:

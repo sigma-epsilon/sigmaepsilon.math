@@ -5,6 +5,18 @@ from typing import Iterable
 import sympy as sy
 
 
+def generate_symbols(
+    template: str, indices: Iterable[int], **assumptions
+) -> list[Symbol]:
+    """
+    Generates a list of symbols.
+    """
+    result = list(
+        sy.symbols(" ".join([template.format(i) for i in indices]), **assumptions)
+    )
+    return result
+
+
 def decode(
     *_,
     expr: Expr | None = None,
@@ -56,7 +68,7 @@ def substitute(
 ) -> Expr:
     """
     Substitutes the variables in the expression with the corresponding values.
-    
+
     Parameters
     ----------
     expr : sympy.Expr
