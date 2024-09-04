@@ -254,7 +254,7 @@ class LinearProgrammingProblem:
         """
         Returns the variables of the problem.
         """
-        return self.vmanager.target()
+        return self.vmanager.source()
 
     def _sync_variables(self) -> None:
         """
@@ -270,7 +270,7 @@ class LinearProgrammingProblem:
         vmap = dict()
         tmpl = self.__class__.__tmpl_shift__
         count = 1
-        for v in self.vmanager.source():
+        for v in self.vmanager.target():
             if not v.is_positive:
                 sym = [tmpl.format(count), tmpl.format(count + 1)]
                 si, sj = sy.symbols(sym, positive=True)
@@ -405,7 +405,7 @@ class LinearProgrammingProblem:
         P._shift_variables()
         slacks = P.get_slack_variables()
         P.vmanager.add_variables(slacks)
-        v = P.vmanager.source()  # can be in arbitrary order
+        v = P.vmanager.target()  # can be in arbitrary order
         n = len(v)
         x = list(
             sy.symbols(

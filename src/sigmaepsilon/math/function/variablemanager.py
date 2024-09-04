@@ -94,15 +94,15 @@ class VariableManager:
     def __call__(self, v):
         return self._vmap[v]
 
-    def target(self) -> list:
+    def source(self) -> list:
         """
-        Return the target variables of the variable manager.
+        Return the source variables of the variable manager.
         """
         return list(self._vmap.keys())
 
-    def source(self) -> list:
+    def target(self) -> list:
         """
-        Returns the source variables of the variable manager.
+        Returns the target variables of the variable manager.
         """
         s = set()
         for expr in self._vmap.values():
