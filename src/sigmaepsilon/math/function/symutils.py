@@ -26,10 +26,12 @@ def decode(
         if not all([isinstance(v, sy.Expr) for v in variables]):
             variables = list(symbols(variables))
 
+        expr = substitute(expr, variables, as_string=True)
+
     return expr, variables
 
 
-def symbolize(*args, **kwargs):
+def symbolize(*args, **kwargs) -> dict:
     expr, variables = decode(*args, **kwargs)
     f0 = lambdify([variables], expr, "numpy")
     g = derive_by_array(expr, variables)
@@ -46,9 +48,15 @@ def symbolize(*args, **kwargs):
     }
 
 
-def substitute(expr, values, variables=None, as_string=False):
+def substitute(
+    expr: Expr,
+    values: Iterable,
+    variables: Iterable[str | Symbol] | None = None,
+    as_string: bool = False,
+) -> Expr:
     if variables is None:
         variables = tuple(expr.free_symbols)
+
     if not as_string:
         return expr.subs([(v, val) for v, val in zip(variables, values)])
     else:
