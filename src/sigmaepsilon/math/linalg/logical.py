@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import ndarray
+import sympy as sy
 
 from .utils import Gram
 
@@ -124,14 +125,11 @@ def has_full_column_rank(matrix: ndarray) -> bool:
     return rank == num_columns
 
 
-def has_full_rank(matrix: ndarray) -> bool:
+def has_full_rank(matrix: ndarray | sy.Matrix) -> bool:
     """
-    Returns `True` if the input matrix has full rank.
-
-    See also
-    --------
-    :func:`numpy.linalg.matrix_rank`
+    Returns `True` if the input matrix has full rank, `False` otherwise.
     """
-    num_rows, num_columns = matrix.shape
-    rank = np.linalg.matrix_rank(matrix)
-    return rank == num_columns == num_rows
+    if isinstance(matrix, sy.Matrix):
+        return matrix.rank() == min(matrix.shape)
+    else:
+        return np.linalg.matrix_rank(matrix) == min(matrix.shape)
