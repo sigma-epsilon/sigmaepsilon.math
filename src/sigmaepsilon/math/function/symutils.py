@@ -38,7 +38,7 @@ def decode(
         if not all([isinstance(v, sy.Expr) for v in variables]):
             variables = list(symbols(variables))
 
-        expr = substitute(expr, variables, as_string=True)
+        expr = substitute(expr, variables, variables, as_string=True)
 
     return expr, variables
 
