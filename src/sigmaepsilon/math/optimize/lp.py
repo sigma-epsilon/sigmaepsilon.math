@@ -23,7 +23,7 @@ __all__ = ["LinearProgrammingProblem"]
 
 
 @unique
-class LinearProgrammingResult(Enum):
+class LinearProgrammingStatus(Enum):
     UNIQUE = auto()
     MULTIPLE = auto()
     NOSOLUTION = auto()
@@ -312,7 +312,18 @@ class LinearProgrammingProblem:
         `False` othwerise. This function can be used for instance if you want to
         transform the problem to an unconstrained optimization problem and solve it
         with a nonlinear solver like the genetic algorithm.
+
+        Parameters
+        ----------
+        x: Iterable
+            The candidate solution. The length of the iterable must be equal to the
+            number of variables in the problem. If x is a dictionary, the keys must
+            be the variable names. If x is a list, the order of the variables must
+            be the same as the order of the variables in the functions of problem.
         """
+        if isinstance(x, dict):
+            x = [x[v] for v in self.variables]
+
         c = [c.relate(x) for c in self.constraints]
         if self._has_standardform():
             x = np.array(x, dtype=float)
@@ -472,8 +483,15 @@ class LinearProgrammingProblem:
         """
         m, n = A.shape
         r = n - m
+
+        if r == 0:
+            try:
+                return np.linalg.inv(A) @ b
+            except LinAlgError:
+                raise NoSolutionError("There is no solution to this problem!")
+
         if not r > 0:  # pragma: no cover
-            raise NotImplementedError("The solver can't solve this problem!")
+            raise NotImplementedError("The solver can't solve this problem yet!")
 
         basic = LinearProgrammingProblem.basic_solution(A, b, order=order)
         if basic:
@@ -628,6 +646,7 @@ class LinearProgrammingProblem:
         return_all: bool = True,
         maximize: bool = False,
         raise_errors: bool = False,
+        return_as_dict: bool = False,
         tol: float = 1e-10,
     ) -> dict:
         """
@@ -673,7 +692,7 @@ class LinearProgrammingProblem:
                 A dictionary with information of execution times of the main stages
                 of the calculation.
         """
-        output = {"time": {}, "x": None, "e": []}
+        output = {"time": {}, "x": None, "e": [], "status": None}
         try:
             _t0 = time()
             P = self._to_standard_form(maximize=maximize, inplace=False)
@@ -689,6 +708,11 @@ class LinearProgrammingProblem:
 
             standard_variables = P.variables
             original_variables = P._original_variables
+
+            if len(x.shape) == 1:
+                output["status"] = LinearProgrammingStatus.UNIQUE
+            elif len(x.shape) == 2:
+                output["status"] = LinearProgrammingStatus.MULTIPLE
 
             if not return_all:
                 x = x[0]
@@ -706,14 +730,22 @@ class LinearProgrammingProblem:
                 for g in original_variables
             }
 
+            if not return_as_dict:
+                res = np.array([res[v] for v in original_variables]).T
+
             output["x"] = res
             output["time"]["postproc"] = time() - _t0
         except Exception as e:
             output["e"].append(e)
+            if isinstance(e, NoSolutionError):
+                output["status"] = LinearProgrammingStatus.NOSOLUTION
+            elif isinstance(e, DegenerateProblemError):
+                output["status"] = LinearProgrammingStatus.DEGENERATE
         finally:
             if len(output["e"]) > 0:
                 output["time"]["solution"] = None
                 output["x"] = None
                 if raise_errors:
                     raise output["e"][0]
+
             return output
