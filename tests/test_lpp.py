@@ -34,6 +34,7 @@ class TestLPP(unittest.TestCase):
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3])
         lpp.is_feasible([0, 0])
+        lpp.is_feasible({x1: 0, x2: 0})
 
     def test_unique_solution(self):
         x1, x2 = syms = sy.symbols(["x1", "x2"], nonnegative=True)
@@ -42,7 +43,7 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3])
-        x = lpp.solve()["x"]
+        x = lpp.solve(return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         _x = np.array([1.0, 1.0])
         self.assertTrue(np.all(np.isclose(_x, x_)))
@@ -81,12 +82,12 @@ class TestLPP(unittest.TestCase):
         eq41 = Equality(x1 - 2 * x3 - x4 + 2, variables=syms)
         eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
         P4 = LPP(obj4, [eq41, eq42])
-        x = P4.solve(return_all=True, raise_errors=True)["x"]
+        x = P4.solve(return_all=True, raise_errors=True, return_as_dict=True)["x"]
         
         x_ = np.array([x[v] for v in syms])
         assert x_.shape == (4, 2)
         
-        x = P4.solve(return_all=False, raise_errors=True)["x"]
+        x = P4.solve(return_all=False, raise_errors=True, return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         assert len(x_.shape) == 1
 
@@ -98,7 +99,7 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3])
-        x = lpp.solve(maximize=True)["x"]
+        x = lpp.solve(maximize=True, return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         _x = np.array([1.0, 1.0])
         assert np.all(np.isclose(_x, x_))
@@ -121,7 +122,7 @@ class TestLPP(unittest.TestCase):
         f = Function(x1 + x2, variables=syms)
         eq = Equality(x1 - 2, variables=syms)
         lpp = LPP(f, [eq])
-        x = lpp.solve(return_all=True, raise_errors=True)["x"]
+        x = lpp.solve(return_all=True, raise_errors=True, return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         assert np.all(np.isclose(x_, np.array([2.0, 0.0])))
         variables = ["x1", "x2"]
@@ -129,7 +130,7 @@ class TestLPP(unittest.TestCase):
         f = Function(x1 + x2, variables=syms)
         eq = Equality(x2 - 2, variables=syms)
         lpp = LPP(f, [eq])
-        x = lpp.solve(return_all=True, raise_errors=True)["x"]
+        x = lpp.solve(return_all=True, raise_errors=True, return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         assert np.all(np.isclose(x_, np.array([0.0, 2.0])))
 
@@ -141,7 +142,7 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3])
-        x = lpp.solve(return_all=True, raise_errors=True)["x"]
+        x = lpp.solve(return_all=True, raise_errors=True, return_as_dict=True)["x"]
         x_ = np.array([x[v] for v in syms])
         assert np.all(np.isclose(x_, np.array([1.0, 1.0])))
         x1, x2 = sy.symbols(["x1", "x2"], nonnegative=True)
@@ -151,7 +152,7 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3])
-        e = lpp.solve(return_all=True, raise_errors=True)["e"]
+        e = lpp.solve(return_all=True, raise_errors=True, return_as_dict=True)["e"]
         assert len(e) == 0
 
 
