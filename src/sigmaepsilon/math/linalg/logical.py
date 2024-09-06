@@ -128,6 +128,11 @@ def has_full_column_rank(matrix: ndarray) -> bool:
 def has_full_rank(matrix: ndarray | sy.Matrix) -> bool:
     """
     Returns `True` if the input matrix has full rank, `False` otherwise.
+    
+    Parameters
+    ----------
+    matrix : numpy.ndarray | sympy.Matrix
+        The input matrix.
     """
     if isinstance(matrix, sy.Matrix):
         return matrix.rank() == min(matrix.shape)
