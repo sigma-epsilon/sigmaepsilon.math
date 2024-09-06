@@ -153,8 +153,9 @@ class Relation(Function):
                 self.op = Relations.eq
 
         if not op and has_op_in_input:
-            lsh, operator, rhs = parse_expression(args[0])
-            args = (" - ".join([lsh, rhs]),)
+            lhs, operator, rhs = parse_expression(args[0])
+            rhs = "(" + rhs + ")"
+            args = (" - ".join([lhs, rhs]),)
             self.op = Relations(operator)
 
         if op and isinstance(self.op, Relations):
