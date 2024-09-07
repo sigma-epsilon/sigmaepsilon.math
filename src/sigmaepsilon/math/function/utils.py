@@ -31,7 +31,7 @@ def parse_expression(expression: str) -> tuple[str, str, str]:
             if op in right_side:
                 raise ValueError(f"Invalid expression: '{expression}'")
 
-        if not operator in valid_operators:
+        if operator not in valid_operators:
             raise ValueError(f"Invalid expression: '{expression}'")
 
         return left_side, operator, right_side
