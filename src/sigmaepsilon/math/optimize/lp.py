@@ -1,7 +1,6 @@
 from typing import List, Tuple, Optional, Iterable
 from collections import defaultdict
 from enum import Enum, auto, unique
-from time import time
 from copy import copy, deepcopy
 from contextlib import suppress
 
@@ -11,15 +10,20 @@ from numpy.linalg import LinAlgError
 import sympy as sy
 from sympy.utilities.iterables import multiset_permutations
 from sympy import Symbol
+from pydantic import BaseModel
 
 from ..function import Function, InEquality, Equality
 from ..function.relation import Relations, Relation
 from ..function.symutils import coefficients, generate_symbols, substitute
-from .errors import DegenerateProblemError, NoSolutionError
+from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
 from ..utils import atleast2d
 
 
-__all__ = ["LinearProgrammingProblem"]
+__all__ = [
+    "LinearProgrammingProblem",
+    "LinearProgrammingStatus",
+    "LinearProgrammingResult",
+]
 
 
 @unique
@@ -28,6 +32,15 @@ class LinearProgrammingStatus(Enum):
     MULTIPLE = auto()
     NOSOLUTION = auto()
     DEGENERATE = auto()
+    OVERDETERMINED = auto()
+    FAILED = auto()
+
+
+class LinearProgrammingResult(BaseModel):
+    status: LinearProgrammingStatus = LinearProgrammingStatus.FAILED
+    x: list[float | int] | None = None
+    errors: list[str] = []
+    success: bool = False
 
 
 class LinearProgrammingProblem:
@@ -146,7 +159,7 @@ class LinearProgrammingProblem:
         tmpl = self.__class__.__tmpl_surplus__
         counter = 1
 
-        for v in self._vmap.values():
+        for v in self._vmap.keys():
             if v.is_nonnegative:
                 pass  # there is nothing to do, variable is already nonnegative
             elif v.is_positive:
@@ -317,13 +330,14 @@ class LinearProgrammingProblem:
         ----------
         x: Iterable
             The candidate solution. The length of the iterable must be equal to the
-            number of variables in the problem. If x is a dictionary, the keys must
-            be the variable names. If x is a list, the order of the variables must
-            be the same as the order of the variables in the functions of problem.
-        """
-        if isinstance(x, dict):
-            x = [x[v] for v in self.variables]
+            number of variables in the problem.
 
+        Notes
+        -----
+        The order of variables in the argument `x` must follow the order of the variables
+        in the functions that make up the problem, which is assumed to be uniform across
+        all functions.
+        """
         c = [c.relate(x) for c in self.constraints]
         if self._has_standardform():
             x = np.array(x, dtype=float)
@@ -491,7 +505,11 @@ class LinearProgrammingProblem:
                 raise NoSolutionError("There is no solution to this problem!")
 
         if not r > 0:  # pragma: no cover
-            raise NotImplementedError("The solver can't solve this problem yet!")
+            raise OverDeterminedError(
+                "There are more constraints than variables. "
+                "Since the system is overdetermined, the problem might not have "
+                "a feasible solution at all. Consider using a different approach."
+            )
 
         basic = LinearProgrammingProblem.basic_solution(A, b, order=order)
         if basic:
@@ -642,24 +660,18 @@ class LinearProgrammingProblem:
 
     def solve(
         self,
-        order: Iterable[int] | None = None,
+        *,
         return_all: bool = True,
         maximize: bool = False,
         raise_errors: bool = False,
-        return_as_dict: bool = False,
         tol: float = 1e-10,
-    ) -> dict:
+        _order: Iterable[int] | None = None,
+    ) -> LinearProgrammingResult:
         """
         Solves the problem and returns the solution(s) if there are any.
 
         Parameters
         ----------
-        order: Iterable, Optional
-            The order of the variables. This might speed up finding the
-            basic solution. Default is None.
-        as_dict: bool
-            If `True`, the results are returned as a dictionary, where the
-            keys are sympy symbols of the variables of the problem.
         raise_errors: bool
             If `True`, the solution raises the errors during solution,
             otherwise they get returned within the result, under key `e`
@@ -672,47 +684,36 @@ class LinearProgrammingProblem:
             If `True`, and there are multiple solutions, all of them are returned.
             Default is `True`.
 
-        Notes
-        -----
-        It is assumed that this function gets invoked on relatively small problems.
-        For large-scale situations, we suggest to use `solve_standard_form` function
-        of this class instead. Contrary to this one, it rases errors, while the more
-        high-level `solve` method of the instance catches those errors, and returns
-        them as part of the returned dictionary.
-
         Returns
         -------
-        dict
-            A dictionary with the following items:
-            x: numpy.ndarray or dict
-                The solution as an array or a dictionary, depending on your input.
-            e: Iterable
-                A list of errors that occured during solution.
-            time: dict
-                A dictionary with information of execution times of the main stages
-                of the calculation.
+        LinearProgrammingResult
+
+        Raises
+        ------
+        NoSolutionError
+            If there is no solution to the problem.
+        DegenerateProblemError
+            If the problem is degenerate.
+        NotimplementedError
+            If the problem is not yet supported.
         """
-        output = {"time": {}, "x": None, "e": [], "status": None}
+        result = LinearProgrammingResult()
+        errors = []
         try:
-            _t0 = time()
             P = self._to_standard_form(maximize=maximize, inplace=False)
             A, b, c = P._to_numpy(maximize=False, assume_standard=True)
-            output["time"]["preproc"] = time() - _t0
+            x = self.solve_standard_form(A, b, c, order=_order, tol=tol)
 
-            _t0 = time()
-            x = self.solve_standard_form(A, b, c, order=order, tol=tol)
-            output["time"]["solution"] = time() - _t0
-
-            _t0 = time()
             res = None
 
             standard_variables = P.variables
             original_variables = P._original_variables
 
             if len(x.shape) == 1:
-                output["status"] = LinearProgrammingStatus.UNIQUE
+                result.status
+                result.status = LinearProgrammingStatus.UNIQUE
             elif len(x.shape) == 2:
-                output["status"] = LinearProgrammingStatus.MULTIPLE
+                result.status = LinearProgrammingStatus.MULTIPLE
 
             if not return_all:
                 x = x[0]
@@ -730,22 +731,27 @@ class LinearProgrammingProblem:
                 for g in original_variables
             }
 
-            if not return_as_dict:
-                res = np.array([res[v] for v in original_variables]).T
+            res = np.array([res[v] for v in original_variables]).T
 
-            output["x"] = res
-            output["time"]["postproc"] = time() - _t0
+            result.x = res.tolist()
+            result.success = True
         except Exception as e:
-            output["e"].append(e)
+            errors.append(e)
+            result.success = False
             if isinstance(e, NoSolutionError):
-                output["status"] = LinearProgrammingStatus.NOSOLUTION
+                result.status = LinearProgrammingStatus.NOSOLUTION
             elif isinstance(e, DegenerateProblemError):
-                output["status"] = LinearProgrammingStatus.DEGENERATE
+                result.status = LinearProgrammingStatus.DEGENERATE
+            elif isinstance(e, OverDeterminedError):
+                result.status = LinearProgrammingStatus.OVERDETERMINED
+            else:
+                result.status = LinearProgrammingStatus.FAILED
         finally:
-            if len(output["e"]) > 0:
-                output["time"]["solution"] = None
-                output["x"] = None
-                if raise_errors:
-                    raise output["e"][0]
+            if len(errors) > 0:
+                result.x = None
+                result.errors = [str(e) for e in errors]
 
-            return output
+                if raise_errors:
+                    raise errors[0]
+
+            return result
