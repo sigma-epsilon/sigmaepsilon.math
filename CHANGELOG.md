@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The `LinearProgrammingProblem` class has changed. Usage of the modified class should be
-  straightforward.
+- The `LinearProgrammingProblem` class has changed. Usage of the modified class should be straightforward.
 
 ### Fixed
 
 - Several fixes to the `LinearProgrammingProblem` class has been made.
+- Fixed the `has_full_rank` function in `sigmaepsilon.math.linalg`
 
 ### Removed
 
