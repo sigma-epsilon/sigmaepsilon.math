@@ -506,6 +506,8 @@ class LinearProgrammingProblem:
             If there is no solution to the problem.
         DegenerateProblemError
             If the problem is degenerate.
+        OverDeterminedError
+            If the problem is overdetermined.
         """
         m, n = A.shape
         r = n - m
