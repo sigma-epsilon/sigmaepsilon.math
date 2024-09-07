@@ -1,4 +1,4 @@
-__all__ = ["DegenerateProblemError", "NoSolutionError"]
+__all__ = ["DegenerateProblemError", "NoSolutionError", "OverDeterminedError"]
 
 
 class DegenerateProblemError(Exception):
@@ -18,6 +18,17 @@ class NoSolutionError(Exception):
 
     Step size could be indefinitely increased in a
     direction without violating feasibility.
+    """
+
+    ...
+    
+
+class OverDeterminedError(Exception):
+    """
+    The problem is overdetermined.
+
+    There are more constraints than variables, and the problem might not have "
+    a feasible solution at all. Consider using a different approach."
     """
 
     ...
