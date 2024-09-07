@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Iterable
+from typing import Iterable
 from collections import defaultdict
 from enum import Enum, auto, unique
 from copy import copy, deepcopy
@@ -28,6 +28,18 @@ __all__ = [
 
 @unique
 class LinearProgrammingStatus(Enum):
+    """
+    An enumeration of the possible statuses of a linear programming problem.
+    The explanation of each status is as follows:
+
+    * UNIQUE: The problem has a unique solution.
+    * MULTIPLE: The problem has multiple solutions.
+    * NOSOLUTION: The problem has no solution.
+    * DEGENERATE: The problem is degenerate.
+    * OVERDETERMINED: The problem is overdetermined.
+    * FAILED: The problem might have a solution, but the solver failed to get it.
+    """
+
     UNIQUE = auto()
     MULTIPLE = auto()
     NOSOLUTION = auto()
@@ -85,10 +97,10 @@ class LinearProgrammingProblem:
     >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5', nonnegative=True)
     >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
     >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=variables)
-    >>> eq1 = Equality(x2 + x3 - x4 - 2, variables=variables)
-    >>> problem = LPP(obj, [eq11, eq12])
-    >>> problem.solve()['x']
-    array([0., 6., 0., 4.])
+    >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=variables)
+    >>> problem = LPP(obj, [eq1, eq2])
+    >>> problem.solve().x
+    [0., 6., 0., 4.]
     
     """
 
@@ -204,7 +216,7 @@ class LinearProgrammingProblem:
         all_pos = all([v.is_nonnegative for v in self.variables])
         return all_pos and all_eq
 
-    def _get_target_variables(self) -> List[Symbol]:
+    def _get_target_variables(self) -> list[Symbol]:
         """
         Returns the target variables of the problem.
         """
@@ -348,7 +360,7 @@ class LinearProgrammingProblem:
     @staticmethod
     def basic_solution(
         A: ndarray, b: ndarray, order: Iterable[int] | None = None
-    ) -> Tuple[ndarray] | None:
+    ) -> tuple[ndarray] | None:
         """
         Returns a basic (aka. extremal) solution to a problem in the form
 
@@ -633,7 +645,7 @@ class LinearProgrammingProblem:
         self,
         maximize: bool = False,
         assume_standard: bool = False,
-    ) -> Tuple[ndarray, ndarray, Optional[List]]:
+    ) -> tuple[ndarray, ndarray, ndarray]:
         """
         Returns the arrays A, b and c.
         """
@@ -694,8 +706,10 @@ class LinearProgrammingProblem:
             If there is no solution to the problem.
         DegenerateProblemError
             If the problem is degenerate.
+        OverDeterminedError
+            If the problem is overdetermined.
         NotimplementedError
-            If the problem is not yet supported.
+            If the problem is not yet supported, for instance if it contains integer variables.
         """
         result = LinearProgrammingResult()
         errors = []
