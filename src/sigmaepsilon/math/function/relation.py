@@ -112,7 +112,7 @@ class Relation(Function):
                 op_str = op.value
             elif op_str in valid_operators:
                 op = Relations(op_str)
-                
+
         if cls is not Relation:
             instance = super().__new__(cls)
         elif op == Relations.eq:

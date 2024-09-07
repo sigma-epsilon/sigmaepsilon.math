@@ -21,7 +21,7 @@ class NoSolutionError(Exception):
     """
 
     ...
-    
+
 
 class OverDeterminedError(Exception):
     """
