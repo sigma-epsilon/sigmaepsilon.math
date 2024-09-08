@@ -38,6 +38,40 @@ class TestLPP(unittest.TestCase):
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         lpp.is_feasible([0, 0])
 
+    def test_raise_no_variables_sym(self):
+        x1, x2 = syms = sy.symbols(["x1", "x2"], nonnegative=True)
+        f = Function(x1 + x2, variables=syms)
+        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
+        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
+        ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        with self.assertRaises(ValueError):
+            LPP(f, [ieq1, ieq2, ieq3])
+            
+    def test_raise_not_symbolic_input(self):
+        x1, x2 = syms = sy.symbols(["x1", "x2"], nonnegative=True)
+        f = Function(x1 + x2, variables=syms)
+        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
+        with self.assertRaises(ValueError):
+            LPP(f, [ieq1, Relation(lambda x:x, op=">=")], variables=syms)
+        with self.assertRaises(ValueError):
+            LPP(Function(lambda x:x), [ieq1], variables=syms)
+        with self.assertRaises(TypeError):
+            LPP(f, [ieq1, lambda x:x], variables=syms)
+        with self.assertRaises(TypeError):
+            LPP(lambda x:x, [ieq1], variables=syms)
+            
+    def test_raise_invalid_variables(self):
+        x1, x2 = syms = sy.symbols(["x1", "x2"], nonnegative=True)
+        x3 = sy.symbols("x3", nonnegative=True)
+        f = Function(x1 + x2, variables=syms)
+        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
+        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
+        ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        with self.assertRaises(TypeError):
+            LPP(f, [ieq1, ieq2, ieq3], variables=[x1, x2, 5])
+        with self.assertRaises(ValueError):
+            LPP(f, [ieq1, ieq2, ieq3], variables=[x1, x2, x3])
+    
     def test_unique_solution(self):
         x1, x2 = syms = sy.symbols(["x1", "x2"], nonnegative=True)
         f = Function(x1 + x2, variables=syms)
