@@ -171,10 +171,3 @@ def _unique2d_njit(data: ndarray):
             indices[unique[i]][counts[i], 1] = c
             counts[i] += 1
     return unique, counts, inverse, indices
-
-
-"""
-@njit(nogil=True, parallel=False, fastmath=False, cache=__cache)
-def unique2d_njit_jagged(data: akarray):
-    return ak.flatten(data)
-"""

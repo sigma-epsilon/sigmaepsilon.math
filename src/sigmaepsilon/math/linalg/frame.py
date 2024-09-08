@@ -569,7 +569,7 @@ class ReferenceFrame(FrameLike):
                 else:
                     out[i][...] = out_[i]
 
-        if type(result) is tuple:
+        if isinstance(result, tuple):
             # multiple return values
             return (ReferenceFrame(x) for x in result)
         elif method == "at":

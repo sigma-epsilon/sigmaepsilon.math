@@ -64,7 +64,7 @@ class PenaltyFunction(EqualityConstraint):
                 f = self.f0(*args, **kwargs)
                 p = self.penalty
                 return np.multiply(0.5 * p, np.power(f, 2))
-        except:
+        except Exception:
             return None
 
     def g(self, *args, **kwargs):
@@ -74,7 +74,7 @@ class PenaltyFunction(EqualityConstraint):
                 g = self.f1(*args, **kwargs)
                 p = self.penalty
                 return np.multiply(np.multiply(p, f), g)
-        except:
+        except Exception:
             return None
 
     def G(self, *args, **kwargs):
@@ -85,5 +85,5 @@ class PenaltyFunction(EqualityConstraint):
                 G = self.f2(*args, **kwargs)
                 p = self.penalty
                 return np.multiply(p, np.add(np.multiply(f, G), np.outer(g, g)))
-        except:
+        except Exception:
             return None

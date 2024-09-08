@@ -127,7 +127,6 @@ def frontal_sym_bulk_uniform(
 
 
 if __name__ == "__main__":
-    pass
     """
     from polydata.mechanics.fem import Uniform3D
     from polydata.mechanics.material.hooke import Hooke
