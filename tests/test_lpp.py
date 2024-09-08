@@ -35,7 +35,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         lpp.is_feasible([0, 0])
 
     def test_unique_solution(self):
@@ -44,7 +44,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         x = lpp.solve().x
         x_ = np.array(x)
         _x = np.array([1.0, 1.0])
@@ -57,7 +57,7 @@ class TestLPP(unittest.TestCase):
         obj2 = Function(3 * x1 + x2 - 6 * x3 + x4, variables=syms)
         eq21 = Equality(x1 + 2 * x3 + x4, variables=syms)
         eq22 = Equality(x2 + x3 - x4 - 2, variables=syms)
-        P2 = LPP(obj2, [eq21, eq22])
+        P2 = LPP(obj2, [eq21, eq22], variables=syms)
         P2.solve(raise_errors=False)
 
     def test_no_solution(self):
@@ -69,7 +69,7 @@ class TestLPP(unittest.TestCase):
         obj3 = Function(-3 * x1 + x2 + 9 * x3 + x4, variables=syms)
         eq31 = Equality(x1 - 2 * x3 - x4 + 2, variables=syms)
         eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
-        P3 = LPP(obj3, [eq31, eq32])
+        P3 = LPP(obj3, [eq31, eq32], variables=syms)
         self.assertFailsProperly(NoSolutionError, P3.solve, raise_errors=True)
 
     def test_overdetermined_problem(self):
@@ -78,7 +78,7 @@ class TestLPP(unittest.TestCase):
         eq1 = Relation(x1 + x2 - 6, op="=", variables=syms)
         eq2 = Relation(x1 - x2 - 2, op="=", variables=syms)
         eq3 = Relation(x1 - x2 + 4, op="=", variables=syms)
-        lpp = LPP(f, [eq1, eq2, eq3])
+        lpp = LPP(f, [eq1, eq2, eq3], variables=syms)
         with self.assertRaises(OverDeterminedError):
             lpp.solve(raise_errors=True)
 
@@ -93,7 +93,7 @@ class TestLPP(unittest.TestCase):
         obj4 = Function(3 * x1 + 2 * x2 + 8 * x3 + x4, variables=syms)
         eq41 = Equality(x1 - 2 * x3 - x4 + 2, variables=syms)
         eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
-        P4 = LPP(obj4, [eq41, eq42])
+        P4 = LPP(obj4, [eq41, eq42], variables=syms)
         x = P4.solve(return_all=True, raise_errors=True).x
 
         x_ = np.array(x)
@@ -110,7 +110,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         x = lpp.solve(maximize=True).x
         x_ = np.array(x)
         _x = np.array([1.0, 1.0])
@@ -123,7 +123,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         self.assertTrue(lpp.is_feasible([1, 1]))
         self.assertFalse(lpp.is_feasible([0, 1]))
         self.assertFalse(lpp.is_feasible([1, 0]))
@@ -133,7 +133,7 @@ class TestLPP(unittest.TestCase):
         x1, x2 = syms = sy.symbols(variables, nonnegative=True)
         f = Function(x1 + x2, variables=syms)
         eq = Equality(x1 - 2, variables=syms)
-        lpp = LPP(f, [eq])
+        lpp = LPP(f, [eq], variables=syms)
         x = lpp.solve(return_all=True).x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([2.0, 0.0])))
@@ -141,7 +141,7 @@ class TestLPP(unittest.TestCase):
         x1, x2 = syms = sy.symbols(variables, nonnegative=True)
         f = Function(x1 + x2, variables=syms)
         eq = Equality(x2 - 2, variables=syms)
-        lpp = LPP(f, [eq])
+        lpp = LPP(f, [eq], variables=syms)
         x = lpp.solve(return_all=True).x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([0.0, 2.0])))
@@ -153,7 +153,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         x = lpp.solve(return_all=True).x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([1.0, 1.0])))
@@ -163,7 +163,7 @@ class TestLPP(unittest.TestCase):
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
-        lpp = LPP(f, [ieq1, ieq2, ieq3])
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
         errors = lpp.solve(return_all=True).errors
         assert len(errors) == 0
 
