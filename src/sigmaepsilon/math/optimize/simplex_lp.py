@@ -17,7 +17,7 @@ __all__ = ["SimplexSolverLP"]
 class SimplexSolverLP:
     """
     Solves a real valued linear programming problem in standard form using the simplex method.
-    
+
     .. math::
         :nowrap:
 
@@ -26,7 +26,7 @@ class SimplexSolverLP:
             \mathbf{A}\mathbf{x}=\mathbf{b}, \quad \mathbf{x} \, \geq \,
             \mathbf{0}.
         \\end{eqnarray}
-        
+
     Parameters
     ----------
     c: numpy.ndarray
@@ -207,7 +207,7 @@ class SimplexSolverLP:
     def _calculate_reduced_costs(self) -> ndarray:
         self.W = self.B_inv @ self.N
         self.reduced_costs = self.cN - self.cB @ self.W
-    
+
     def _process(self) -> ndarray:
         if self.R == 0:
             try:
@@ -282,7 +282,7 @@ class SimplexSolverLP:
     def solve(self) -> ndarray:
         """
         Solves the linear programming problem and returns the results as
-        a NumPy array. The returned array might be 
+        a NumPy array. The returned array might be
         """
         self._preprocess()
         self.x = self._process()

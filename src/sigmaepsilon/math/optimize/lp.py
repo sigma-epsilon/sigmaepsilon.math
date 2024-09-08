@@ -103,7 +103,6 @@ class LinearProgrammingProblem:
     >>> problem = LPP(obj, [eq1, eq2], variables=variables)
     >>> problem.solve().x
     [0., 6., 0., 4.]
-    
     """
 
     __slots__ = ["obj", "constraints", "_vmap", "_variables", "_original_variables"]
@@ -127,7 +126,7 @@ class LinearProgrammingProblem:
         self._vmap = dict()
 
         _variables = []
-        
+
         if variables is None:
             raise ValueError("The variables must be provided for symbolic problems!")
 
@@ -160,8 +159,6 @@ class LinearProgrammingProblem:
                 raise ValueError("Inconsistent variables provided!")
 
             self._variables = variables
-        else:
-            self._variables = list(_variables)
 
         self._original_variables = deepcopy(self.variables)
 
@@ -472,7 +469,6 @@ class LinearProgrammingProblem:
             original_variables = P._original_variables
 
             if len(x.shape) == 1:
-                result.status
                 result.status = LinearProgrammingStatus.UNIQUE
             elif len(x.shape) == 2:
                 result.status = LinearProgrammingStatus.MULTIPLE

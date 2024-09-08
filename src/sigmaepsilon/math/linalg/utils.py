@@ -932,9 +932,7 @@ def generalized_inverse(matrix: ndarray) -> ndarray:
         raise LinalgError("The matrix has no inverse")
 
 
-def unit_basis_vector(
-    length: int, index: int = 0, value: float = 1.0
-) -> ndarray:
+def unit_basis_vector(length: int, index: int = 0, value: float = 1.0) -> ndarray:
     """
     Returns a unit basis vector of length `length` with a value of `value` at
     the index `index`.
