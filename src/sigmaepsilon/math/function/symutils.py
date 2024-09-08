@@ -35,7 +35,7 @@ def decode(
         variables = []
         variables = tuple(expr.free_symbols)
     else:
-        if not all([isinstance(v, sy.Expr) for v in variables]):
+        if not all([isinstance(v, (sy.Expr, sy.Symbol)) for v in variables]):
             variables = list(symbols(variables))
 
         expr = substitute(expr, variables, variables, as_string=True)
