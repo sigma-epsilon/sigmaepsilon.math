@@ -1,14 +1,11 @@
 from typing import Iterable
 from collections import defaultdict
 from enum import Enum, auto, unique
-from copy import copy, deepcopy
-from contextlib import suppress
+from copy import deepcopy
 
 import numpy as np
 from numpy import ndarray
-from numpy.linalg import LinAlgError
 import sympy as sy
-from sympy.utilities.iterables import multiset_permutations
 from sympy import Symbol
 from pydantic import BaseModel
 
@@ -17,7 +14,7 @@ from ..function.relation import Relations, Relation
 from ..function.symutils import coefficients, generate_symbols, substitute
 from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
 from ..utils import atleast2d
-
+from .simplex_lp import SimplexSolverLP
 
 __all__ = [
     "LinearProgrammingProblem",
@@ -53,6 +50,7 @@ class LinearProgrammingResult(BaseModel):
     x: list[float | int] | None = None
     errors: list[str] = []
     success: bool = False
+    obj: float | list[float] | None = None
 
 
 class LinearProgrammingProblem:
@@ -69,6 +67,10 @@ class LinearProgrammingProblem:
         The objective function.
     constraints: Iterable[Relation]
         The constraints.
+    variables: Iterable[Symbol], Optional
+        The variables of the problem. The variables must be provided for symbolic functions
+        to guarantee that the order of the variables is consistent with the symbolic functions
+        that make up the problem.
         
     See Also
     --------
@@ -98,13 +100,13 @@ class LinearProgrammingProblem:
     >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
     >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=variables)
     >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=variables)
-    >>> problem = LPP(obj, [eq1, eq2])
+    >>> problem = LPP(obj, [eq1, eq2], variables=variables)
     >>> problem.solve().x
     [0., 6., 0., 4.]
     
     """
 
-    __slots__ = ["obj", "constraints", "_vmap", "variables", "_original_variables"]
+    __slots__ = ["obj", "constraints", "_vmap", "_variables", "_original_variables"]
 
     __tmpl_surplus__ = r"\beta_{}"
     __tmpl_slack__ = r"\gamma_{}"
@@ -115,19 +117,26 @@ class LinearProgrammingProblem:
         self,
         obj: Function,
         constraints: Iterable[Relation],
+        *,
+        variables: Iterable[Symbol] | None = None,
     ):
         super().__init__()
         self.obj = None
         self.constraints = []
-        self.variables = []
+        self._variables = []
         self._vmap = dict()
+
+        _variables = []
+        
+        if variables is None:
+            raise ValueError("The variables must be provided for symbolic problems!")
 
         if isinstance(obj, Function):
             if not obj.is_symbolic:
                 raise ValueError("The objective function must be symbolic!")
 
             self.obj = obj
-            self.variables += self.obj.variables
+            _variables += self.obj.variables
         else:
             raise TypeError("The objective function must be an intance of `Function`!")
 
@@ -137,12 +146,38 @@ class LinearProgrammingProblem:
                     raise ValueError("The constraints must be symbolic!")
 
                 self.constraints.append(constraint)
-                self.variables += constraint.variables
+                _variables += constraint.variables
             else:
                 raise TypeError("The constraints must be instances of `Relation`!")
 
-        self.variables = list(set(self.variables))
+        _variables = set(_variables)
+
+        if variables is not None:
+            if not all([isinstance(v, Symbol) for v in variables]):
+                raise TypeError("All variables must be instances of `Symbol`!")
+
+            if not all([v in _variables for v in variables]):
+                raise ValueError("Inconsistent variables provided!")
+
+            self._variables = variables
+        else:
+            self._variables = list(_variables)
+
         self._original_variables = deepcopy(self.variables)
+
+    @property
+    def variables(self) -> list[Symbol]:
+        """
+        Returns the variables of the problem.
+        """
+        return self._variables
+
+    @variables.setter
+    def variables(self, variables: Iterable[Symbol]):
+        """
+        Sets the variables of the problem.
+        """
+        self._variables = list(variables)
 
     def _substitute(
         self, vmap: dict, inverse: bool = False, inplace: bool = True
@@ -357,292 +392,6 @@ class LinearProgrammingProblem:
         else:
             return all(c)
 
-    @staticmethod
-    def basic_solution(
-        A: ndarray, b: ndarray, order: Iterable[int] | None = None
-    ) -> tuple[ndarray] | None:
-        """
-        Returns a basic (aka. extremal) solution to a problem in the form
-
-        .. math::
-            :nowrap:
-
-            \\begin{eqnarray}
-                minimize  \quad  \mathbf{c}\mathbf{x} \quad under \quad
-                \mathbf{A}\mathbf{x}=\mathbf{b}, \quad \mathbf{x} \, \geq \,
-                \mathbf{0}.
-            \\end{eqnarray}
-
-        where :math:`\mathbf{b} \in \mathbf{R}^m, \mathbf{c} \in \mathbf{R}^n` and :math:`\mathbf{A}` is
-        an :math:`m \\times n` matrix with :math:`n>m`.
-
-        If the function is unable to find a basic solution, it returns `None`.
-
-        Parameters
-        ----------
-        A: numpy.ndarray
-            An :math:`m \times n` matrix with :math:`n>m`
-        b: numpy.ndarray
-            Right-hand sides. :math:`\mathbf{b} \in \mathbf{R}^m`
-        order: Iterable[int], Optional
-            An arbitrary permutation of the indices to start with.
-
-        Returns
-        -------
-        numpy.ndarray
-            Coefficient matrix :math:`\mathbf{B}`
-        numpy.ndarray
-            Inverse of coefficient matrix :math:`\mathbf{B}^{-1}`
-        numpy.ndarray
-            Coefficient matrix :math:`\mathbf{N}`
-        numpy.ndarray
-            Basic solution :math:`\mathbf{x}_{B}`
-        numpy.ndarray
-            Remaining solution :math:`\mathbf{x}_{N}`
-        """
-        m, n = A.shape
-        r = n - m
-        assert r > 0
-
-        stop = False
-        try:
-            with suppress(StopIteration):
-                """
-                StopIteration:
-
-                There is no permutation of columns that would produce a regular
-                mxm submatrix
-                    -> there is no feasible basic solution
-                        -> there is no feasible solution
-                """
-                if order is not None:
-                    if isinstance(order, Iterable):
-                        permutations = iter([order])
-                else:
-                    order = [i for i in range(n)]
-                    permutations = multiset_permutations(order)
-
-                while not stop:
-                    order = next(permutations)
-                    A_ = A[:, order]
-                    B_ = A_[:, :m]
-
-                    with suppress(LinAlgError):
-                        B_inv = np.linalg.inv(B_)
-                        xB = np.matmul(B_inv, b)
-                        stop = all(xB >= 0)
-                        """
-                        LinAlgError:
-                        
-                        If there is no error, it means that calculation
-                        of xB was succesful, which is only possible if the
-                        current permutation defines a positive definite submatrix.
-                        Note that this is cheaper than checking the eigenvalues,
-                        since it only requires the eigenvalues to be all positive,
-                        and does not involve calculating their actual values.
-                        """
-        finally:
-            if stop:
-                N_ = A_[:, m:]
-                xN = np.zeros(r, dtype=float)
-                return B_, B_inv, N_, xB, xN, order
-            else:
-                return None
-
-    @staticmethod
-    def solve_standard_form(
-        A: ndarray,
-        b: ndarray,
-        c: ndarray,
-        order: Iterable[int] | None = None,
-        tol: float = 1e-10,
-    ) -> ndarray:
-        """
-        Solves a linear problem in standard form:
-
-        .. math::
-           :nowrap:
-
-           \\begin{eqnarray}
-               minimize  \\quad  \\mathbf{c} \\mathbf{x} \\quad under \\quad
-               \\mathbf{A} \\mathbf{x} = \\mathbf{b}, \\quad \\mathbf{x} \\, \\geq \\,
-               \\mathbf{0}.
-           \\end{eqnarray}
-
-        See the notes section for the behaviour and the possible gotchas.
-
-        Parameters
-        ----------
-        A: numpy.ndarray
-            2d float array.
-        b: numpy.ndarray
-            1d float array.
-        c: numpy.ndarray
-            1d float array.
-        order: Iterable, Optional
-            The order of the variables.
-        tol: float, Optional
-            Floating point tolerance. Default is 1e-10.
-
-        Returns
-        -------
-        numpy.ndarray
-            A 1d (unique solution) or a 2d (multiple solutions) numpy array.
-
-        Notes
-        -----
-        1) The value of the parameter `tol` is used to make judgements on the vanishing ratios
-        of entering variables, therfore effects the detection of degenerate situations. The higher
-        the value, the more tolerant the system is to violations.
-
-        2) The line between the unique, the degenerate situation and having no solution at all may
-        be very thin in some settings. In such a scenario, repeated solutions might return a
-        a solution, a `NoSolutionError` or a `DegenerateProblemError`. Problems
-        with this behaviour are all considered degenerate, and suggest an ill-posed setup.
-
-        Raises
-        ------
-        NoSolutionError
-            If there is no solution to the problem.
-        DegenerateProblemError
-            If the problem is degenerate.
-        OverDeterminedError
-            If the problem is overdetermined.
-        """
-        m, n = A.shape
-        r = n - m
-
-        if r == 0:
-            try:
-                return np.linalg.inv(A) @ b
-            except LinAlgError:
-                raise NoSolutionError("There is no solution to this problem!")
-
-        if not r > 0:  # pragma: no cover
-            raise OverDeterminedError(
-                "There are more constraints than variables. "
-                "Since the system is overdetermined, the problem might not have "
-                "a feasible solution at all. Consider using a different approach."
-            )
-
-        basic = LinearProgrammingProblem.basic_solution(A, b, order=order)
-        if basic:
-            B, B_inv, N, xB, xN, order = basic
-            c_ = c[order]
-            cB = c_[:m]
-            cN = c_[m:]
-            t = None
-        else:
-            raise NoSolutionError("Failed to find basic solution!")
-
-        def unit_basis_vector(
-            length: int, index: int = 0, value: float = 1.0
-        ) -> ndarray:
-            return value * np.bincount([index], None, length)
-
-        def enter(i_enter):
-            nonlocal B, B_inv, N, xB, xN, order, cB, cN, t
-            v = unit_basis_vector(r, i_enter, 1.0)
-
-            # w = vector of decrements of the current solution xB
-            # Only positive values are a threat to feasibility, and we
-            # need to tell which of the components of xB vanishes first,
-            # which, since all components of xB are posotive,
-            # has to do with the positive components only.
-            w_enter = np.matmul(W, v)
-            i_leaving = np.argwhere(w_enter > 0)
-            if len(i_leaving) == 0:
-                # step size could be indefinitely increased in this
-                # direction without violating feasibility, there is
-                # no solution to the problem
-                raise NoSolutionError("There is no solution to this problem!")
-
-            vanishing_ratios = xB[i_leaving] / w_enter[i_leaving]
-            # the variable that vanishes first is the one with the smallest
-            # vanishing ratio
-            i_leave = i_leaving.flatten()[np.argmin(vanishing_ratios)]
-
-            # step size in the direction of current basis vector
-            t = xB[i_leave] / w_enter[i_leave]
-
-            # update solution
-            if abs(t) <= tol:
-                # Smallest vanishing ratio is zero, any step would
-                # result in an infeasible situation.
-                # -> go for the next entering variable
-                return False
-            xB -= t * w_enter
-            xN = t * v
-
-            order[m + i_enter], order[i_leave] = order[i_leave], order[m + i_enter]
-            B[:, i_leave], N[:, i_enter] = N[:, i_enter], copy(B[:, i_leave])
-            B_inv = np.linalg.inv(B)
-            cB[i_leave], cN[i_enter] = cN[i_enter], cB[i_leave]
-            xB[i_leave], xN[i_enter] = xN[i_enter], xB[i_leave]
-            return True
-
-        def unique_result() -> ndarray:
-            return np.concatenate((xB, xN))[np.argsort(order)]
-
-        def multiple_results() -> ndarray:
-            assert np.all(reduced_costs >= 0)
-            assert reduced_costs.min() <= tol
-            inds = np.where(reduced_costs <= tol)[0]
-            res = [
-                unique_result(),
-            ]
-            for i in inds:
-                assert enter(i)
-                res.append(unique_result())
-            return np.stack(res)
-
-        degenerate = False
-        while True:
-            if degenerate:
-                # The objective could be decreased, but only on the expense
-                # of violating positivity of the standard variables.
-                # Hence, the solution is degenerate.
-                raise DegenerateProblemError("The problem is ill posed!")
-
-            # calculate reduced costs
-            W = np.matmul(B_inv, N)
-            reduced_costs = cN - np.matmul(cB, W)
-            nEntering = np.count_nonzero(reduced_costs < 0)
-            if nEntering == 0:
-                # The objective can not be further reduced.
-                # There was only one basic solution, which is
-                # a unique optimizer.
-                d = np.count_nonzero(reduced_costs >= tol)
-                if d < len(reduced_costs):
-                    # there are edges along with the objective does
-                    # not increase
-                    # dc = np.abs(reduced_costs - reduced_costs.min())
-                    # inds = np.where(dc <= tol)[0]
-                    return multiple_results()
-                else:
-                    return unique_result()
-
-            # If we reach this line, reduction of the objective is possible,
-            # although maybe indefinitely. If the objective can be decreased,
-            # but only on the expense of violating feasibility, the
-            # solution is degenerate.
-            degenerate = True
-
-            # Candidates for entering index are the indices of the negative
-            # components of the vector of reduced costs.
-            i_entering = np.argsort(reduced_costs)[:nEntering]
-            for i_enter in i_entering:
-                if not enter(i_enter):
-                    # Smallest vanishing ratio is zero, any step would
-                    # result in an infeasible situation.
-                    # -> go for the next entering variable
-                    continue
-
-                # break loop at the first meaningful (t != 0) decrease and
-                # force recalculation of the vector of reduced costs
-                degenerate = False
-                break
-
     def _to_numpy(
         self,
         maximize: bool = False,
@@ -678,8 +427,6 @@ class LinearProgrammingProblem:
         return_all: bool = True,
         maximize: bool = False,
         raise_errors: bool = False,
-        tol: float = 1e-10,
-        _order: Iterable[int] | None = None,
     ) -> LinearProgrammingResult:
         """
         Solves the problem and returns the solution(s) if there are any.
@@ -690,8 +437,6 @@ class LinearProgrammingProblem:
             If `True`, the solution raises the errors during solution,
             otherwise they get returned within the result, under key `e`
             without being explicitly raised.
-        tol: float, Optional
-            Floating point tolerance. Default is `1e-10`.
         maximize: bool
             Set this to `True` if the problem is a maximization. Default is `False`.
         return_all: bool
@@ -718,7 +463,8 @@ class LinearProgrammingProblem:
         try:
             P = self._to_standard_form(maximize=maximize, inplace=False)
             A, b, c = P._to_numpy(maximize=False, assume_standard=True)
-            x = self.solve_standard_form(A, b, c, order=_order, tol=tol)
+
+            x = SimplexSolverLP(c, A, b).solve()
 
             res = None
 
@@ -748,6 +494,11 @@ class LinearProgrammingProblem:
             }
 
             res = np.array([res[v] for v in original_variables]).T
+
+            if len(res.shape) == 1:
+                result.obj = self.obj(res)
+            else:
+                result.obj = [self.obj(r) for r in res]
 
             result.x = res.tolist()
             result.success = True
