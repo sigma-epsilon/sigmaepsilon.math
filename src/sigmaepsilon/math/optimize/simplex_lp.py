@@ -1,11 +1,9 @@
-from contextlib import suppress
-from typing import Iterable
+import itertools
 from copy import copy
 
 import numpy as np
 from numpy import ndarray
 from numpy.linalg import LinAlgError
-from sympy.utilities.iterables import multiset_permutations
 
 from ..linalg.utils import unit_basis_vector
 from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
@@ -43,109 +41,68 @@ class SimplexSolverLP:
         self.b = b
         self.x = None
 
+        # intermediate variables
+        self.B = None
+        self.B_inv = None
+        self.N = None
+        self.xB = None
+        self.xN = None
+        self.cB = None
+        self.cN = None
+        self.order = None
+        self.no_constraints = None
+        self.no_variables = None
+        self.no_freedom = None
+
     def _preprocess(self) -> None:
-        self.M, self.N = self.A.shape
-        self.R = self.N - self.M
+        self.no_constraints, self.no_variables = self.A.shape
+        self.no_freedom = self.no_variables - self.no_constraints
         self.SMALLNUM = np.nextafter(0, 1)
 
-    @staticmethod
-    def basic_solution(
-        A: ndarray, b: ndarray, order: Iterable[int] | None = None
-    ) -> tuple[ndarray] | None:
+    def _initialize_basic_solution(self) -> tuple[ndarray] | None:
         """
-        Returns a basic (aka. extremal) solution to a problem in the form
-
-        .. math::
-            :nowrap:
-
-            \\begin{eqnarray}
-                minimize  \quad  \mathbf{c}\mathbf{x} \quad under \quad
-                \mathbf{A}\mathbf{x}=\mathbf{b}, \quad \mathbf{x} \, \geq \,
-                \mathbf{0}.
-            \\end{eqnarray}
-
-        where :math:`\mathbf{b} \in \mathbf{R}^m, \mathbf{c} \in \mathbf{R}^n` and :math:`\mathbf{A}` is
-        an :math:`m \\times n` matrix with :math:`n>m`.
-
-        If the function is unable to find a basic solution, it returns `None`.
-
-        Parameters
-        ----------
-        A: numpy.ndarray
-            An :math:`m \times n` matrix with :math:`n>m`
-        b: numpy.ndarray
-            Right-hand sides. :math:`\mathbf{b} \in \mathbf{R}^m`
-        order: Iterable[int], Optional
-            An arbitrary permutation of the indices to start with.
-
-        Returns
-        -------
-        numpy.ndarray
-            Coefficient matrix :math:`\mathbf{B}`
-        numpy.ndarray
-            Inverse of coefficient matrix :math:`\mathbf{B}^{-1}`
-        numpy.ndarray
-            Coefficient matrix :math:`\mathbf{N}`
-        numpy.ndarray
-            Basic solution :math:`\mathbf{x}_{B}`
-        numpy.ndarray
-            Remaining solution :math:`\mathbf{x}_{N}`
+        Calculates a basic solution.
         """
-        m, n = A.shape
-        r = n - m
-        assert r > 0
+        assert self.no_freedom > 0
 
         stop = False
         basic_order = None
+
         try:
-            with suppress(StopIteration):
-                """
-                StopIteration:
+            column_indices = list(range(self.no_variables))
+            combinations = itertools.combinations(column_indices, self.no_constraints)
 
-                There is no permutation of columns that would produce a regular
-                mxm submatrix
-                    -> there is no feasible basic solution
-                        -> there is no feasible solution
-                """
-                if order is not None:
-                    if isinstance(order, Iterable):
-                        permutations = iter([order])
-                else:
-                    order = [i for i in range(n)]
-                    permutations = multiset_permutations(order)
+            while not stop:
+                basic_column_indices = next(combinations)
+                remaining_column_indices = np.setdiff1d(
+                    column_indices, basic_column_indices
+                )
+                basic_order = np.concatenate(
+                    (basic_column_indices, remaining_column_indices)
+                )
 
-                while not stop:
-                    order = next(permutations)
+                A_ = self.A[:, basic_order]
+                B_ = A_[:, : self.no_constraints]
+                B_det = np.linalg.det(B_)
+                if abs(B_det) < self.SMALLNUM:
+                    continue
 
-                    A_ = A[:, order]
-                    B_ = A_[:, :m]
-
-                    with suppress(LinAlgError):
-                        B_inv = np.linalg.inv(B_)
-                        xB = np.matmul(B_inv, b)
-                        stop = all(xB >= 0)
-                        basic_order = order if stop else None
-                        """
-                        LinAlgError:
-                        
-                        If there is no error, it means that calculation
-                        of xB was succesful, which is only possible if the
-                        current permutation defines a positive definite submatrix.
-                        Note that this is cheaper than checking the eigenvalues,
-                        since it only requires the eigenvalues to be all positive,
-                        and does not involve calculating their actual values.
-                        """
+                B_inv = np.linalg.inv(B_)
+                xB = B_inv @ self.b
+                stop = all(xB >= 0)
+        except StopIteration:  # pragma: no cover
+            raise NoSolutionError("Failed to find basic solution!")
         finally:
             if stop:
-                N_ = A_[:, m:]
-                xN = np.zeros(r, dtype=float)
-                assert basic_order is not None
-                return B_, B_inv, N_, xB, xN, basic_order
-            else:
-                return None
+                self.B = B_
+                self.B_inv = B_inv
+                self.N = A_[:, self.no_constraints :]
+                self.xB = xB
+                self.xN = np.zeros(self.no_freedom, dtype=float)
+                self.order = basic_order
 
     def _enter(self, i_enter: int) -> None:
-        v = unit_basis_vector(self.R, i_enter, 1.0)
+        v = unit_basis_vector(self.no_freedom, i_enter, 1.0)
 
         # w = vector of decrements of the current solution xB
         # Only positive values are a threat to feasibility, and we
@@ -178,13 +135,11 @@ class SimplexSolverLP:
         self.xB -= t * w_enter
         self.xN = t * v
 
-        self.order[self.M + i_enter], self.order[i_leave] = (
+        self.order[self.no_constraints + i_enter], self.order[i_leave] = (
             self.order[i_leave],
-            self.order[self.M + i_enter],
+            self.order[self.no_constraints + i_enter],
         )
-        self.B[:, i_leave], self.N[:, i_enter] = self.N[:, i_enter], copy(
-            self.B[:, i_leave]
-        )
+        self.B[:, i_leave], self.N[:, i_enter] = self.N[:, i_enter], copy(self.B[:, i_leave])
         self.B_inv = np.linalg.inv(self.B)
         self.cB[i_leave], self.cN[i_enter] = self.cN[i_enter], self.cB[i_leave]
         self.xB[i_leave], self.xN[i_enter] = self.xN[i_enter], self.xB[i_leave]
@@ -209,30 +164,26 @@ class SimplexSolverLP:
         self.reduced_costs = self.cN - self.cB @ self.W
 
     def _process(self) -> ndarray:
-        if self.R == 0:
+        if self.no_freedom == 0:
             try:
                 self.x = np.linalg.inv(self.A) @ self.b
                 return
             except LinAlgError:
                 raise NoSolutionError("There is no solution to this problem!")
 
-        if not self.R > 0:
+        if not self.no_freedom > 0:
             raise OverDeterminedError(
                 "There are more constraints than variables. "
                 "Since the system is overdetermined, the problem might not have "
                 "a feasible solution at all. Consider using a different approach."
             )
 
-        basic = self.basic_solution(self.A, self.b)
-        if basic:
-            self.B, self.B_inv, self.N, self.xB, self.xN, self.order = basic
-            c_ = self.c[self.order]
-            self.cB = c_[: self.M]
-            self.cN = c_[self.M :]
-            del c_
-            self.t = None
-        else:
-            raise NoSolutionError("Failed to find basic solution!")
+        self._initialize_basic_solution()
+
+        c_ = self.c[self.order]
+        self.cB = c_[: self.no_constraints]
+        self.cN = c_[self.no_constraints :]
+        del c_
 
         degenerate = False
         while True:
