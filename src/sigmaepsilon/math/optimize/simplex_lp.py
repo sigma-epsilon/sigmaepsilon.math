@@ -139,7 +139,9 @@ class SimplexSolverLP:
             self.order[i_leave],
             self.order[self.no_constraints + i_enter],
         )
-        self.B[:, i_leave], self.N[:, i_enter] = self.N[:, i_enter], copy(self.B[:, i_leave])
+        self.B[:, i_leave], self.N[:, i_enter] = self.N[:, i_enter], copy(
+            self.B[:, i_leave]
+        )
         self.B_inv = np.linalg.inv(self.B)
         self.cB[i_leave], self.cN[i_enter] = self.cN[i_enter], self.cB[i_leave]
         self.xB[i_leave], self.xN[i_enter] = self.xN[i_enter], self.xB[i_leave]
