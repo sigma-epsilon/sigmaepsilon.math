@@ -148,7 +148,8 @@ class SimplexSolverLP:
         return True
 
     def _unique_result(self) -> ndarray:
-        return np.concatenate((self.xB, self.xN))[np.argsort(self.order)]
+        self.x = np.concatenate((self.xB, self.xN))[np.argsort(self.order)]
+        return self.x
 
     def _multiple_results(self) -> ndarray:
         assert np.all(self.reduced_costs >= 0)
@@ -159,7 +160,8 @@ class SimplexSolverLP:
         for i in inds:
             assert self._enter(i)
             res.append(self._unique_result())
-        return np.stack(res)
+        self.x = np.stack(res)
+        return self.x
 
     def _calculate_reduced_costs(self) -> ndarray:
         self.W = self.B_inv @ self.N
@@ -169,7 +171,7 @@ class SimplexSolverLP:
         if self.no_freedom == 0:
             try:
                 self.x = np.linalg.inv(self.A) @ self.b
-                return
+                return self.x
             except LinAlgError:
                 raise NoSolutionError("There is no solution to this problem!")
 

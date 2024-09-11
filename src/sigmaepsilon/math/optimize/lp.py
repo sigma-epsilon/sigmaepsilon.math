@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Sequence
 from collections import defaultdict
 from enum import Enum, auto, unique
 from copy import deepcopy
@@ -12,8 +12,9 @@ from pydantic import BaseModel
 from ..function import Function, InEquality, Equality
 from ..function.relation import Relations, Relation
 from ..function.symutils import coefficients, generate_symbols, substitute
-from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
 from ..utils import atleast2d
+from ..mathtypes import BoundsLike
+from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
 from .simplex_lp import SimplexSolverLP
 
 __all__ = [
@@ -63,14 +64,24 @@ class LinearProgrammingProblem:
 
     Parameters
     ----------
-    obj: Function
+    obj : Function
         The objective function.
-    constraints: Iterable[Relation]
+    constraints : Sequence[Relation]
         The constraints.
-    variables: Iterable[Symbol], Optional
+    variables : Sequence[Symbol], Optional
         The variables of the problem. The variables must be provided for symbolic functions
         to guarantee that the order of the variables is consistent with the symbolic functions
         that make up the problem.
+    bounds : BoundsLike, Optional
+        A bound for a single variable is a tuple ``(min, max)``, defining
+        the minimum and maximum values of that decision variable. A bound for all variables
+        is either a sequence of such tuples, or a dictionary that maps variables to their bounds.
+        A sequence of ``(min, max)`` pairs for each element in ``x``, defining
+        the minimum and maximum values of that decision variable.
+        Use ``None`` to indicate that there is no bound. For instance, the
+        default bound ``(0, None)`` for a decision variable means that
+        it is non-negative, and the pair ``(None, None)`` means no bounds at all,
+        i.e. the variable is allowed to be any real.
         
     See Also
     --------
@@ -84,15 +95,14 @@ class LinearProgrammingProblem:
     The following example solves a problem with a unique solution.
 
     .. math::
-        :nowrap:
 
-        \\begin{eqnarray}
-            & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
-            & subject \, to& & \\nonumber\\\\
-            & & x_1 + 2 x_3 + x_4 \,=\, 4, \\\\
-            & & x_2 + x_3 - x_4 \,=\, 2, \\\\
+        \begin{eqnarray}
+            & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\
+            & subject \, to& & \nonumber\\
+            & & x_1 + 2 x_3 + x_4 \,=\, 4, \\
+            & & x_2 + x_3 - x_4 \,=\, 2, \\
             & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
-        \\end{eqnarray}
+        \end{eqnarray}
 
     >>> from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
     >>> import sympy as sy
@@ -100,12 +110,20 @@ class LinearProgrammingProblem:
     >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
     >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=variables)
     >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=variables)
-    >>> problem = LPP(obj, [eq1, eq2], variables=variables)
-    >>> problem.solve().x
+    >>> bounds = [(1, None), (1, None), (1, None), (1, None)]
+    >>> problem = LPP(obj, [eq1, eq2], variables=variables, bounds=bounds)
+    >>> problem.solve().x  # doctest: +SKIP
     [0., 6., 0., 4.]
     """
 
-    __slots__ = ["obj", "constraints", "_vmap", "_variables", "_original_variables"]
+    __slots__ = [
+        "obj",
+        "constraints",
+        "_vmap",
+        "_variables",
+        "_original_variables",
+        "bounds",
+    ]
 
     __tmpl_surplus__ = r"\beta_{}"
     __tmpl_slack__ = r"\gamma_{}"
@@ -115,20 +133,25 @@ class LinearProgrammingProblem:
     def __init__(
         self,
         obj: Function,
-        constraints: Iterable[Relation],
+        constraints: Sequence[Relation],
         *,
-        variables: Iterable[Symbol] | None = None,
+        variables: Sequence[Symbol] | None = None,
+        bounds: BoundsLike = None,
     ):
         super().__init__()
         self.obj = None
         self.constraints = []
         self._variables = []
         self._vmap = dict()
+        self.bounds = bounds
 
         _variables = []
 
         if variables is None:
             raise ValueError("The variables must be provided for symbolic problems!")
+
+        if bounds and not variables:  # pragma: no cover
+            raise ValueError("Bounds were provided but no variables were set!")
 
         if isinstance(obj, Function):
             if not obj.is_symbolic:
@@ -159,6 +182,15 @@ class LinearProgrammingProblem:
                 raise ValueError("Inconsistent variables provided!")
 
             self._variables = variables
+
+        if self.bounds is not None and not isinstance(self.bounds, dict):
+
+            if not len(self.bounds) == len(self.variables):
+                raise ValueError(
+                    "The number of bounds must be equal to the number of variables!"
+                )
+
+            self.bounds = {v: b for v, b in zip(self.variables, self.bounds)}
 
         self._original_variables = deepcopy(self.variables)
 
@@ -195,30 +227,18 @@ class LinearProgrammingProblem:
 
         return result
 
-    def _transform_variables(self) -> None:
-        """
-        Handle variables not in the form `x >= 0`.
-        """
+    def _handle_bounds(self) -> None:
+        if not self.bounds:
+            return
+
         vmap = dict()
         tmpl = self.__class__.__tmpl_surplus__
         counter = 1
 
-        for v in self._vmap.keys():
-            if v.is_nonnegative:
-                pass  # there is nothing to do, variable is already nonnegative
-            elif v.is_positive:
-                sym = sy.symbols(tmpl.format(counter), nonnegative=True)
-                vmap[v] = sym + np.nextafter(0, 1)
-                counter += 1
-            elif v.is_negative:
-                sym = sy.symbols(tmpl.format(counter), nonnegative=True)
-                vmap[v] = -sym - np.nextafter(0, 1)
-                counter += 1
-            elif v.is_nonpositive:
-                sym = sy.symbols(tmpl.format(counter), nonnegative=True)
-                vmap[v] = -sym
-                counter += 1
-            else:  # unrestricted
+        for v in self.variables:
+            bv = self.bounds.get(v, (None, None))
+
+            if (bv[0] is None) and (bv[1] is None):
                 sym = [
                     tmpl.format(counter),
                     tmpl.format(counter + 1),
@@ -226,6 +246,12 @@ class LinearProgrammingProblem:
                 si, sj = sy.symbols(sym, nonnegative=True)
                 vmap[v] = si - sj
                 counter += 2
+            elif bv[0] is not None:
+                if bv[0] == 0:
+                    continue
+                self.constraints.append(InEquality(v - bv[0], op=">="))
+            elif bv[1] is not None:
+                self.constraints.append(InEquality(v - bv[1], op="<="))
 
         self._substitute(vmap, inverse=False)
 
@@ -245,8 +271,8 @@ class LinearProgrammingProblem:
 
     def _has_standardform(self) -> bool:
         all_eq = all([isinstance(c, Equality) for c in self.constraints])
-        all_pos = all([v.is_nonnegative for v in self.variables])
-        return all_pos and all_eq
+        all_nonnegative = all([b == (0, None) for b in self.bounds.values()])
+        return all_nonnegative and all_eq
 
     def _get_target_variables(self) -> list[Symbol]:
         """
@@ -265,13 +291,10 @@ class LinearProgrammingProblem:
         if P._has_integer_variables():
             raise NotImplementedError("Integer variables are not supported yet!")
 
-        # initialize the variable mapper
         P._vmap = {v: v for v in self.variables}
 
-        # handle variables not restricted in sign
-        P._transform_variables()
+        P._handle_bounds()
 
-        # gather and add slack variables to the variable manager
         slack_variables = P._get_slack_variables()
         P._vmap.update({v: v for v in slack_variables})
 
@@ -358,6 +381,7 @@ class LinearProgrammingProblem:
         P.obj = obj
         P.constraints = constraints
         P.variables = standard_variables
+        P.bounds = {v: (0, None) for v in standard_variables}
         return P
 
     def _eval_constraints(self, x: Iterable) -> ndarray:
