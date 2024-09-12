@@ -6,8 +6,6 @@ __all__ = ["NumberLike", "BoundsLike"]
 NumberLike: TypeAlias = int | float
 # type NumberLike = int | float  # after Python 3.12 and higher
 
-BoundsLike: TypeAlias = (
-    Sequence[tuple[NumberLike | None, NumberLike | None]]
-    | dict[Symbol, tuple[NumberLike | None, NumberLike | None]]
-    | None
-)
+BoundLike: TypeAlias = tuple[NumberLike | None, NumberLike | None]
+
+BoundsLike: TypeAlias = BoundLike | Sequence[BoundLike] | dict[Symbol, BoundLike]

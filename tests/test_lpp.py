@@ -54,6 +54,45 @@ class TestLPP(unittest.TestCase):
         with self.assertRaises(ValueError):
             LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
 
+    def test_equivalent_bounds_inputs(self):
+        syms = x1, x2 = sy.symbols(["x1", "x2"])
+        f = Function(x1 + x2 - 5, variables=syms)
+        x_ = np.array([1.0, 1.0])
+
+        ieq = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        bounds = [(1, None), (1, None)]
+        lpp = LPP(f, [ieq], variables=syms, bounds=bounds)
+        solution = lpp.solve(raise_errors=True)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, x_)))
+        self.assertTrue(np.isclose(solution.obj, -3.0))
+
+        ieq = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        bounds = (1, None)
+        lpp = LPP(f, [ieq], variables=syms, bounds=bounds)
+        solution = lpp.solve(raise_errors=True)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, x_)))
+        self.assertTrue(np.isclose(solution.obj, -3.0))
+
+        ieq1 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        ieq2 = InEquality(x1 - 1, op=">=", variables=syms)
+        ieq3 = InEquality(x2 - 1, op=">=", variables=syms)
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
+        solution = lpp.solve(raise_errors=True)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, x_)))
+        self.assertTrue(np.isclose(solution.obj, -3.0))
+
+        ieq1 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
+        ieq2 = InEquality("x1 >= 1", variables=syms)
+        ieq3 = InEquality("x2 >= 1", variables=syms)
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
+        solution = lpp.solve(raise_errors=True)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, x_)))
+        self.assertTrue(np.isclose(solution.obj, -3.0))
+
     def test_raise_not_symbolic_input(self):
         x1, x2 = syms = sy.symbols(["x1", "x2"])
         f = Function(x1 + x2, variables=syms)
@@ -221,6 +260,25 @@ class TestLPP(unittest.TestCase):
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
         errors = lpp.solve(return_all=True).errors
         assert len(errors) == 0
+
+    def test_result_arbitrary_gradient(self):
+        """
+        Generate a few simple linear problems with unit gradients in the positive
+        quadrant and zero bias and check if the result is always correct.
+        """
+        x_ = np.array([0.0, 0.0])
+        obj_ = 0.0
+        for _ in range(5):
+            mx, my = np.random.rand(2) * 10
+            variables = x1, x2 = sy.symbols(["x1", "x2"])
+            f = Function(mx * x1 + my * x2, variables=variables)
+            ieq1 = InEquality(x1, op=">=", variables=variables)
+            ieq2 = InEquality(x2, op=">=", variables=variables)
+            lpp = LPP(f, [ieq1, ieq2], variables=variables)
+            solution = lpp.solve(raise_errors=True)
+            x = np.array(solution.x)
+            self.assertTrue(np.all(np.isclose(x, x_)))
+            self.assertTrue(np.isclose(solution.obj, obj_))
 
 
 if __name__ == "__main__":

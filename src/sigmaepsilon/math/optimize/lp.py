@@ -56,7 +56,7 @@ class LinearProgrammingResult(BaseModel):
 
 class LinearProgrammingProblem:
     """
-    A class to handle real valued linear programming problems.
+    A class to handle real valued linear programming problems [1]_.
     
     To define the objective and the constraints of the problem,
     you can use the `Function`, `Relation`, `Equality` and `InEquality` 
@@ -75,16 +75,21 @@ class LinearProgrammingProblem:
     bounds : BoundsLike, Optional
         A bound for a single variable is a tuple ``(min, max)``, defining
         the minimum and maximum values of that decision variable. A bound for all variables
-        is either a sequence of such tuples, or a dictionary that maps variables to their bounds.
-        A sequence of ``(min, max)`` pairs for each element in ``x``, defining
-        the minimum and maximum values of that decision variable.
+        is either a single tuple like that -meaning that it should be taken as a value for all variables-,
+        a sequence of such tuples, or a dictionary that maps variables to their bounds.
+        If it is a sequence, the order of the bounds must be consistent with the order of the variables.
+        and bounds for all variables must be provided.
         Use ``None`` to indicate that there is no bound. For instance, the
         default bound ``(0, None)`` for a decision variable means that
         it is non-negative, and the pair ``(None, None)`` means no bounds at all,
         i.e. the variable is allowed to be any real.
+        Use `bounds=None` if you want to specify the bounds using inequalities and you don't want 
+        the solver to handle bounds in any other way.
         
     See Also
     --------
+    :class:`~sigmaepsilon.math.optimize.lp.LinearProgrammingStatus`
+    :class:`~sigmaepsilon.math.optimize.lp.LinearProgrammingResult`
     :class:`~sigmaepsilon.math.function.function.Function`
     :class:`~sigmaepsilon.math.function.relation.Relation`
     :class:`~sigmaepsilon.math.function.relation.Equality`
@@ -105,15 +110,39 @@ class LinearProgrammingProblem:
         \end{eqnarray}
 
     >>> from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
+    >>> from sigmaepsilon.math.function import Function, Relation
     >>> import sympy as sy
-    >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5', nonnegative=True)
+    >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5')
     >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
-    >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=variables)
-    >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=variables)
-    >>> bounds = [(1, None), (1, None), (1, None), (1, None)]
+    >>> eq1 = Relation(x1 + 2*x3 + x4 - 4, variables=variables)
+    >>> eq2 = Relation(x2 + x3 - x4 - 2, variables=variables)
+    >>> bounds = [(0, None), (0, None), (0, None), (0, None)]
     >>> problem = LPP(obj, [eq1, eq2], variables=variables, bounds=bounds)
-    >>> problem.solve().x  # doctest: +SKIP
-    [0., 6., 0., 4.]
+    >>> problem.solve().x
+    [0.0, 6.0, 0.0, 4.0]
+    
+    In this example, bounds could have been specified as `bounds=(0, None)` as
+    well, since all variables have the same bound.
+    
+    The bounds of the problem can be specified directly using inequalities
+    as well. In this case, the argument `bounds` must be set to `None`, 
+    which is the default value.
+    
+    >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5')
+    >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
+    >>> eq1 = Relation(x1 + 2*x3 + x4 - 4, variables=variables)
+    >>> eq2 = Relation(x2 + x3 - x4 - 2, variables=variables)
+    >>> ieq1 = Relation(x1, op=">=", variables=variables)
+    >>> ieq2 = Relation(x2, op=">=", variables=variables)
+    >>> ieq3 = Relation(x3, op=">=", variables=variables)
+    >>> ieq4 = Relation(x4, op=">=", variables=variables)
+    >>> problem = LPP(obj, [eq1, eq2, ieq1, ieq2, ieq3, ieq4], variables=variables)
+    >>> problem.solve().x
+    [0.0, 6.0, 0.0, 4.0]
+    
+    References
+    ----------
+    .. [1] https://en.wikipedia.org/wiki/Linear_programming
     """
 
     __slots__ = [
@@ -143,15 +172,12 @@ class LinearProgrammingProblem:
         self.constraints = []
         self._variables = []
         self._vmap = dict()
-        self.bounds = bounds
+        self.bounds = None
 
         _variables = []
 
         if variables is None:
             raise ValueError("The variables must be provided for symbolic problems!")
-
-        if bounds and not variables:  # pragma: no cover
-            raise ValueError("Bounds were provided but no variables were set!")
 
         if isinstance(obj, Function):
             if not obj.is_symbolic:
@@ -184,15 +210,38 @@ class LinearProgrammingProblem:
             self._variables = variables
 
         if self.bounds is not None and not isinstance(self.bounds, dict):
-
             if not len(self.bounds) == len(self.variables):
                 raise ValueError(
                     "The number of bounds must be equal to the number of variables!"
                 )
 
-            self.bounds = {v: b for v, b in zip(self.variables, self.bounds)}
-
+        self._init_bounds(bounds)
         self._original_variables = deepcopy(self.variables)
+
+    def _init_bounds(self, bounds: BoundsLike):
+        if bounds is None:
+            self.bounds = None
+            return
+
+        NoneType = type(None)
+
+        if (
+            isinstance(bounds, Sequence)
+            and len(bounds) == 2
+            and (type(bounds[0]) in (int, float, NoneType))
+            and (type(bounds[1]) in (int, float, NoneType))
+        ):
+            bounds = [bounds for _ in range(len(self.variables))]
+
+        if not isinstance(bounds, dict):
+            if not len(bounds) == len(self.variables):
+                raise ValueError(
+                    "The number of bounds must be equal to the number of variables!"
+                )
+
+            bounds = {v: b for v, b in zip(self.variables, bounds)}
+
+        self.bounds = bounds
 
     @property
     def variables(self) -> list[Symbol]:
@@ -247,8 +296,6 @@ class LinearProgrammingProblem:
                 vmap[v] = si - sj
                 counter += 2
             elif bv[0] is not None:
-                if bv[0] == 0:
-                    continue
                 self.constraints.append(InEquality(v - bv[0], op=">="))
             elif bv[1] is not None:
                 self.constraints.append(InEquality(v - bv[1], op="<="))
@@ -463,6 +510,11 @@ class LinearProgrammingProblem:
         return_all: bool
             If `True`, and there are multiple solutions, all of them are returned.
             Default is `True`.
+
+        Notes
+        -----
+        In the case of multiple solutions, the solver returns two extremal points, but there are
+        an infinite number of solutions as defined by the line segment between those two points.
 
         Returns
         -------
