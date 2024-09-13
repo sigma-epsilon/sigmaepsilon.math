@@ -100,6 +100,16 @@ class TestFunction(unittest.TestCase):
         f1.f([-1]), f1.g([-1]), f1.G([-1])
         f1.subs([1], variables=f1.variables)
         
+    def test_simplify(self):
+        variables = ["x1", "x2", "x3", "x4"]
+        x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+        f1 = Function(3 * x1 + 9 * x3 + x2 + x4, variables=syms)
+        f1.simplify()
+        
+        f1 = Function(lambda x: x[0] + x[1], d=2)
+        with self.assertRaises(TypeError):
+            f1.simplify()
+        
     def test_equal_def(self):
         variables = ["x1", "x2", "x3", "x4"]
         x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
