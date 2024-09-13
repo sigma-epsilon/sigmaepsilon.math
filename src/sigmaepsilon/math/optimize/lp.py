@@ -83,7 +83,7 @@ class LinearProgrammingProblem:
     __slots__ = [
         "obj",
         "constraints",
-        "variables",
+        "_variables",
         "bounds",
         "integrality",
     ]
@@ -105,7 +105,7 @@ class LinearProgrammingProblem:
         super().__init__()
         self.obj = None
         self.constraints = []
-        self.variables = []
+        self._variables = []
         self.bounds = bounds
         self.integrality = integrality
 
@@ -142,9 +142,16 @@ class LinearProgrammingProblem:
             if not all([v in _variables for v in variables]):
                 raise ValueError("Inconsistent variables provided!")
 
-            self.variables = variables
+            self._variables = variables
 
-    def to_scipy(self, *, maximize: bool = False) -> tuple[ndarray, dict]:
+    @property
+    def variables(self) -> Iterable[Symbol]:
+        """
+        Returns the variables of the problem.
+        """
+        return self._variables
+
+    def _to_scipy(self, *, maximize: bool = False) -> tuple[ndarray, dict]:
         """
         Returns values for the parameters `A_ub`, `b_ub`, `A_eq`, `b_eq`, `bounds` and `integrality`
         for the `scipy.optimize.linprog` function.
@@ -219,7 +226,7 @@ class LinearProgrammingProblem:
         Solves the linear programming problem using `scipy.optimize.linprog`
         and returns an instance of `scipy.optimize.OptimizeResult`.
         """
-        c, _kwargs = self.to_scipy(maximize=maximize)
+        c, _kwargs = self._to_scipy(maximize=maximize)
         _kwargs.update(kwargs)
         _kwargs["method"] = method
         res = linprog(c, **_kwargs)
