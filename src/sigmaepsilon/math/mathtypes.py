@@ -1,11 +1,10 @@
 from typing import TypeAlias, Sequence
-from sympy import Symbol
 
-__all__ = ["NumberLike", "BoundsLike"]
+__all__ = ["Scalar", "BoundLike", "BoundsLike"]
 
-NumberLike: TypeAlias = int | float
+Scalar: TypeAlias = int | float
 # type NumberLike = int | float  # after Python 3.12 and higher
 
-BoundLike: TypeAlias = tuple[NumberLike | None, NumberLike | None]
+BoundLike: TypeAlias = tuple[Scalar | None, Scalar | None]
 
-BoundsLike: TypeAlias = BoundLike | Sequence[BoundLike] | dict[Symbol, BoundLike]
+BoundsLike: TypeAlias = BoundLike | Sequence[BoundLike]
