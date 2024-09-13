@@ -8,9 +8,9 @@ The appereance of a single nonlinear function anywhere, suffices to reject the p
 as an LPP.
 
 .. tip::
-   For problems starting from medium size, it is suggested to use the 
+   If your problem is already in standard form, you can use the 
    :func:`solve_standard_form <sigmaepsilon.math.optimize.LinearProgrammingProblem.solve_standard_form>` 
-   to solve linear problems.
+   directly to solve linear problems.
 
 The definition of an LPP is expected in **General Form**:
 
@@ -22,7 +22,7 @@ The definition of an LPP is expected in **General Form**:
       & subject \, to \quad & \nonumber \\
       && \sum_i a_{ji} \,x_i \,\leq\, b_j, \qquad j = 1, \ldots, p, \\
       && \sum_i a_{ji} \,x_i \,\geq\, b_j, \qquad j = p+1, \ldots, q, \\
-      && \sum_i a_{ji} \,x_i \,=\, b_j, \qquad j = q+1, \ldots, m.
+      && \sum_i a_{ji} \,x_i \,=\, b_j, \qquad j = q+1, \ldots, m,
    \end{eqnarray}
 
 where :math:`c_i, b_i`, and :math:`a_{ji}` are the data of the problem. It can be shown, 

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Tuple, List, Iterable, Optional, Union, Generator
+from typing import Iterable, Callable, Tuple, List, Optional, Union, Generator
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field

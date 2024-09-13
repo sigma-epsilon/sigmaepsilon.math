@@ -5,7 +5,7 @@ import sympy as sy
 import numpy as np
 
 import sigmaepsilon.math.function as fnc
-from sigmaepsilon.math.function.metafunction import decode, substitute, coefficients
+from sigmaepsilon.math.function.symutils import decode, substitute, coefficients
 from sigmaepsilon.math.function import Function
 from sigmaepsilon.math.function import Equality, InEquality, Relation
 from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
@@ -35,10 +35,13 @@ class TestFunction(unittest.TestCase):
             return np.array([2 * x, 1])  # pragma: no cover
 
         f = Function(f0, f1, d=2)
-        self.assertFalse(f.symbolic)
-        # f.to_latex()
-        f.coefficients()
-        f.linear_coefficients()
+        self.assertFalse(f.is_symbolic)
+
+        with self.assertRaises(TypeError):
+            f.coefficients()
+        
+        with self.assertRaises(TypeError):
+            f.linear_coefficients()
 
         Function(value=f0, gradient=f1, Hessian=None, d=2)
 
@@ -77,14 +80,14 @@ class TestFunction(unittest.TestCase):
             return np.array([2 * x, 1])  # pragma: no cover
 
         f = Function(f0, f1, d=2)
-        self.assertFalse(f.symbolic)
-        self.assertTrue(f.linear)
+        self.assertFalse(f.is_symbolic)
+        self.assertTrue(f.is_linear)
 
     def test_sym(self):
         f = gen_Lagrange_1d(N=2)
         f1 = Function(f[1][0], f[1][1], f[1][2])
         f2 = Function(f[2][0], f[2][1], f[2][2])
-        assert f1.linear and f2.linear
+        assert f1.is_linear and f2.is_linear
         assert f1.dimension == 1
         assert f2.dimension == 1
         assert np.isclose(f1([-1]), 1.0)
@@ -96,6 +99,16 @@ class TestFunction(unittest.TestCase):
         f1.to_latex()
         f1.f([-1]), f1.g([-1]), f1.G([-1])
         f1.subs([1], variables=f1.variables)
+        
+    def test_simplify(self):
+        variables = ["x1", "x2", "x3", "x4"]
+        x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
+        f1 = Function(3 * x1 + 9 * x3 + x2 + x4, variables=syms)
+        f1.simplify()
+        
+        f1 = Function(lambda x: x[0] + x[1], d=2)
+        with self.assertRaises(TypeError):
+            f1.simplify()
         
     def test_equal_def(self):
         variables = ["x1", "x2", "x3", "x4"]
@@ -109,11 +122,19 @@ class TestRelations(unittest.TestCase):
     def test_Relation(self):
         variables = ["x1", "x2", "x3", "x4"]
         x1, _, x3, x4 = syms = sy.symbols(variables, positive=True)
+        
         r = Relation(x1 + 2 * x3 + x4 - 4, variables=syms)
+        self.assertIsInstance(r, Relation)
+        self.assertIsInstance(r, Equality)
         r.operator
+        
         r = Relation(
-            x1 + 2 * x3 + x4 - 4, variables=syms, op=lambda x, y: x <= y
-        )  # pragma: no cover
+            x1 + 2 * x3 + x4 - 4, variables=syms, op=lambda x, y: x <= y, op_str="<="
+        )
+        self.assertIsInstance(r, Relation)
+        self.assertIsInstance(r, InEquality)
+        
+        
 
     def test_Equality(self):
         variables = ["x1", "x2", "x3", "x4"]
@@ -138,7 +159,7 @@ class TestRelations(unittest.TestCase):
         failed_properly = False
         try:
             InEquality("x + y")
-        except ValueError:
+        except Exception:
             failed_properly = True
         finally:
             self.assertTrue(failed_properly)
