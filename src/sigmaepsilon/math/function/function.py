@@ -245,6 +245,15 @@ class Function(MetaFunction):
         `SymPy` expression.
         """
         return self.expr is not None
+    
+    def simplify(self) -> None:
+        """
+        Simplifies the symbolic expression of the instance.
+        """
+        if self.is_symbolic:
+            self.expr = self.expr.simplify()
+        else:
+            raise TypeError("This is exclusive to symbolic functions.")
 
     def linear_coefficients(self, normalize: bool = False) -> dict | None:
         """
