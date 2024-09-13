@@ -268,7 +268,6 @@ class Function(MetaFunction):
         --------
         >>> from sigmaepsilon.math.function import Function
         >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
-        >>>
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> linear_coefficients = f1.linear_coefficients()
@@ -293,7 +292,6 @@ class Function(MetaFunction):
         --------
         >>> from sigmaepsilon.math.function import Function
         >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
-        >>>
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> coefficients = f1.coefficients()
@@ -327,7 +325,6 @@ class Function(MetaFunction):
         --------
         >>> from sigmaepsilon.math.function import Function
         >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
-        >>>
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> latex_string = f1.to_latex()
@@ -346,8 +343,6 @@ class Function(MetaFunction):
         Examples
         --------
         >>> from sigmaepsilon.math.function import Function
-        >>> import sympy as sy
-        >>>
         >>> g = Function("3*x + 4*y - 2", variables=["x", "y", "z"])
         >>> g = g.subs([0, 0, 0], ["x", "y", "z"], inplace=True)
         """

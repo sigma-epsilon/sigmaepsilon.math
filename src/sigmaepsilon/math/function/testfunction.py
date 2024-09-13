@@ -1,4 +1,4 @@
-import collections
+from typing import Iterable
 
 from .function import Function
 
@@ -17,7 +17,7 @@ class TestFunction(Function):
                 self.optText = value
                 break
             elif key == "optimums":
-                assert isinstance(value, collections.Iterable)
+                assert isinstance(value, Iterable)
                 for v in value:
                     self.optimums.append(v)
         return
@@ -25,7 +25,7 @@ class TestFunction(Function):
 
 class TestFunction2D(TestFunction):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs, d=2)
+        super().__init__(*args, **kwargs)
 
 
 class TestMinFunction(TestFunction):

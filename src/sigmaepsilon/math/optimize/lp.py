@@ -249,7 +249,7 @@ class LinearProgrammingProblem:
         """
         Solves the linear programming problem using `scipy.optimize.linprog`
         and returns an instance of `scipy.optimize.OptimizeResult`.
-        
+
         Parameters
         ----------
         maximize : bool, Optional

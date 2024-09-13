@@ -4,7 +4,16 @@ from .testfunction import TestMinFunction2D
 from .symutils import symbolize, substitute
 
 
-def Rosenbrock(a=1, b=100) -> TestMinFunction2D:
+__all__ = [
+    "Rosenbrock",
+    "Himmelblau",
+    "GoldsteinPrice",
+    "Beale",
+    "Matyas",
+]
+
+
+def Rosenbrock(a: float = 1, b: float = 100) -> TestMinFunction2D:
     """
     Implements the Rosenbrock function, aka. Banana function.
 
