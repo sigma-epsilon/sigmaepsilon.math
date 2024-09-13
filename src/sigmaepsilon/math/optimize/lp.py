@@ -73,6 +73,35 @@ class LinearProgrammingProblem:
     In this example, bounds could have been specified as `bounds=(0, None)` as
     well, since all variables have the same bound.
     
+    Now let see how to solve the following mixed integer linear programming problem.
+    
+    .. math::
+
+        \begin{eqnarray}
+            & minimize&  \quad  3 x_2 + 2 x_3  \\
+            & subject \, to& & \nonumber\\
+            & & 2 x_1 + 2 x_2 - 4 x_3 \,=\, 5, \\
+            & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4. \\
+            & & x_1, x_3 \,\in\, \mathbb{Z}.
+        \end{eqnarray}
+    
+    >>> variables = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
+    >>> f = Function(3 * x2 + 2 * x3, variables=variables)
+    >>> eq = Relation(2 * x1 + 2 * x2 - 4 * x3 - 5, op="=", variables=variables)
+    >>> bounds = (0, None)
+    >>> integrality = [1, 0, 1]
+    >>> problem = LPP(f, [eq], variables=variables, bounds=bounds, integrality=integrality)
+    
+    These integrality constraints can also be specified using assumptions on the
+    symbolic variables.
+    
+    >>> x1, x3 = sy.symbols(["x1", "x3"], integer=True)
+    >>> x2 = sy.symbols("x2")
+    >>> variables = x1, x2, x3
+    >>> f = Function(3 * x2 + 2 * x3, variables=variables)
+    >>> eq = Relation("2 * x1 + 2 * x2 - 4 * x3 = 5", variables=variables)
+    >>> problem = LPP(f, [eq], variables=variables, bounds=(0, None))
+    
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Linear_programming
@@ -225,6 +254,16 @@ class LinearProgrammingProblem:
         """
         Solves the linear programming problem using `scipy.optimize.linprog`
         and returns an instance of `scipy.optimize.OptimizeResult`.
+        
+        Parameters
+        ----------
+        maximize : bool, Optional
+            If `True`, the problem is a maximization problem.
+        method : str, Optional
+            The solver to use. The default is "highs". For more options see the
+            `method` parameter in `scipy.optimize.linprog`.
+        **kwargs
+            Additional keyword arguments to pass to `scipy.optimize.linprog`.
         """
         c, _kwargs = self._to_scipy(maximize=maximize)
         _kwargs.update(kwargs)
