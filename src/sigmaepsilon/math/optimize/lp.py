@@ -117,11 +117,6 @@ class LinearProgrammingProblem:
         "integrality",
     ]
 
-    __tmpl_surplus__ = r"\beta_{}"
-    __tmpl_slack__ = r"\gamma_{}"
-    __tmpl_standard__ = r"\alpha_{}"
-    __tmpl_coeff__ = "c_{}"
-
     def __init__(
         self,
         obj: Function,
