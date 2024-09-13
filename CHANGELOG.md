@@ -7,15 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.2.0] - 2024-09-05
+## [2.0.0] - 2024-09-05
 
 ### Changed
 
-- The `LinearProgrammingProblem` class has changed. Usage of the modified class should be straightforward.
+- The `LinearProgrammingProblem` class has changed. Now it uses SciPy as a solver and the class only serves as a preprocessor. Usage of the modified class should be straightforward from the documentation.
 
 ### Fixed
 
-- Several fixes to the `LinearProgrammingProblem` class has been made.
 - Fixed the `has_full_rank` function in `sigmaepsilon.math.linalg`
 
 ### Removed
