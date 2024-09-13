@@ -245,7 +245,7 @@ class Function(MetaFunction):
         `SymPy` expression.
         """
         return self.expr is not None
-    
+
     def simplify(self) -> None:
         """
         Simplifies the symbolic expression of the instance.
