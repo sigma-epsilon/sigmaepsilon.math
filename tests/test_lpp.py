@@ -164,12 +164,12 @@ class TestLPP(unittest.TestCase):
         assert np.all(np.isclose(_x, x_))
 
     def test_mixed_integer_problem(self):
-        syms = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
-        f = Function(3 * x2 + 2 * x3, variables=syms)
-        eq1 = Relation(2 * x1 + 2 * x2 - 4 * x3 - 5, op="=", variables=syms)
+        variables = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
+        f = Function(3 * x2 + 2 * x3, variables=variables)
+        eq1 = Relation(2 * x1 + 2 * x2 - 4 * x3 - 5, op="=", variables=variables)
         bounds = (0, None)
         integrality = [1, 0, 1]
-        lpp = LPP(f, [eq1], variables=syms, bounds=bounds, integrality=integrality)
+        lpp = LPP(f, [eq1], variables=variables, bounds=bounds, integrality=integrality)
         solution = lpp.solve()
         self.assertTrue(solution.success)
         x = np.array(solution.x)
