@@ -294,7 +294,8 @@ class Function(MetaFunction):
 
         try:
             d = OrderedDict({x: 0 for x in self.variables})
-            d.update(self.expr.as_coefficients_dict())
+            expr = self.expr.simplify()
+            d.update(expr.as_coefficients_dict())
             if not normalize:
                 return d
             else:
