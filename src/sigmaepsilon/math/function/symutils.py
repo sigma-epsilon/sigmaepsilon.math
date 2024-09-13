@@ -43,8 +43,10 @@ def decode(
     return expr, variables
 
 
-def symbolize(*args, **kwargs) -> dict:
+def symbolize(*args, simplify: bool = True, **kwargs) -> dict:
     expr, variables = decode(*args, **kwargs)
+    if simplify:
+        expr = expr.simplify()
     f0 = lambdify([variables], expr, "numpy")
     g = derive_by_array(expr, variables)
     f1 = lambdify([variables], g, "numpy")
