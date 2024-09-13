@@ -163,6 +163,28 @@ class TestLPP(unittest.TestCase):
         _x = np.array([1.0, 1.0])
         assert np.all(np.isclose(_x, x_))
 
+    def test_mixed_integer_problem(self):
+        syms = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
+        f = Function(3 * x2 + 2 * x3, variables=syms)
+        eq1 = Relation(2 * x1 + 2 * x2 - 4 * x3 - 5, op="=", variables=syms)
+        bounds = (0, None)
+        integrality = [1, 0, 1]
+        lpp = LPP(f, [eq1], variables=syms, bounds=bounds, integrality=integrality)
+        solution = lpp.solve()
+        self.assertTrue(solution.success)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, np.array([2, 0.5, 0]))))
+        self.assertTrue(np.isclose(solution.fun, 1.5))
+
+    def test_cyclic_problem(self):
+        syms = x1, x2 = sy.symbols(["X2", "x2"])
+        f = Function(x1 + 2 * x2, variables=syms)
+        eq1 = Relation(x1 + x2 - 1, op="<=", variables=syms)
+        bounds = [(0, 1), (0, None)]
+        lpp = LPP(f, [eq1], variables=syms, bounds=bounds)
+        solution = lpp.solve()
+        self.assertTrue(solution.success)
+
     def test_1(self):
         variables = ["x1", "x2"]
         x1, x2 = syms = sy.symbols(variables)
