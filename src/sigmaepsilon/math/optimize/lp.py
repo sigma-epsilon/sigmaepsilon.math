@@ -1,66 +1,26 @@
 from typing import Iterable, Sequence
-from collections import defaultdict
-from enum import Enum, auto, unique
-from copy import deepcopy
 
 import numpy as np
 from numpy import ndarray
-import sympy as sy
 from sympy import Symbol
-from pydantic import BaseModel
+from scipy.optimize import linprog, OptimizeResult
 
 from ..function import Function, InEquality, Equality
 from ..function.relation import Relations, Relation
-from ..function.symutils import coefficients, generate_symbols, substitute
-from ..utils import atleast2d
 from ..mathtypes import BoundsLike
-from .errors import DegenerateProblemError, NoSolutionError, OverDeterminedError
-from .simplex_lp import SimplexSolverLP
 
-__all__ = [
-    "LinearProgrammingProblem",
-    "LinearProgrammingStatus",
-    "LinearProgrammingResult",
-]
-
-
-@unique
-class LinearProgrammingStatus(Enum):
-    """
-    An enumeration of the possible statuses of a linear programming problem.
-    The explanation of each status is as follows:
-
-    * UNIQUE: The problem has a unique solution.
-    * MULTIPLE: The problem has multiple solutions.
-    * NOSOLUTION: The problem has no solution.
-    * DEGENERATE: The problem is degenerate.
-    * OVERDETERMINED: The problem is overdetermined.
-    * FAILED: The problem might have a solution, but the solver failed to get it.
-    """
-
-    UNIQUE = auto()
-    MULTIPLE = auto()
-    NOSOLUTION = auto()
-    DEGENERATE = auto()
-    OVERDETERMINED = auto()
-    FAILED = auto()
-
-
-class LinearProgrammingResult(BaseModel):
-    status: LinearProgrammingStatus = LinearProgrammingStatus.FAILED
-    x: list[float | int] | None = None
-    errors: list[str] = []
-    success: bool = False
-    obj: float | list[float] | None = None
+__all__ = ["LinearProgrammingProblem"]
 
 
 class LinearProgrammingProblem:
     """
-    A class to handle real valued linear programming problems [1]_.
+    A class to solve linear programming problems [1]_. It uses the `scipy.optimize.linprog`
+    function as a solver [2]_, which eventually calls into the HIGHS solver [3]_.
     
-    To define the objective and the constraints of the problem,
+    To define the objective and the constraints,
     you can use the `Function`, `Relation`, `Equality` and `InEquality` 
-    classes, or `SymPy` expressions directly.
+    classes. These are able to understand SymPy expressions and strings, giving you
+    the flexibility in defining the problem.
 
     Parameters
     ----------
@@ -73,23 +33,12 @@ class LinearProgrammingProblem:
         to guarantee that the order of the variables is consistent with the symbolic functions
         that make up the problem.
     bounds : BoundsLike, Optional
-        A bound for a single variable is a tuple ``(min, max)``, defining
-        the minimum and maximum values of that decision variable. A bound for all variables
-        is either a single tuple like that -meaning that it should be taken as a value for all variables-,
-        a sequence of such tuples, or a dictionary that maps variables to their bounds.
-        If it is a sequence, the order of the bounds must be consistent with the order of the variables.
-        and bounds for all variables must be provided.
-        Use ``None`` to indicate that there is no bound. For instance, the
-        default bound ``(0, None)`` for a decision variable means that
-        it is non-negative, and the pair ``(None, None)`` means no bounds at all,
-        i.e. the variable is allowed to be any real.
-        Use `bounds=None` if you want to specify the bounds using inequalities and you don't want 
-        the solver to handle bounds in any other way.
+        See the `bounds` parameter in `scipy.optimize.linprog` for more details.
+    integrality : Iterable[int] | int, Optional
+        See the `integrality` parameter in `scipy.optimize.linprog` for more details.
         
     See Also
     --------
-    :class:`~sigmaepsilon.math.optimize.lp.LinearProgrammingStatus`
-    :class:`~sigmaepsilon.math.optimize.lp.LinearProgrammingResult`
     :class:`~sigmaepsilon.math.function.function.Function`
     :class:`~sigmaepsilon.math.function.relation.Relation`
     :class:`~sigmaepsilon.math.function.relation.Equality`
@@ -124,34 +73,19 @@ class LinearProgrammingProblem:
     In this example, bounds could have been specified as `bounds=(0, None)` as
     well, since all variables have the same bound.
     
-    The bounds of the problem can be specified directly using inequalities
-    as well. In this case, the argument `bounds` must be set to `None`, 
-    which is the default value.
-    
-    >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5')
-    >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
-    >>> eq1 = Relation(x1 + 2*x3 + x4 - 4, variables=variables)
-    >>> eq2 = Relation(x2 + x3 - x4 - 2, variables=variables)
-    >>> ieq1 = Relation(x1, op=">=", variables=variables)
-    >>> ieq2 = Relation(x2, op=">=", variables=variables)
-    >>> ieq3 = Relation(x3, op=">=", variables=variables)
-    >>> ieq4 = Relation(x4, op=">=", variables=variables)
-    >>> problem = LPP(obj, [eq1, eq2, ieq1, ieq2, ieq3, ieq4], variables=variables)
-    >>> problem.solve().x
-    [0.0, 6.0, 0.0, 4.0]
-    
     References
     ----------
     .. [1] https://en.wikipedia.org/wiki/Linear_programming
+    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html
+    .. [3] https://highs.dev/
     """
 
     __slots__ = [
         "obj",
         "constraints",
-        "_vmap",
-        "_variables",
-        "_original_variables",
+        "variables",
         "bounds",
+        "integrality",
     ]
 
     __tmpl_surplus__ = r"\beta_{}"
@@ -165,14 +99,15 @@ class LinearProgrammingProblem:
         constraints: Sequence[Relation],
         *,
         variables: Sequence[Symbol] | None = None,
-        bounds: BoundsLike = None,
+        bounds: BoundsLike = (0, None),
+        integrality: Iterable[int] | int = None,
     ):
         super().__init__()
         self.obj = None
         self.constraints = []
-        self._variables = []
-        self._vmap = dict()
-        self.bounds = None
+        self.variables = []
+        self.bounds = bounds
+        self.integrality = integrality
 
         _variables = []
 
@@ -207,390 +142,87 @@ class LinearProgrammingProblem:
             if not all([v in _variables for v in variables]):
                 raise ValueError("Inconsistent variables provided!")
 
-            self._variables = variables
+            self.variables = variables
 
-        if self.bounds is not None and not isinstance(self.bounds, dict):
-            if not len(self.bounds) == len(self.variables):
-                raise ValueError(
-                    "The number of bounds must be equal to the number of variables!"
-                )
-
-        self._init_bounds(bounds)
-        self._original_variables = deepcopy(self.variables)
-
-    def _init_bounds(self, bounds: BoundsLike):
-        if bounds is None:
-            self.bounds = None
-            return
-
-        NoneType = type(None)
-
-        if (
-            isinstance(bounds, Sequence)
-            and len(bounds) == 2
-            and (type(bounds[0]) in (int, float, NoneType))
-            and (type(bounds[1]) in (int, float, NoneType))
-        ):
-            bounds = [bounds for _ in range(len(self.variables))]
-
-        if not isinstance(bounds, dict):
-            if not len(bounds) == len(self.variables):
-                raise ValueError(
-                    "The number of bounds must be equal to the number of variables!"
-                )
-
-            bounds = {v: b for v, b in zip(self.variables, bounds)}
-
-        self.bounds = bounds
-
-    @property
-    def variables(self) -> list[Symbol]:
+    def to_scipy(self, *, maximize: bool = False) -> tuple[ndarray, dict]:
         """
-        Returns the variables of the problem.
+        Returns values for the parameters `A_ub`, `b_ub`, `A_eq`, `b_eq`, `bounds` and `integrality`
+        for the `scipy.optimize.linprog` function.
         """
-        return self._variables
+        n_eq = len(list(filter(lambda c: isinstance(c, Equality), self.constraints)))
+        n_ieq = len(list(filter(lambda c: isinstance(c, InEquality), self.constraints)))
+        n_x = len(self.variables)
 
-    @variables.setter
-    def variables(self, variables: Iterable[Symbol]):
-        """
-        Sets the variables of the problem.
-        """
-        self._variables = list(variables)
+        coeffs = self.obj.linear_coefficients(normalize=True)
+        c = np.array([coeffs[x_] for x_ in self.variables]).astype(float)
+        if maximize:
+            c *= -1
 
-    def _substitute(
-        self, vmap: dict, inverse: bool = False, inplace: bool = True
-    ) -> None:
-        """
-        Substitute the variables with the corresponding expressions.
-        """
-        if not inverse:
-            old = list(vmap.values())
-            new = list(vmap.keys())
-        else:
-            old = list(vmap.keys())
-            new = list(vmap.values())
+        A_ub, b_ub, A_eq, b_eq = 4 * [None]
 
-        result = self._vmap if inplace else dict()
-        for v, expr in self._vmap.items():
-            result[v] = substitute(expr, old, new)
+        x_zero = np.zeros((n_x,))
+        SMALLNUM = np.nextafter(0, 1)
 
-        return result
+        if n_eq > 0:
+            A_eq = np.zeros((n_eq, n_x))
+            b_eq = np.zeros((n_eq,))
+            equalities: Iterable[Equality] = filter(
+                lambda c: isinstance(c, Equality), self.constraints
+            )
+            for i, eq in enumerate(equalities):
+                coeffs = eq.linear_coefficients(normalize=True)
+                A_eq[i] = [coeffs[x_] for x_ in self.variables]
+                b_eq[i] = -eq(x_zero)
 
-    def _handle_bounds(self) -> None:
-        if not self.bounds:
-            return
+        if n_ieq > 0:
+            A_ub = np.zeros((n_ieq, n_x))
+            b_ub = np.zeros((n_ieq,))
+            inequalities: Iterable[InEquality] = filter(
+                lambda c: isinstance(c, InEquality), self.constraints
+            )
+            for i, ieq in enumerate(inequalities):
+                coeffs = ieq.linear_coefficients(normalize=True)
+                A_ub[i] = [coeffs[x_] for x_ in self.variables]
+                b_ub[i] = -ieq(x_zero)
 
-        vmap = dict()
-        tmpl = self.__class__.__tmpl_surplus__
-        counter = 1
+                if ieq.op == Relations.ge:
+                    A_ub[i] *= -1
+                    b_ub[i] *= -1
+                elif ieq.op == Relations.gt:
+                    A_ub[i] *= -1
+                    b_ub[i] *= -1
+                    b_ub[i] -= SMALLNUM
+                elif ieq.op == Relations.lt:
+                    b_ub[i] -= SMALLNUM
 
-        for v in self.variables:
-            bv = self.bounds.get(v, (None, None))
+        integrality = self.integrality
+        if integrality is None:
+            is_int = [v.is_integer for v in self.variables]
+            if any(is_int):
+                integrality = np.array(is_int, dtype=bool).astype(int)
 
-            if (bv[0] is None) and (bv[1] is None):
-                sym = [
-                    tmpl.format(counter),
-                    tmpl.format(counter + 1),
-                ]
-                si, sj = sy.symbols(sym, nonnegative=True)
-                vmap[v] = si - sj
-                counter += 2
-            elif bv[0] is not None:
-                self.constraints.append(InEquality(v - bv[0], op=">="))
-            elif bv[1] is not None:
-                self.constraints.append(InEquality(v - bv[1], op="<="))
-
-        self._substitute(vmap, inverse=False)
-
-    def _has_integer_variables(self) -> bool:
-        return any([v.is_integer for v in self.variables])
-
-    def _get_slack_variables(self, template: str | None = None) -> list[Symbol]:
-        tmpl = self.__class__.__tmpl_slack__ if template is None else template
-        c = self.constraints
-        inequalities = list(filter(lambda c: isinstance(c, InEquality), c))
-        n = len(inequalities)
-        symbols_str = list(map(tmpl.format, range(1, n + 1)))
-        slack_variables = sy.symbols(symbols_str, nonnegative=True)
-        for i in range(n):
-            inequalities[i].slack = slack_variables[i]
-        return slack_variables
-
-    def _has_standardform(self) -> bool:
-        all_eq = all([isinstance(c, Equality) for c in self.constraints])
-        all_nonnegative = all([b == (0, None) for b in self.bounds.values()])
-        return all_nonnegative and all_eq
-
-    def _get_target_variables(self) -> list[Symbol]:
-        """
-        Returns the target variables of the problem.
-        """
-        s = set()
-        for expr in self._vmap.values():
-            s.update(expr.free_symbols)
-        return list(s)
-
-    def _to_standard_form(
-        self, maximize: bool = False, inplace: bool = False
-    ) -> "LinearProgrammingProblem":
-        P = self if inplace else deepcopy(self)
-
-        if P._has_integer_variables():
-            raise NotImplementedError("Integer variables are not supported yet!")
-
-        P._vmap = {v: v for v in self.variables}
-
-        P._handle_bounds()
-
-        slack_variables = P._get_slack_variables()
-        P._vmap.update({v: v for v in slack_variables})
-
-        # standardize variables
-        general_variables = P._get_target_variables()
-        number_of_general_variables = len(general_variables)
-        variable_indices = range(1, number_of_general_variables + 1)
-        standard_variables = generate_symbols(
-            self.__tmpl_standard__, variable_indices, nonnegative=True
+        kwargs = dict(
+            A_ub=A_ub,
+            b_ub=b_ub,
+            A_eq=A_eq,
+            b_eq=b_eq,
+            bounds=self.bounds,
+            integrality=integrality,
         )
-        standard_coefficients = generate_symbols(self.__tmpl_coeff__, variable_indices)
-        standard_to_general = {
-            k: v for k, v in zip(standard_variables, general_variables)
-        }
-        P._substitute(vmap=standard_to_general, inverse=True)
 
-        # create template for a general linear function
-        general_variables.append(1)
-        standard_variables.append(1)
-        standard_coefficients.append(sy.symbols("c"))
-        standard_to_coeff = {
-            k: v for k, v in zip(standard_variables, standard_coefficients)
-        }
-        template = np.inner(standard_coefficients, standard_variables)
-        standard_variables.pop(-1)
-        general_variables.pop(-1)
-
-        original_to_standard = {v: P._vmap[v] for v in self.variables}
-        slack_to_standard = {s: P._vmap[s] for s in slack_variables}
-
-        def expr_to_standard(fnc: Function):
-            expr = fnc.expr.subs(
-                [(v, expr) for v, expr in original_to_standard.items()]
-            )
-            expr_coeffs = coefficients(expr=expr, normalize=True)
-            coeff_map = defaultdict(lambda: 0)
-            coeff_map.update({standard_to_coeff[x]: c for x, c in expr_coeffs.items()})
-            return template.subs([(c, coeff_map[c]) for c in standard_coefficients])
-
-        def tr_obj(fnc: Function) -> Function:
-            minmax = -1 if maximize else 1
-            expr = minmax * expr_to_standard(fnc)
-            return Function(
-                expr, variables=standard_variables, vmap=standard_to_general
-            )
-
-        def tr_eq(fnc: Equality) -> Equality:
-            expr = expr_to_standard(fnc)
-            return Equality(
-                expr, variables=standard_variables, vmap=standard_to_general
-            )
-
-        def tr_ieq(fnc: InEquality) -> Equality:
-            expr = expr_to_standard(fnc)
-
-            # bring inequality to the form expr >= 0
-            if fnc.op == Relations.le:
-                expr *= -1
-            elif fnc.op == Relations.gt:
-                expr -= np.nextafter(0, 1)
-            elif fnc.op == Relations.lt:
-                expr *= -1
-                expr -= np.nextafter(0, 1)
-
-            # handle inequality in the form of expr >= 0 with slack variable
-            expr -= slack_to_standard[fnc.slack]
-            eq = Equality(expr, variables=standard_variables, vmap=standard_to_general)
-            eq.slack = fnc.slack
-            fnc.slack = None
-
-            return eq
-
-        # transform the objective function and the constraints
-        obj = tr_obj(P.obj)
-        constraints = []
-        constraints += list(
-            map(tr_eq, filter(lambda c: isinstance(c, Equality), P.constraints))
-        )
-        if len(slack_variables) > 0:
-            constraints += list(
-                map(tr_ieq, filter(lambda c: isinstance(c, InEquality), P.constraints))
-            )
-
-        P.obj = obj
-        P.constraints = constraints
-        P.variables = standard_variables
-        P.bounds = {v: (0, None) for v in standard_variables}
-        return P
-
-    def _eval_constraints(self, x: Iterable) -> ndarray:
-        return np.array([c(x) for c in self.constraints], dtype=float)
-
-    def is_feasible(self, x: Iterable) -> bool:
-        """
-        Returns `True` if `x` is a feasible candidate to the current problem,
-        `False` othwerise. This function can be used for instance if you want to
-        transform the problem to an unconstrained optimization problem and solve it
-        with a nonlinear solver like the genetic algorithm.
-
-        Parameters
-        ----------
-        x: Iterable
-            The candidate solution. The length of the iterable must be equal to the
-            number of variables in the problem.
-
-        Notes
-        -----
-        The order of variables in the argument `x` must follow the order of the variables
-        in the functions that make up the problem, which is assumed to be uniform across
-        all functions.
-        """
-        c = [c.relate(x) for c in self.constraints]
-        if self._has_standardform():
-            x = np.array(x, dtype=float)
-            return all(c) and all(x >= 0)
-        else:
-            return all(c)
-
-    def _to_numpy(
-        self,
-        maximize: bool = False,
-        assume_standard: bool = False,
-    ) -> tuple[ndarray, ndarray, ndarray]:
-        """
-        Returns the arrays A, b and c.
-        """
-        if not (assume_standard or self._has_standardform()):
-            P = self._to_standard_form(maximize=maximize, inplace=False)
-        else:
-            P = self
-
-        x = P.variables
-
-        zeros = np.zeros((len(x),), dtype=float)
-        b = -P._eval_constraints(zeros)
-
-        A = []
-        for c in P.constraints:
-            coeffs = c.linear_coefficients(normalize=True)
-            A.append(np.array([coeffs[x_] for x_ in x], dtype=float))
-        A = np.vstack(A)
-
-        coeffs = P.obj.linear_coefficients(normalize=True)
-        c = np.array([coeffs[x_] for x_ in x], dtype=float)
-
-        return A, b, c
+        return c, kwargs
 
     def solve(
-        self,
-        *,
-        return_all: bool = True,
-        maximize: bool = False,
-        raise_errors: bool = False,
-    ) -> LinearProgrammingResult:
+        self, *, maximize: bool = False, method: str = "highs", **kwargs
+    ) -> OptimizeResult:
         """
-        Solves the problem and returns the solution(s) if there are any.
-
-        Parameters
-        ----------
-        raise_errors: bool
-            If `True`, the solution raises the errors during solution,
-            otherwise they get returned within the result, under key `e`
-            without being explicitly raised.
-        maximize: bool
-            Set this to `True` if the problem is a maximization. Default is `False`.
-        return_all: bool
-            If `True`, and there are multiple solutions, all of them are returned.
-            Default is `True`.
-
-        Notes
-        -----
-        In the case of multiple solutions, the solver returns two extremal points, but there are
-        an infinite number of solutions as defined by the line segment between those two points.
-
-        Returns
-        -------
-        LinearProgrammingResult
-
-        Raises
-        ------
-        NoSolutionError
-            If there is no solution to the problem.
-        DegenerateProblemError
-            If the problem is degenerate.
-        OverDeterminedError
-            If the problem is overdetermined.
-        NotimplementedError
-            If the problem is not yet supported, for instance if it contains integer variables.
+        Solves the linear programming problem using `scipy.optimize.linprog`
+        and returns an instance of `scipy.optimize.OptimizeResult`.
         """
-        result = LinearProgrammingResult()
-        errors = []
-        try:
-            P = self._to_standard_form(maximize=maximize, inplace=False)
-            A, b, c = P._to_numpy(maximize=False, assume_standard=True)
-
-            x = SimplexSolverLP(c, A, b).solve()
-
-            res = None
-
-            standard_variables = P.variables
-            original_variables = P._original_variables
-
-            if len(x.shape) == 1:
-                result.status = LinearProgrammingStatus.UNIQUE
-            elif len(x.shape) == 2:
-                result.status = LinearProgrammingStatus.MULTIPLE
-
-            if not return_all:
-                x = x[0]
-            x = atleast2d(x)
-
-            original_values = {var: [] for var in original_variables}
-
-            for i in range(x.shape[0]):
-                smap = {s: sx for s, sx in zip(standard_variables, x[i])}
-                vmap = P._substitute(smap, inplace=False)
-                [original_values[g].append(vmap[g]) for g in original_variables]
-
-            res = {
-                g: np.squeeze(np.array(original_values[g], dtype=float))
-                for g in original_variables
-            }
-
-            res = np.array([res[v] for v in original_variables]).T
-
-            if len(res.shape) == 1:
-                result.obj = self.obj(res)
-            else:
-                result.obj = [self.obj(r) for r in res]
-
-            result.x = res.tolist()
-            result.success = True
-        except Exception as e:
-            errors.append(e)
-            result.success = False
-            if isinstance(e, NoSolutionError):
-                result.status = LinearProgrammingStatus.NOSOLUTION
-            elif isinstance(e, DegenerateProblemError):
-                result.status = LinearProgrammingStatus.DEGENERATE
-            elif isinstance(e, OverDeterminedError):
-                result.status = LinearProgrammingStatus.OVERDETERMINED
-            else:
-                result.status = LinearProgrammingStatus.FAILED
-        finally:
-            if len(errors) > 0:
-                result.x = None
-                result.errors = [str(e) for e in errors]
-
-                if raise_errors:
-                    raise errors[0]
-
-            return result
+        c, _kwargs = self.to_scipy(maximize=maximize)
+        _kwargs.update(kwargs)
+        _kwargs["method"] = method
+        res = linprog(c, **_kwargs)
+        if res.success:
+            res.fun = self.obj(res.x)
+        return res

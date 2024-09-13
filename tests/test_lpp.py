@@ -3,11 +3,7 @@ import doctest
 import numpy as np
 
 from sigmaepsilon.math.function import Function, Equality, InEquality, Relation
-from sigmaepsilon.math.optimize import (
-    LinearProgrammingProblem as LPP,
-    NoSolutionError,
-    OverDeterminedError,
-)
+from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
 import sympy as sy
 
 from sigmaepsilon.math import optimize
@@ -20,39 +16,14 @@ def load_tests(loader, tests, ignore):  # pragma: no cover
 
 class TestLPP(unittest.TestCase):
 
-    def test_coverage(self):
-        x1, x2 = sy.symbols(["x1", "x2"])
-        syms = [x1, x2]
-        f = Function(x1 + x2, variables=syms)
-        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
-        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
-        ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        bounds = [(0, None), (0, None)]
-        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
-        lpp.is_feasible([0, 0])
-
     def test_raise_no_variables_sym(self):
         x1, x2 = syms = sy.symbols(["x1", "x2"])
         f = Function(x1 + x2, variables=syms)
         ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        bounds = [(0, None), (0, None)]
         with self.assertRaises(ValueError):
             LPP(f, [ieq1, ieq2, ieq3])
-        with self.assertRaises(ValueError):
-            LPP(f, [ieq1, ieq2, ieq3], bounds=bounds)
-
-    def test_raise_wrong_bounds_length(self):
-        x1, x2 = sy.symbols(["x1", "x2"])
-        syms = [x1, x2]
-        f = Function(x1 + x2, variables=syms)
-        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
-        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
-        ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        bounds = [(0, None), (0, None), (0, None)]
-        with self.assertRaises(ValueError):
-            LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
 
     def test_equivalent_bounds_inputs(self):
         syms = x1, x2 = sy.symbols(["x1", "x2"])
@@ -62,36 +33,36 @@ class TestLPP(unittest.TestCase):
         ieq = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         bounds = [(1, None), (1, None)]
         lpp = LPP(f, [ieq], variables=syms, bounds=bounds)
-        solution = lpp.solve(raise_errors=True)
+        solution = lpp.solve()
         x = np.array(solution.x)
         self.assertTrue(np.all(np.isclose(x, x_)))
-        self.assertTrue(np.isclose(solution.obj, -3.0))
+        self.assertTrue(np.isclose(solution.fun, -3.0))
 
         ieq = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         bounds = (1, None)
         lpp = LPP(f, [ieq], variables=syms, bounds=bounds)
-        solution = lpp.solve(raise_errors=True)
+        solution = lpp.solve()
         x = np.array(solution.x)
         self.assertTrue(np.all(np.isclose(x, x_)))
-        self.assertTrue(np.isclose(solution.obj, -3.0))
+        self.assertTrue(np.isclose(solution.fun, -3.0))
 
         ieq1 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         ieq2 = InEquality(x1 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x2 - 1, op=">=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
-        solution = lpp.solve(raise_errors=True)
+        solution = lpp.solve()
         x = np.array(solution.x)
         self.assertTrue(np.all(np.isclose(x, x_)))
-        self.assertTrue(np.isclose(solution.obj, -3.0))
+        self.assertTrue(np.isclose(solution.fun, -3.0))
 
         ieq1 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         ieq2 = InEquality("x1 >= 1", variables=syms)
         ieq3 = InEquality("x2 >= 1", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms)
-        solution = lpp.solve(raise_errors=True)
+        solution = lpp.solve()
         x = np.array(solution.x)
         self.assertTrue(np.all(np.isclose(x, x_)))
-        self.assertTrue(np.isclose(solution.obj, -3.0))
+        self.assertTrue(np.isclose(solution.fun, -3.0))
 
     def test_raise_not_symbolic_input(self):
         x1, x2 = syms = sy.symbols(["x1", "x2"])
@@ -134,17 +105,6 @@ class TestLPP(unittest.TestCase):
         x_ = np.array(x)
         _x = np.array([1.0, 1.0])
         self.assertTrue(np.all(np.isclose(_x, x_)))
-        self.assertTrue(lpp.is_feasible(x_))
-
-    def test_degenerate_solution(self):
-        variables = ["x1", "x2", "x3", "x4"]
-        x1, x2, x3, x4 = syms = sy.symbols(variables)
-        obj2 = Function(3 * x1 + x2 - 6 * x3 + x4, variables=syms)
-        eq21 = Equality(x1 + 2 * x3 + x4, variables=syms)
-        eq22 = Equality(x2 + x3 - x4 - 2, variables=syms)
-        bounds = [(0, None), (0, None), (0, None), (0, None)]
-        lpp = LPP(obj2, [eq21, eq22], variables=syms, bounds=bounds)
-        lpp.solve(raise_errors=False)
 
     def test_no_solution(self):
         """
@@ -157,8 +117,8 @@ class TestLPP(unittest.TestCase):
         eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
         bounds = [(0, None), (0, None), (0, None), (0, None)]
         lpp = LPP(obj3, [eq31, eq32], variables=syms, bounds=bounds)
-        with self.assertRaises(NoSolutionError):
-            lpp.solve(raise_errors=True)
+        solution = lpp.solve()
+        self.assertFalse(solution.success)
 
     def test_overdetermined_problem(self):
         syms = x1, x2 = sy.symbols(["X2", "x2"])
@@ -168,8 +128,10 @@ class TestLPP(unittest.TestCase):
         eq3 = Relation(x1 - x2 + 4, op="=", variables=syms)
         bounds = [(0, None), (0, None)]
         lpp = LPP(f, [eq1, eq2, eq3], variables=syms, bounds=bounds)
-        with self.assertRaises(OverDeterminedError):
-            lpp.solve(raise_errors=True)
+        solution = lpp.solve()
+        self.assertFalse(solution.success)
+        self.assertEqual(solution.status, 2)
+        self.assertIn("HiGHS Status 8", solution.message)
 
     def test_multiple_solution(self):
         """
@@ -183,15 +145,9 @@ class TestLPP(unittest.TestCase):
         eq41 = Equality(x1 - 2 * x3 - x4 + 2, variables=syms)
         eq42 = Equality(x2 + x3 - x4 - 2, variables=syms)
         bounds = [(0, None), (0, None), (0, None), (0, None)]
-        P4 = LPP(obj4, [eq41, eq42], variables=syms, bounds=bounds)
-        x = P4.solve(return_all=True, raise_errors=True).x
-
-        x_ = np.array(x)
-        assert x_.shape == (2, 4)
-
-        x = P4.solve(return_all=False, raise_errors=True).x
-        x_ = np.array(x)
-        assert len(x_.shape) == 1
+        lpp = LPP(obj4, [eq41, eq42], variables=syms, bounds=bounds)
+        solution = lpp.solve()
+        self.assertTrue(solution.success)
 
     def test_maximize_solution(self):
         x1, x2 = sy.symbols(["x1", "x2"])
@@ -202,23 +158,10 @@ class TestLPP(unittest.TestCase):
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         bounds = [(0, None), (0, None)]
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
-        x = lpp.solve(maximize=True).x
-        x_ = np.array(x)
+        solution = lpp.solve(maximize=True)
+        x_ = np.array(solution.x)
         _x = np.array([1.0, 1.0])
         assert np.all(np.isclose(_x, x_))
-
-    def test_feasible(self):
-        x1, x2 = sy.symbols(["x1", "x2"])
-        syms = [x1, x2]
-        f = Function(-x1 - x2, variables=syms)
-        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
-        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
-        ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
-        bounds = [(0, None), (0, None)]
-        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
-        self.assertTrue(lpp.is_feasible([1, 1]))
-        self.assertFalse(lpp.is_feasible([0, 1]))
-        self.assertFalse(lpp.is_feasible([1, 0]))
 
     def test_1(self):
         variables = ["x1", "x2"]
@@ -227,7 +170,7 @@ class TestLPP(unittest.TestCase):
         eq = Equality(x1 - 2, variables=syms)
         bounds = [(0, None), (0, None)]
         lpp = LPP(f, [eq], variables=syms, bounds=bounds)
-        x = lpp.solve(return_all=True).x
+        x = lpp.solve().x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([2.0, 0.0])))
         variables = ["x1", "x2"]
@@ -235,7 +178,7 @@ class TestLPP(unittest.TestCase):
         f = Function(x1 + x2, variables=syms)
         eq = Equality(x2 - 2, variables=syms)
         lpp = LPP(f, [eq], variables=syms, bounds=bounds)
-        x = lpp.solve(return_all=True).x
+        x = lpp.solve().x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([0.0, 2.0])))
 
@@ -248,9 +191,10 @@ class TestLPP(unittest.TestCase):
         ieq3 = InEquality(x1 + x2 - 4, op="<=", variables=syms)
         bounds = [(0, None), (0, None)]
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
-        x = lpp.solve(return_all=True).x
+        x = lpp.solve().x
         x_ = np.array(x)
         assert np.all(np.isclose(x_, np.array([1.0, 1.0])))
+
         x1, x2 = sy.symbols(["x1", "x2"])
         syms = [x1, x2]
         f = Function(x1 + x2, variables=syms)
@@ -258,8 +202,8 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
-        errors = lpp.solve(return_all=True).errors
-        assert len(errors) == 0
+        success = lpp.solve().success
+        self.assertTrue(success)
 
     def test_result_arbitrary_gradient(self):
         """
@@ -275,10 +219,10 @@ class TestLPP(unittest.TestCase):
             ieq1 = InEquality(x1, op=">=", variables=variables)
             ieq2 = InEquality(x2, op=">=", variables=variables)
             lpp = LPP(f, [ieq1, ieq2], variables=variables)
-            solution = lpp.solve(raise_errors=True)
+            solution = lpp.solve()
             x = np.array(solution.x)
             self.assertTrue(np.all(np.isclose(x, x_)))
-            self.assertTrue(np.isclose(solution.obj, obj_))
+            self.assertTrue(np.isclose(solution.fun, obj_))
 
 
 if __name__ == "__main__":
