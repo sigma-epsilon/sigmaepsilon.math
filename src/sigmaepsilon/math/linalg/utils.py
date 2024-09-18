@@ -118,7 +118,7 @@ def rotation_matrix(
 
 def permutation_tensor(dim: int = 3) -> ndarray:
     """
-    Returns the Levi-Civita pseudotensor for N dimensions.
+    Returns the Levi-Civita pseudotensor for N dimensions as a NumPy array.
 
     Parameters
     ----------
