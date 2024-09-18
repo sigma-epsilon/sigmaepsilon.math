@@ -64,7 +64,7 @@ try:
             adj = adjacency_matrix(self, *args, **kwargs)
             return csr_matrix(adj) if to_csr else adj
 
-        def rooted_level_structure(self, root:int=0) -> dict[int, np.ndarray]:
+        def rooted_level_structure(self, root: int = 0) -> dict[int, np.ndarray]:
             """
             Returns the rooted level structure (RLS) of the graph.
 
