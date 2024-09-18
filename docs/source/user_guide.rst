@@ -18,7 +18,7 @@ are found in the :doc:`api`.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Tutorials
+    :caption: User Guide
     
     ../notebooks/approximation
     ../notebooks/optimization
