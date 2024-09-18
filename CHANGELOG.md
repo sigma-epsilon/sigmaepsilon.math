@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The `LinearProgrammingProblem` class has changed. Now it uses SciPy as a solver and the class only serves as a preprocessor. Usage of the modified class should be straightforward from the documentation.
+- The `MLSApproximator` class got refactored.
 
 ### Fixed
 
 - Fixed the `has_full_rank` function in `sigmaepsilon.math.linalg`
+- Fixed initialization isssues related to relation classes in `sigmaepsilon.math.function.relation`.
 
 ### Removed
 
