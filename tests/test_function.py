@@ -140,7 +140,6 @@ class TestRelations(unittest.TestCase):
         variables = ["x1", "x2", "x3", "x4"]
         x1, _, x3, x4 = syms = sy.symbols(variables, positive=True)
         eq1 = Equality(x1 + 2 * x3 + x4 - 4, variables=syms)
-        eq1.to_eq()
         eq1.operator
 
     def test_InEquality(self):
