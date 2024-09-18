@@ -75,6 +75,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx_design",
     "sphinx_inline_tabs",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
 autosummary_generate = True
