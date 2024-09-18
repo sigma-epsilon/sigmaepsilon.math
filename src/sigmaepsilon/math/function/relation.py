@@ -139,7 +139,7 @@ class Relation(Function):
             if isinstance(op, str):
                 if op not in valid_operators:
                     raise ValueError(f"Invalid operator: {op}")
-                self.op = Relations(op)
+                self.op = op = Relations(op)
             elif isinstance(op, Relations):
                 self.op = op
             elif isinstance(op, Callable):
@@ -148,15 +148,15 @@ class Relation(Function):
 
         if not op and not has_op_in_input:
             if op_str in valid_operators:
-                self.op = Relations(op_str)
+                self.op = op = Relations(op_str)
             else:
-                self.op = Relations.eq
+                self.op = op = Relations.eq
 
         if not op and has_op_in_input:
             lhs, operator, rhs = parse_expression(args[0])
             rhs = "(" + rhs + ")"
             args = (" - ".join([lhs, rhs]),)
-            self.op = Relations(operator)
+            self.op = op = Relations(operator)
 
         if op and isinstance(self.op, Relations):
             self.opfunc = self.op.to_opfunc()
@@ -170,9 +170,6 @@ class Relation(Function):
         Returns the associated operator.
         """
         return self.op
-
-    def to_eq(self) -> "Equality":
-        raise NotImplementedError
 
     def to_latex(self) -> str:
         """
@@ -218,9 +215,6 @@ class Equality(Relation):
         if self.op:
             assert self.op == Relations.eq
 
-    def to_eq(self) -> "Equality":
-        return self
-
 
 class InEquality(Relation):
     """
@@ -241,6 +235,3 @@ class InEquality(Relation):
         assert hasattr(self, "op")
         if self.op:
             assert self.op in {Relations.gt, Relations.ge, Relations.lt, Relations.le}
-
-    def to_eq(self) -> "Equality":
-        raise NotImplementedError
