@@ -60,7 +60,7 @@ class csr_matrix:
     Create from a JaggedArray
 
     >>> import numpy as np
-    >>> from sigmaepsilon.math.linalg.sparse import JaggedArray, csr_matrix
+    >>> from sigmaepsilon.math.linalg import JaggedArray, csr_matrix
     >>> data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     >>> csr = JaggedArray(data, cuts=[3, 3, 4]).to_csr()
     >>> csr
@@ -76,7 +76,7 @@ class csr_matrix:
     Create from a SciPy sparse matrix
 
     >>> from scipy.sparse import csr_matrix as csr_scipy
-    >>> csr_scipy((3, 4), dtype=np.int8).toarray()
+    >>> scipy_matrix = csr_scipy((3, 4), dtype=np.int8).toarray()
     >>> csr_matrix(scipy_matrix)
     3x4 CSR matrix with 0 nonzero values
 
