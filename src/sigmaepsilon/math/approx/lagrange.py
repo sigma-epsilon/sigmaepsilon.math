@@ -63,8 +63,8 @@ def gen_Lagrange_1d(
         If neither 'x' nor 'i' is specified, this controls the number of functions to
         generate. Default is None.
     lambdify: bool, Optional
-        If True, the functions are turned into lambda functions and stored in the output
-        for each index with keyword 'fnc'. Default is False.
+        If True, the functions are turned into `NumPy` functions via `sympy.lambdify`
+        and stored in the output for each index with keyword 'fnc'. Default is False.
     out: dict, Optional
         A dictionary to store the values in. Default is None.
 
@@ -75,19 +75,19 @@ def gen_Lagrange_1d(
         The keys of the dictionary are the indices of the points, the values are
         dictionaries with the following keys and values:
 
-            symbol : the SymPy symbol of the function
+            'symbol' : the `SymPy` symbol of the function
 
             0 : the function
 
-            1 : the first derivative as a SymPy expression
+            1 : the first derivative as a `SymPy` expression
 
-            2 : the second derivative as a SymPy expression
+            2 : the second derivative as a `SymPy` expression
 
-            3 : the third derivative as a SymPy expression
+            3 : the third derivative as a `SymPy` expression
 
-    Example
-    -------
-    >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
+    Examples
+    --------
+    >>> from sigmaepsilon.math.approx import gen_Lagrange_1d
 
     To generate approximation functions for a 2-noded line:
 
@@ -156,7 +156,7 @@ def gen_Lagrange_1d(
                 fnc = module_data[ind][j]
                 module_data[ind]["fnc"][j] = sy.lambdify(xvar, fnc, "numpy")
 
-    if isinstance(out, DeepDict):
+    if isinstance(module_data, DeepDict):
         module_data.lock()
 
     return module_data
@@ -175,8 +175,8 @@ def approx_Lagrange_1d(
     target: Iterable[float]
         An n-tuple of floats.
     lambdify: bool, Optional
-        If True, the returned function is turned into a lambda function.
-        Default is False.
+        If True, the returned function is turned into a `NumPy` function via
+        `sympy.lambdify`. Default is False.
 
     Returns
     -------
@@ -185,8 +185,8 @@ def approx_Lagrange_1d(
 
     Example
     -------
-    >>> from sigmaepsilon.math.approx.lagrange import approx_1d
-    >>> approx = approx_1d([-1, 1], [0, 10], lambdify=True)
+    >>> from sigmaepsilon.math.approx import approx_Lagrange_1d
+    >>> approx = approx_Lagrange_1d([-1, 1], [0, 10], lambdify=True)
     >>> approx(-1), approx(1), approx(0)
     (0, 10, 5)
 
@@ -194,14 +194,14 @@ def approx_Lagrange_1d(
 
     >>> import sympy as sy
     >>> L = sy.symbols('L', real=True, positive=True)
-    >>> fnc = approx_1d([-1, 1], [0, L])
+    >>> fnc = approx_Lagrange_1d([-1, 1], [0, L])
     >>> str(fnc)
     'L*(x/2 + 1/2)'
 
     To get the Jacobian of the transformation [0, L] -> [-1, 1]:
 
     >>> L = sy.symbols('L', real=True, positive=True)
-    >>> fnc = approx_1d([0, L], [-1, 1])
+    >>> fnc = approx_Lagrange_1d([0, L], [-1, 1])
     >>> dfnc = fnc.diff('x')
     >>> str(dfnc)
     '2/L'
@@ -209,7 +209,7 @@ def approx_Lagrange_1d(
     Or the other way:
 
     >>> L = sy.symbols('L', real=True, positive=True)
-    >>> fnc = approx_1d([-1, 1], [0, L])
+    >>> fnc = approx_Lagrange_1d([-1, 1], [0, L])
     >>> dfnc = fnc.diff('x')
     >>> str(dfnc)
     'L/2'
