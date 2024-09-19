@@ -184,7 +184,9 @@ class MLSApproximator:
         X_T: ndarray
             The target points.
         """
-        self._calc_factors_and_neighbours(self.X_S, X_T)
+        X_S = atleast2d(self.X_S, back=True)
+        X_T = atleast2d(X_T, back=True)
+        self._calc_factors_and_neighbours(X_S, X_T)
         neighbours = self.neighbours
         factors = self.factors
 
@@ -192,7 +194,7 @@ class MLSApproximator:
         if len(self.Y_S.shape) == 1:
             data = atleast2d(data, back=True)
 
-        if len(data) == 2:
+        if len(data.shape) == 2:
             res = _approximate_2d(data, neighbours, factors)
         else:
             res = np.zeros((len(neighbours),) + data.shape[1:], dtype=data.dtype)
