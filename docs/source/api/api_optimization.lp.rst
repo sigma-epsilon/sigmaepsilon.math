@@ -1,3 +1,5 @@
+.. _api_optimization_LP:
+
 =======================
 Linear Programming (LP)
 =======================

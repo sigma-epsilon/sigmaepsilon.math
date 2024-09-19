@@ -110,7 +110,8 @@ highlight_language = "python3"
 intersphinx_mapping = {
     "python": (r"https://docs.python.org/{.major}".format(sys.version_info), None),
     "numpy": (r"https://numpy.org/doc/stable/", None),
-    "scipy": (r"http://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": (r"http://docs.scipy.org/doc/scipy/", None),
+    "sympy": (r"https://docs.sympy.org/latest/", None),
     "matplotlib": (r"https://matplotlib.org/stable", None),
     "sphinx": (r"https://www.sphinx-doc.org/en/master", None),
     "pandas": (r"https://pandas.pydata.org/pandas-docs/stable/", None),
@@ -185,6 +186,13 @@ nbsphinx_prolog = r"""
 {% set docname = 'docs/source/' + env.doc2path(env.docname, base=None) %}
 
 .. raw:: html
+
+    <style>
+        .nbinput .prompt,
+        .nboutput .prompt {
+            display: none;
+        }
+    </style>
 
     <div class="admonition note">
       This page was generated from
