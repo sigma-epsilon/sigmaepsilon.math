@@ -14,7 +14,7 @@ __all__ = ["LinearProgrammingProblem"]
 
 class LinearProgrammingProblem:
     """
-    A class to solve linear programming problems [1]_. It uses the `scipy.optimize.linprog`
+    A class to solve linear programming problems [1]_. It uses the :func:`scipy.optimize.linprog`
     function as a solver [2]_, which eventually calls into the HIGHS solver [3]_.
     
     To define the objective and the constraints,
@@ -50,13 +50,13 @@ class LinearProgrammingProblem:
 
     .. math::
 
-        \begin{eqnarray}
-            & minimize&  \quad  3 x_1 + x_2 + 9 x_3 + x_4  \\
-            & subject \, to& & \nonumber\\
-            & & x_1 + 2 x_3 + x_4 \,=\, 4, \\
-            & & x_2 + x_3 - x_4 \,=\, 2, \\
-            & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4.
-        \end{eqnarray}
+        \\begin{eqnarray}
+            & minimize&  \\quad  3 x_1 + x_2 + 9 x_3 + x_4  \\\\
+            & subject \\, to& & \\nonumber\\\\
+            & & x_1 + 2 x_3 + x_4 \\,=\\, 4, \\\\
+            & & x_2 + x_3 - x_4 \\,=\\, 2, \\\\
+            & & x_i \\,\\geq\\, \\, 0, \\qquad i=1, \\ldots, 4.
+        \\end{eqnarray}
 
     >>> from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
     >>> from sigmaepsilon.math.function import Function, Relation
@@ -77,13 +77,13 @@ class LinearProgrammingProblem:
     
     .. math::
 
-        \begin{eqnarray}
-            & minimize&  \quad  3 x_2 + 2 x_3  \\
-            & subject \, to& & \nonumber\\
-            & & 2 x_1 + 2 x_2 - 4 x_3 \,=\, 5, \\
-            & & x_i \,\geq\, \, 0, \qquad i=1, \ldots, 4. \\
-            & & x_1, x_3 \,\in\, \mathbb{Z}.
-        \end{eqnarray}
+        \\begin{eqnarray}
+            & minimize&  \\quad  3 x_2 + 2 x_3  \\\\
+            & subject \\, to& & \\nonumber\\\\
+            & & 2 x_1 + 2 x_2 - 4 x_3 \\,=\\, 5, \\\\
+            & & x_i \\,\\geq\\, \\, 0, \\qquad i=1, \\ldots, 4. \\\\
+            & & x_1, x_3 \\,\\in\\, \\mathbb{Z}.
+        \\end{eqnarray}
     
     >>> variables = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
     >>> f = Function(3 * x2 + 2 * x3, variables=variables)
@@ -259,6 +259,11 @@ class LinearProgrammingProblem:
             `method` parameter in `scipy.optimize.linprog`.
         **kwargs
             Additional keyword arguments to pass to `scipy.optimize.linprog`.
+            
+        Returns
+        -------
+        :class:`scipy.optimize.OptimizeResult`
+            The result of the optimization.
         """
         c, _kwargs = self._to_scipy(maximize=maximize)
         _kwargs.update(kwargs)

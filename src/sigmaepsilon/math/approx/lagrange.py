@@ -163,20 +163,20 @@ def gen_Lagrange_1d(
 
 
 def approx_Lagrange_1d(
-    source: Iterable, target: Iterable, lambdify: bool = False
+    points: Iterable, values: Iterable, lambdify: bool = False
 ) -> Callable:
     """
     Returns a callable that maps from 'source' to 'target' in 1d.
 
     Parameters
     ----------
-    source: Iterable[float]
-        An n-tuple of floats.
-    target: Iterable[float]
-        An n-tuple of floats.
+    points: Iterable[float]
+        The locations of the data points.
+    values: Iterable[float]
+        The values at the data points.
     lambdify: bool, Optional
-        If True, the returned function is turned into a `NumPy` function via
-        `sympy.lambdify`. Default is False.
+        If `True`, the returned function is turned into a `NumPy` function via
+        `sympy.lambdify`, otherwise it is left as a `SymPy` expression. Default is `False`.
 
     Returns
     -------
@@ -215,11 +215,11 @@ def approx_Lagrange_1d(
     'L/2'
     """
     xsym = "x"
-    assert len(source) == len(target), "'source' and 'target' must have the same length"
-    indices = list(range(len(source)))
-    basis = gen_Lagrange_1d(x=source, i=indices, xsym=xsym, lambdify=False)
+    assert len(points) == len(values), "'source' and 'target' must have the same length"
+    indices = list(range(len(points)))
+    basis = gen_Lagrange_1d(x=points, i=indices, xsym=xsym, lambdify=False)
     shp0 = [basis[i, 0] for i in indices]
-    fnc0 = sum([a * f for a, f in zip(target, shp0)])
+    fnc0 = sum([a * f for a, f in zip(values, shp0)])
     if lambdify:
         return sy.lambdify(xsym, fnc0, "numpy")
     else:
