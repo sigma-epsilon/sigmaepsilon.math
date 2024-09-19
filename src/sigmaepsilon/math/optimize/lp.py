@@ -259,7 +259,7 @@ class LinearProgrammingProblem:
             `method` parameter in `scipy.optimize.linprog`.
         **kwargs
             Additional keyword arguments to pass to `scipy.optimize.linprog`.
-            
+
         Returns
         -------
         :class:`scipy.optimize.OptimizeResult`
