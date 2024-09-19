@@ -1,4 +1,4 @@
-from typing import Iterable, Callable
+from typing import Iterable, Callable, Any
 from copy import deepcopy as dcopy
 
 import numpy as np
@@ -27,22 +27,42 @@ __all__ = ["ReferenceFrame", "RectangularFrame", "CartesianFrame"]
 
 
 def inplace_binary(
-    obj: FrameLike, other, bop: Callable, rtype: FrameLike = None
+    obj: FrameLike, other: Any, bop: Callable, rtype: FrameLike | None = None
 ) -> FrameLike:
     """
     Performs a binary operation inplace. Components of registered tensorial entities
-    are transformed accordingly and registered to the output frame.
+    are transformed accordingly and registered to the output frame. This is important because
+    the operation takes effect inplace, the resulting instance can be new in the case of
+    having to change the type of the object (eg. from CartesianFrame to RectangularFrame).
     """
     axes = np.copy(obj.show())
-    bop(axes, other, out=(axes,))
+    new_axes = np.zeros_like(axes)
+    bop(axes, other, out=(new_axes,))
     if rtype:
         result = rtype(axes)
         tensors = list(obj._weakrefs.values())
         for t in tensors:
             t.frame = result
+        result.axes = new_axes
     else:
-        obj.axes = axes
+        obj.axes = new_axes
         result = obj
+    return result
+
+
+def out_of_place_binary(
+    obj: FrameLike, other: Any, bop: Callable, rtype: FrameLike | None = None
+) -> FrameLike:
+    """
+    Performs a binary operation inplace. Components of registered tensorial entities
+    are transformed accordingly and registered to the output frame. This is important because
+    the operation takes effect inplace, the resulting instance can be new in the case of
+    having to change the type of the object (eg. from CartesianFrame to RectangularFrame).
+    """
+    axes = np.copy(obj.show())
+    bop(axes, other, out=(axes,))
+    rtype = rtype if rtype else obj.__class__
+    result = rtype(axes)
     return result
 
 
@@ -176,18 +196,18 @@ class ReferenceFrame(FrameLike):
         self._name = name
 
     @property
-    def is_rectangular(self):
+    def is_rectangular(self) -> bool:
         """
         Returns True if the frame is a rectangular one.
         """
-        return is_rectangular_frame(self.axes)
+        return bool(is_rectangular_frame(self.axes))
 
     @property
-    def is_cartesian(self):
+    def is_cartesian(self) -> bool:
         """
         Returns True if the frame is a cartesian (orthonormal) one.
         """
-        return is_orthonormal_frame(self.axes)
+        return bool(is_orthonormal_frame(self.axes))
 
     @property
     def is_independent(self) -> bool:
@@ -405,7 +425,7 @@ class ReferenceFrame(FrameLike):
         :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`
         """
         dcm = rotation_matrix(*args, **kwargs)
-        self._array = show_frame(transpose_axes(dcm), self.axes)
+        self.axes = show_frame(transpose_axes(dcm), self.axes)
         return self
 
     def orient_new(self, *args, name="", **kwargs) -> "ReferenceFrame":
@@ -569,7 +589,7 @@ class ReferenceFrame(FrameLike):
                 else:
                     out[i][...] = out_[i]
 
-        if type(result) is tuple:
+        if isinstance(result, tuple):
             # multiple return values
             return (ReferenceFrame(x) for x in result)
         elif method == "at":
@@ -644,7 +664,7 @@ class RectangularFrame(ReferenceFrame):
             ), "This frame is not rectangular, check your input!"
 
     @property
-    def is_rectangular(self):
+    def is_rectangular(self) -> bool:
         """
         Returns True if the frame is a rectangular one.
         """
@@ -658,24 +678,32 @@ class RectangularFrame(ReferenceFrame):
         """
         return True
 
+    def __mul__(self, other) -> ReferenceFrame:
+        rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
+        return out_of_place_binary(self, other, np.multiply, rtype)
+
     def __imul__(self, other) -> ReferenceFrame:
         rtype = None if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.multiply, rtype)
+
+    def __truediv__(self, other) -> ReferenceFrame:
+        rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
+        return out_of_place_binary(self, other, np.divide, rtype)
 
     def __itruediv__(self, other) -> ReferenceFrame:
         rtype = None if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.divide, rtype)
 
-    def __imatmul__(self, other) -> "ReferenceFrame":
+    def __imatmul__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.matmul, ReferenceFrame)
 
-    def __iadd__(self, other) -> "ReferenceFrame":
+    def __iadd__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.add, ReferenceFrame)
 
-    def __isub__(self, other) -> "ReferenceFrame":
+    def __isub__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.subtract, ReferenceFrame)
 
-    def __ipow__(self, other) -> "ReferenceFrame":
+    def __ipow__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.power, ReferenceFrame)
 
 
@@ -731,14 +759,14 @@ class CartesianFrame(RectangularFrame):
                 ), "This frame is not cartesian, check your input!"
 
     @property
-    def is_rectangular(self):
+    def is_rectangular(self) -> bool:
         """
         Returns True if the frame is a rectangular one.
         """
         return True
 
     @property
-    def is_cartesian(self):
+    def is_cartesian(self) -> bool:
         """
         Returns True if the frame is a cartesian (orthonormal) one.
         """
@@ -757,28 +785,28 @@ class CartesianFrame(RectangularFrame):
         """
         return 1.0
 
-    def dual(self) -> "ReferenceFrame":
+    def dual(self) -> ReferenceFrame:
         """
         Returns the dual (or reciprocal) frame.
         """
         return self
 
-    def __imul__(self, other) -> ReferenceFrame:
+    def __imul__(self, other) -> ReferenceFrame | RectangularFrame:
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.multiply, rtype)
 
-    def __itruediv__(self, other) -> ReferenceFrame:
+    def __itruediv__(self, other) -> ReferenceFrame | RectangularFrame:
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.divide, rtype)
 
-    def __imatmul__(self, other) -> "ReferenceFrame":
+    def __imatmul__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.matmul, ReferenceFrame)
 
-    def __iadd__(self, other) -> "ReferenceFrame":
+    def __iadd__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.add, ReferenceFrame)
 
-    def __isub__(self, other) -> "ReferenceFrame":
+    def __isub__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.subtract, ReferenceFrame)
 
-    def __ipow__(self, other) -> "ReferenceFrame":
+    def __ipow__(self, other) -> ReferenceFrame:
         return inplace_binary(self, other, np.power, ReferenceFrame)

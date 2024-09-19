@@ -5,6 +5,7 @@ __all__ = ["Graph"]
 
 try:
     import networkx as ntx
+    import numpy as np
 
     try:
         adjacency_matrix = ntx.to_scipy_sparse_array
@@ -27,13 +28,13 @@ try:
         --------
         A basic example with `networkx`:
 
-        >>> from sigmaepsilon.math.topology import Graph
+        >>> from sigmaepsilon.math.graph import Graph
         >>> import networkx as nx
         >>> grid = nx.grid_2d_graph(5, 5)  # 5x5 grid
         >>> G = Graph(grid)
         """
 
-        def adjacency_matrix(self, *args, to_csr: bool = False, **kwargs):
+        def adjacency_matrix(self, *args, to_csr: bool = False, **kwargs) -> csr_matrix:
             """
             Returns the adjacency matrix of the graph.
 
@@ -42,10 +43,8 @@ try:
             to_csr : bool, Optional
                 If `True`, the result of networkx.adjacency_matrix is
                 returned as a csr_matrix.
-
             *args : Tuple, Optional
                 Forwarded to networkx.adjacency_matrix
-
             **kwargs, dict, Optional
                 Forwarded to networkx.adjacency_matrix
 
@@ -61,12 +60,11 @@ try:
             >>> A = G.adjacency_matrix()
             >>> print(A.todense())
             [[1]]
-
             """
             adj = adjacency_matrix(self, *args, **kwargs)
             return csr_matrix(adj) if to_csr else adj
 
-        def rooted_level_structure(self, root=0):
+        def rooted_level_structure(self, root: int = 0) -> dict[int, np.ndarray]:
             """
             Returns the rooted level structure (RLS) of the graph.
 
@@ -76,15 +74,13 @@ try:
             See Also
             --------
             :func:`rooted_level_structure`
-
             """
             return rooted_level_structure(csr_matrix(adjacency_matrix(self)), root)
 
-        def pseudo_peripheral_nodes(self):
+        def pseudo_peripheral_nodes(self) -> np.ndarray:
             """
             Returns the indices of nodes that are possible candidates
             for being peripheral nodes of a graph.
-
             """
             return pseudo_peripheral_nodes(csr_matrix(adjacency_matrix(self)))
 

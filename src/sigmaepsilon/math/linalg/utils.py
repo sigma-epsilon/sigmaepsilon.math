@@ -50,6 +50,7 @@ __all__ = [
     "generalized_left_inverse",
     "generalized_right_inverse",
     "generalized_inverse",
+    "unit_basis_vector",
 ]
 
 
@@ -117,7 +118,7 @@ def rotation_matrix(
 
 def permutation_tensor(dim: int = 3) -> ndarray:
     """
-    Returns the Levi-Civita pseudotensor for N dimensions.
+    Returns the Levi-Civita pseudotensor for N dimensions as a NumPy array.
 
     Parameters
     ----------
@@ -929,3 +930,11 @@ def generalized_inverse(matrix: ndarray) -> ndarray:
         return generalized_right_inverse(matrix)
     else:
         raise LinalgError("The matrix has no inverse")
+
+
+def unit_basis_vector(length: int, index: int = 0, value: float = 1.0) -> ndarray:
+    """
+    Returns a unit basis vector of length `length` with a value of `value` at
+    the index `index`.
+    """
+    return value * np.bincount([index], None, length)

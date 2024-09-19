@@ -844,6 +844,7 @@ class TestSparse(LinalgTestCase):
         jagged.flatten(return_cuts=True)
         jagged.size
         np.vstack([jagged, jagged])
+        np.concatenate([jagged, jagged])
         self.assertFailsProperly(TypeError, np.vstack, jagged, np.eye(3))
         np.dot(jagged, jagged)
         np.min(jagged)

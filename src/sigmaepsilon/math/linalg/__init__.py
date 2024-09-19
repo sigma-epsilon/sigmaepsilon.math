@@ -4,8 +4,9 @@ from .vector import *
 from .tensor import *
 from .meta import *
 from .logical import *
+from .sparse import JaggedArray, csr_matrix
 
-__all__ = []
+__all__ = ["JaggedArray", "csr_matrix"]
 
 from .utils import __all__ as _utils_all
 from .frame import __all__ as _frame_all

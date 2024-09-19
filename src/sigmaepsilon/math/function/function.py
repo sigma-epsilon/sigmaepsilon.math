@@ -1,5 +1,6 @@
-from typing import TypeVar, Callable, Iterable, Union
+from typing import TypeVar, Callable, Iterable
 from collections import OrderedDict
+import warnings
 
 from sympy import Expr, degree, latex
 from sympy.core.numbers import One
@@ -7,7 +8,8 @@ import numpy as np
 
 from sigmaepsilon.core.kwargtools import getasany
 
-from .metafunction import MetaFunction, substitute
+from .metafunction import MetaFunction
+from .symutils import substitute
 
 
 __all__ = ["Function", "FunctionLike"]
@@ -18,30 +20,47 @@ FunctionLike = TypeVar("FunctionLike", str, Callable, Expr)
 
 class Function(MetaFunction):
     """
-    Base class for all kinds of functions.
+    Base class for all kinds of functions. It can be used to represent
+    symbolic and numerical functions. The class is designed to be as
+    flexible as possible, so it can be used in a wide range of applications.
+
+    As you can see from the examples, the class can be used in a variety of ways.
+    You can initialize a function object with a string expression, a `SymPy` expression,
+    or with numerical functions. If you initialize the object with a string or a `SymPy`
+    expression, first and second derivatives can be calculated automatically.
 
     Parameters
     ----------
-    f0: Callable
-        A callable object that returns function evaluations.
-    f1: Callable
-        A callable object that returns evaluations of the
-        gradient of the function.
-    f2: Callable
-        A callable object that returns evaluations of the
-        Hessian of the function.
+    f0: FunctionLike or None, Optional
+        Positional parameter. A callable object that returns function evaluations.
+    f1: Callable or None, Optional
+        Positional parameter.
+        A callable object that returns evaluations of the gradient of the function.
+        If the first positional argument is a string or a `SymPy` expression, this
+        parameter can be ignored and derivative functions are calculated automatically.
+    f2: Callable or None, Optional
+        Positional parameter.
+        A callable object that returns evaluations of the Hessian of the function.
+        If the first positional argument is a string or a `SymPy` expression, this
+        parameter can be ignored and derivative functions are calculated automatically.
     variables: List, Optional
         Symbolic variables. Only required if the function is defined by
         a string or `SymPy` expression.
     value: Callable, Optional
-        Same as `f0`.
+        Keyword only parameter. Same as `f0`.
     gradient: Callable, Optional
-        Same as `f1`.
+        Keyword only parameter.Same as `f1`.
     Hessian: Callable, Optional
-        Same as `f2`.
+        Keyword only parameter.Same as `f2`.
     dimension or dim or d : int, Optional
-        The number of dimensions of the domain of the function. Required only when
-        going full blind, in most of the cases it can be inferred from other properties.
+        Keyword only parameter. The number of dimensions of the domain of the function. This property
+        is only required if the function is defined by numerical functions.
+
+    See Also
+    --------
+    :class:`~sigmaepsilon.math.function.relation.Relation`
+    :class:`~sigmaepsilon.math.function.relation.Equality`
+    :class:`~sigmaepsilon.math.function.relation.InEquality`
 
     Examples
     --------
@@ -115,7 +134,7 @@ class Function(MetaFunction):
     if not all variables appear in the string expression you feed the object with:
 
     >>> g = Function('3*x + 4*y - 2', variables=['x', 'y', 'z'])
-    >>> g.linear
+    >>> g.is_linear
     True
 
     If you do not specify 'z' as a variable here, the resulting object expects
@@ -128,11 +147,13 @@ class Function(MetaFunction):
     The variables can be `SymPy` variables as well:
 
     >>> m = Function('3*x + 4*y - 2', variables=sy.symbols('x y z'))
-    >>> m.linear
+    >>> m.is_linear
     True
     >>> m([1, 2, -30])
     9
     """
+
+    __slots__ = ("f0", "f1", "f2", "dimension", "domain", "vmap", "from_str")
 
     # NOTE domain is missing from the possible parameters
     # NOTE investigate if dimensions could be derived
@@ -159,12 +180,14 @@ class Function(MetaFunction):
         **kwargs
     ):
         self.from_str = None
+
         if f0 is not None:
             if isinstance(f0, str):
                 kwargs.update(self._str_to_func(f0, variables=variables, **kwargs))
                 self.from_str = True
             elif isinstance(f0, Expr):
                 kwargs.update(self._sympy_to_func(f0, variables=variables, **kwargs))
+
         self.expr = kwargs.get("expr", None)
         self.variables = kwargs.get("variables", variables)
         self.f0 = kwargs.get("value", f0)
@@ -177,27 +200,77 @@ class Function(MetaFunction):
     @property
     def symbolic(self) -> bool:
         """
-        Returns True if the function is a fit subject of symbolic manipulation.
+        Returns `True` if the function is a fit subject of symbolic manipulation.
         This is probably only true if the object was created from a string or
         `sympy` expression.
         """
-        return self.expr is not None
+        warnings.warn(
+            "The property `symbolic` is deprecated and will be removed in a future version. "
+            "Use `is_symbolic` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.is_symbolic
 
     @property
     def linear(self) -> bool:
         """
         Returns True if the function is at most linear in all of its variables.
         """
-        if self.symbolic:
+        warnings.warn(
+            "The property `linear` is deprecated and will be removed in a future version. "
+            "Use `is_linear` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.is_linear
+
+    @property
+    def is_linear(self) -> bool:
+        """
+        Returns `True` if the function is at most linear in all of its variables.
+        """
+        if self.is_symbolic:
             return all(
                 np.array([degree(self.expr, v) for v in self.variables], dtype=int) <= 1
             )
         else:
             return self.f2 is None
 
-    def linear_coefficients(self, normalize: bool = False) -> Union[Iterable, None]:
+    @property
+    def is_symbolic(self) -> bool:
         """
-        Returns the linear coeffiecients, if the function is symbolic.
+        Returns `True` if the function is a fit subject of symbolic manipulation.
+        This is probably only true if the object was created from a string or
+        `SymPy` expression.
+        """
+        return self.expr is not None
+
+    def simplify(self) -> None:
+        """
+        Simplifies the symbolic expression of the instance.
+        """
+        if self.is_symbolic:
+            self.expr = self.expr.simplify()
+        else:
+            raise TypeError("This is exclusive to symbolic functions.")
+
+    def linear_coefficients(self, normalize: bool = False) -> dict | None:
+        """
+        Returns the linear coeffiecients, if the function is symbolic and linear.
+
+        Parameters
+        ----------
+        normalize : bool, Optional
+            If True, the coefficients are normalized. Default is False.
+
+        Examples
+        --------
+        >>> from sigmaepsilon.math.function import Function
+        >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
+        >>> f = gen_Lagrange_1d(N=2)
+        >>> f1 = Function(f[1][0], f[1][1], f[1][2])
+        >>> linear_coefficients = f1.linear_coefficients()
         """
         d = self.coefficients(normalize)
         if d:
@@ -206,13 +279,30 @@ class Function(MetaFunction):
             }
         return None
 
-    def coefficients(self, normalize: bool = False):
+    def coefficients(self, normalize: bool = False) -> dict | None:
         """
         Returns the coefficients if the function is symbolic.
+
+        Parameters
+        ----------
+        normalize : bool, Optional
+            If True, the coefficients are normalized. Default is False.
+
+        Examples
+        --------
+        >>> from sigmaepsilon.math.function import Function
+        >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
+        >>> f = gen_Lagrange_1d(N=2)
+        >>> f1 = Function(f[1][0], f[1][1], f[1][2])
+        >>> coefficients = f1.coefficients()
         """
+        if not self.is_symbolic:
+            raise TypeError("This is exclusive to symbolic functions.")
+
         try:
             d = OrderedDict({x: 0 for x in self.variables})
-            d.update(self.expr.as_coefficients_dict())
+            expr = self.expr.simplify()
+            d.update(expr.as_coefficients_dict())
             if not normalize:
                 return d
             else:
@@ -223,15 +313,23 @@ class Function(MetaFunction):
                     else:
                         res[key] = value
                 return res
-        except Exception:
+        except Exception:  # pragma: no cover
             return None
 
     def to_latex(self) -> str:
         """
-        Returns the LaTeX code of the symbolic expression of the object.
-        Only for simbolic functions.
+        Returns the LaTeX code of the symbolic expression of the instance.
+        Only for symbolic functions.
+
+        Examples
+        --------
+        >>> from sigmaepsilon.math.function import Function
+        >>> from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
+        >>> f = gen_Lagrange_1d(N=2)
+        >>> f1 = Function(f[1][0], f[1][1], f[1][2])
+        >>> latex_string = f1.to_latex()
         """
-        if self.symbolic:
+        if self.is_symbolic:
             return latex(self.expr)
         else:
             raise TypeError("This is exclusive to symbolic functions.")
@@ -240,9 +338,15 @@ class Function(MetaFunction):
         self, values: Iterable, variables: Iterable | None = None, inplace: bool = False
     ) -> "Function":
         """
-        Substitites values for variables.
+        Substitites values for variables. Only for symbolic functions.
+
+        Examples
+        --------
+        >>> from sigmaepsilon.math.function import Function
+        >>> g = Function("3*x + 4*y - 2", variables=["x", "y", "z"])
+        >>> g = g.subs([0, 0, 0], ["x", "y", "z"], inplace=True)
         """
-        if not self.symbolic:
+        if not self.is_symbolic:
             raise TypeError("This is exclusive to symbolic functions.")
 
         expr = substitute(self.expr, values, variables, as_string=self.from_str)
