@@ -6,6 +6,7 @@ import numbers
 from .utils import show_vector
 from .frame import ReferenceFrame as Frame
 from .abstract import AbstractTensor
+from .meta import FrameLike
 
 
 __all__ = ["Vector"]
@@ -25,7 +26,7 @@ class Vector(AbstractTensor):
     ----------
     args: tuple, Optional
         Positional arguments forwarded to `numpy.ndarray`.
-    frame: numpy.ndarray, Optional
+    frame: FrameLike, Optional
         The reference frame the vector is represented by its coordinates.
     kwargs: dict, Optional
         Keyword arguments forwarded to `numpy.ndarray`.
@@ -83,6 +84,14 @@ class Vector(AbstractTensor):
 
     _frame_cls_ = Frame
     _HANDLED_TYPES_ = (numbers.Number,)
+
+    def __init__(
+        self,
+        *args,
+        frame: FrameLike | None = None,
+        **kwargs,
+    ):
+        super().__init__(*args, frame=frame, **kwargs)
 
     @classmethod
     def _verify_input(cls, arr: ndarray, *_, **kwargs) -> bool:

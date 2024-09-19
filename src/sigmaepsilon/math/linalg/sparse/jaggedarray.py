@@ -80,14 +80,14 @@ HANDLED_FUNCTIONS = {}
 
 class JaggedArray(NDArrayOperatorsMixin, Wrapper):
     """
-    A numba-jittable class that handles 2d matrices with a variable
+    A NumPy-compliant class that handles 2d matrices with a variable
     number of columns per row.
 
     The class is actually an interface to `awkward.Array`,
     with some additional features, specific to 2d jagged arrays.
 
     At the moment a JaggedArray can be constructed from
-    * a flattened 2d jagged array through unflatteing (we use Awkward here)
+    * a flattened 2d jagged array with 'cuts' through unflatteing (we use Awkward here)
     * a list of 1d lists
     * a list of 2d NumPy arrays
 
@@ -107,7 +107,7 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
     The following defines a dense matrix from a flattened shape:
 
     >>> import numpy as np
-    >>> from sigmaepsilon.math.linalg.sparse import JaggedArray
+    >>> from sigmaepsilon.math.linalg import JaggedArray
     >>> data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
     >>> JaggedArray(data, cuts=[3, 3, 3])
     array([[1, 2, 3],
@@ -326,6 +326,13 @@ def unique(*args, **kwargs):
 
 @implements(np.vstack)
 def vstack(*args, **kwargs):
+    data = np.concatenate(list(t.flatten() for t in args[0]))
+    cuts = np.concatenate(list(t.widths() for t in args[0]))
+    return JaggedArray(data, cuts=cuts)
+
+
+@implements(np.concatenate)
+def concatenate(*args, **kwargs):
     data = np.concatenate(list(t.flatten() for t in args[0]))
     cuts = np.concatenate(list(t.widths() for t in args[0]))
     return JaggedArray(data, cuts=cuts)

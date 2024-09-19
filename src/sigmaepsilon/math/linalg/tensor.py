@@ -197,7 +197,7 @@ class Tensor2(Tensor):
 
     See also
     --------
-    :class:"~sigmaepsilon.math.linalg.tensor.Tensor2x3"
+    :class:`~sigmaepsilon.math.linalg.tensor.Tensor2x3`
     """
 
     _rank_ = 2
@@ -258,7 +258,7 @@ class Tensor4(Tensor):
 
     See also
     --------
-    :class:"~sigmaepsilon.math.linalg.tensor.Tensor4x3"
+    :class:`~sigmaepsilon.math.linalg.tensor.Tensor4x3`
     """
 
     _rank_ = 4

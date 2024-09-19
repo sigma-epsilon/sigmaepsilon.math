@@ -230,7 +230,7 @@ class Function(MetaFunction):
         """
         Returns `True` if the function is at most linear in all of its variables.
         """
-        if self.symbolic:
+        if self.is_symbolic:
             return all(
                 np.array([degree(self.expr, v) for v in self.variables], dtype=int) <= 1
             )

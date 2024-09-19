@@ -1,6 +1,10 @@
+.. _api_optimization_NLP:
+
 ===========================
 Nonlinear Programming (NLP)
 ===========================
+
+.. _api_optimization_GA:
 
 Genetic Algorithms (GA)
 =======================
@@ -18,6 +22,8 @@ from
 
 .. autoclass:: sigmaepsilon.math.optimize.ga.GeneticAlgorithm
     :members: solve, populate, decode, mutate, crossover, select
+
+.. _api_optimization_BGA:
 
 Binary Genetic Algorithm (BGA)
 ------------------------------

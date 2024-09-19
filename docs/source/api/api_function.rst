@@ -11,6 +11,9 @@ Functions
 Relations
 =========
 
+.. autoclass:: sigmaepsilon.math.function.Relation
+   :members: 
+
 .. autoclass:: sigmaepsilon.math.function.Equality
    :members: 
 

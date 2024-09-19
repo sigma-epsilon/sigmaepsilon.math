@@ -26,14 +26,9 @@ class TestMLSApproximator(unittest.TestCase):
         values = np.random.rand(nx * ny * nz)
         values = np.ones((len(values), 3))
 
-        approximator = MLSApproximator()
-        approximator.fit(points, points)
-        self.assertTrue(isinstance(approximator.neighbours, np.ndarray))
-
-        approximator = MLSApproximator()
-        approximator.fit(points)
+        approximator = MLSApproximator(points, values)
         
-        values_approx = approximator.approximate(points, values)
+        values_approx = approximator.approximate(points)
         self.assertIsInstance(values_approx, np.ndarray)
         self.assertEqual(len(values_approx), len(points))
 
@@ -41,46 +36,40 @@ class TestMLSApproximator(unittest.TestCase):
         values = np.ones_like(self.values)
         values = np.ones((len(values), 3))  # bulkify
         points = self.points
-        approximator = MLSApproximator()
-        approximator.fit(points, points)
-        values_approx = approximator.approximate(points, values)
+        approximator = MLSApproximator(points, values)
+        values_approx = approximator.approximate(points)
         self.assertTrue(np.allclose(np.ones_like(values_approx), values_approx))
 
     def test_constant_field_nd_bulk(self):
         values = np.ones_like(self.values)
         values = np.ones((len(values), 3, 3))  # bulkify
         points = self.points
-        approximator = MLSApproximator()
-        approximator.fit(points, points)
-        values_approx = approximator.approximate(points, values)
+        approximator = MLSApproximator(points, values)
+        values_approx = approximator.approximate(points)
         self.assertTrue(np.allclose(np.ones_like(values_approx), values_approx))
 
     def test_constant_field_1d(self):
         values = np.ones_like(self.values)
         points = self.points
-        approximator = MLSApproximator()
-        approximator.fit(points, points)
-        values_approx = approximator.approximate(points, values)
+        approximator = MLSApproximator(points, values)
+        values_approx = approximator.approximate(points)
         self.assertTrue(np.allclose(np.ones_like(values_approx), values_approx))
 
 
 class TestMLSApproximatorConfig(unittest.TestCase):
 
     def setUp(self):
-        self.approximator = MLSApproximator()
+        self.points = np.zeros((10, 3))
+        self.values = np.zeros((10,))
 
     def test_config__knn_backend(self):
-        self.assertRaises(ValueError, self.approximator.config, knn_backend=1)
-        self.approximator.config(knn_backend="sklearn")
+        self.assertRaises(ValueError, MLSApproximator, self.points, self.values, knn_backend=1)
 
     def test_config__k(self):
-        self.assertRaises(ValueError, self.approximator.config, k=0.5)
-        self.approximator.config(k=10)
+        self.assertRaises(ValueError, MLSApproximator, self.points, self.values, k=0.5)
 
     def test_config__max_distance(self):
-        self.assertRaises(ValueError, self.approximator.config, max_distance="5")
-        self.approximator.config(max_distance=10)
-        self.approximator.config(max_distance=10.0)
+        self.assertRaises(ValueError, MLSApproximator, self.points, self.values, max_distance="5")
 
 
 def test_mls_1d_sine_with_noise():
@@ -94,11 +83,10 @@ def test_mls_1d_sine_with_noise():
     coords = np.zeros((number_of_data_points, 3))
     coords[:, 0] = np.linspace(0, 1, number_of_data_points)
 
-    approximator = MLSApproximator()
     coords_approx = np.zeros((number_of_sampling_points, 3))
     coords_approx[:, 0] = np.linspace(0, 1, number_of_sampling_points)
-    approximator.fit(coords, coords_approx)
-    data_approx = approximator.approximate(coords_approx, data)
+    approximator = MLSApproximator(coords, data)
+    data_approx = approximator.approximate(coords_approx)
     assert isinstance(data_approx, np.ndarray)
     assert len(data_approx) == len(coords_approx)
 
