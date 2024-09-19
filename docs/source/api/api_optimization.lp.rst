@@ -1,3 +1,5 @@
+.. _api_optimization_LP:
+
 =======================
 Linear Programming (LP)
 =======================
@@ -6,11 +8,6 @@ The main feature of a linear programming problem (LPP) is that all functions inv
 the objective function and those expressing the constraints, must be linear. 
 The appereance of a single nonlinear function anywhere, suffices to reject the problem
 as an LPP.
-
-.. tip::
-   If your problem is already in standard form, you can use the 
-   :func:`solve_standard_form <sigmaepsilon.math.optimize.LinearProgrammingProblem.solve_standard_form>` 
-   directly to solve linear problems.
 
 The definition of an LPP is expected in **General Form**:
 
@@ -25,31 +22,7 @@ The definition of an LPP is expected in **General Form**:
       && \sum_i a_{ji} \,x_i \,=\, b_j, \qquad j = q+1, \ldots, m,
    \end{eqnarray}
 
-where :math:`c_i, b_i`, and :math:`a_{ji}` are the data of the problem. It can be shown, 
-that all problems that admit the general form can be simplified to a 
-**Standard Form**:
-
-.. math::
-   :nowrap:
-
-   \begin{eqnarray}
-      minimize  \quad  \mathbf{c}\mathbf{x} \quad under \quad 
-      \mathbf{A}\mathbf{x}=\mathbf{b}, \quad \mathbf{x} \, \geq \, 
-      \mathbf{0}.
-   \end{eqnarray}
-
-where :math:`\mathbf{b} \in \mathbf{R}^m, \mathbf{c} \in \mathbf{R}^n` and :math:`\mathbf{A}` is
-an :math:`m \times n` matrix with :math:`n>m` and typically :math:`n` much
-greater than :math:`m`.
+where :math:`c_i, b_i`, and :math:`a_{ji}` are the data of the problem.
 
 .. autoclass:: sigmaepsilon.math.optimize.LinearProgrammingProblem
-   :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.DegenerateProblemError
-   :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.NoSolutionError
-   :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.lp.LinearProgrammingResult
    :members:

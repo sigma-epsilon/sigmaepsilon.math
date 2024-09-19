@@ -26,7 +26,7 @@ class Array(ABC_Safe, ndarray):
     to directly create instances of this class, you can use it like if it was
     a ``numpy.ndarray`` instance.
 
-    The class has a strong metaclass, which means that there is a safety mechanism
+    The class has a safe metaclass, which means that there is a safety mechanism
     that prevents you from unintentionally crashing the internal behaviour of the
     class upon subclassing. This practically means, that you will see an error if
     you try to shadow a definition in any of the base classes of the class. For this

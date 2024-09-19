@@ -4,23 +4,19 @@ User Guide
 The user guide is an overview and explains the important features; details
 are found in the :doc:`api`.
 
-.. note::
-
-    The user guide is a work in progress and we are aware that some sections
-    and concepts require more explanation. We are working on it.
-
 .. toctree::
     :maxdepth: 1
-    :caption: Getting started
+    :titlesonly:
     
-    user_guide/what_is_this
-    user_guide/installation
+    getting_started
 
 .. toctree::
     :maxdepth: 2
-    :caption: Tutorials
+    :caption: Contents
     
-    ../notebooks/approximation
-    ../notebooks/optimization
-    ../notebooks/graph
-    ../notebooks/linalg
+    user_guide/linalg
+    user_guide/function
+    user_guide/approximation
+    user_guide/optimization
+    user_guide/graph
+    

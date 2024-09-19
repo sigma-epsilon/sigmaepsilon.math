@@ -2,12 +2,6 @@
 Tensors
 =======
 
-.. autoclass:: sigmaepsilon.math.linalg.meta.TensorLike
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.abstract.AbstractTensor
-    :members:
-
 .. autoclass:: sigmaepsilon.math.linalg.Tensor
     :members:
 

@@ -42,9 +42,17 @@ class MLSApproximator:
 
     Parameters
     ----------
-    **config: dict, Optional
-        Keyword arguments that configure the instance.
-        For the possible options, see the :func:`config` method.
+    X_S: ndarray
+        The source points.
+    Y_S: ndarray, Optional
+        The source data.
+    knn_backend: {"scipy", "sklearn"}, Optional
+        The backend to use for the KNN calculation. If None, the default backend
+        of the library is used. Default is None.
+    k: int, Optional
+        The number of neighbours to consider. Default is None.
+    max_distance: Number, Optional
+        The maximum distance to consider for the neighbours. Default is None.
 
     Notes
     -----
@@ -60,9 +68,6 @@ class MLSApproximator:
     >>> import numpy as np
     >>> from sigmaepsilon.math.approx import MLSApproximator
     >>>
-    >>> # instantiate the approximator
-    >>> approximator = MLSApproximator(knn_backend="scipy")
-    >>>
     >>> # prepare the source points
     >>> nx, ny, nz = (10, 10, 10)
     >>> x = np.linspace(0, 1, nx)
@@ -74,23 +79,53 @@ class MLSApproximator:
     >>> # prepare the source values
     >>> source_values = np.ones((nx*ny*nz, 3))  # could be anything with a shape of (nx*ny*nz, ...)
     >>>
-    >>> # fit the approximator
-    >>> approximator.fit(source_points)
+    >>> # instantiate the approximator
+    >>> approximator = MLSApproximator(source_points, source_values, knn_backend="scipy")
     >>>
     >>> # approximate to the target points
     >>> target_points = source_points[:10]  # could be anything with a shape of (..., source_points.shape[-1])
-    >>> target_values = approximator.approximate(target_points, source_values)
+    >>> target_values = approximator.approximate(target_points)
     >>>
     >>> # check the results
     >>> assert np.allclose(target_values, np.ones_like(target_values))
     """
 
-    __slots__ = ["X_S", "X_T", "_neighbours", "_factors", "_config"]
+    __slots__ = ["X_S", "Y_S", "_neighbours", "_factors", "_knn_config"]
 
-    def __init__(self, **config) -> None:
-        self._config = dict()
-        self.clean()
-        self.config(**config)
+    def __init__(
+        self,
+        X_S: ndarray,
+        Y_S: ndarray,
+        knn_backend: str | None = None,
+        k: int | None = None,
+        max_distance: Number | None = None,
+    ) -> None:
+        self.X_S = X_S
+        self.Y_S = Y_S
+        self._neighbours = None
+        self._factors = None
+        self._knn_config = dict()
+
+        if isinstance(knn_backend, str):
+            self._knn_config["knn_backend"] = knn_backend
+        elif knn_backend is not None:  # pragma: no cover
+            raise ValueError(
+                f"Expected a string for parameter 'knn_backend', got {type(knn_backend)} instead."
+            )
+
+        if isinstance(k, int):
+            self._knn_config["k"] = k
+        elif k is not None:  # pragma: no cover
+            raise ValueError(
+                f"Expected an integer for parameter 'k', got {type(k)} instead."
+            )
+
+        if isinstance(max_distance, Number):
+            self._knn_config["max_distance"] = float(max_distance)
+        elif max_distance is not None:  # pragma: no cover
+            raise ValueError(
+                f"Expected a number for parameter 'max_distance', got {type(max_distance)} instead."
+            )
 
     @property
     def neighbours(self) -> ndarray | None:
@@ -122,79 +157,8 @@ class MLSApproximator:
         """
         self._factors = val
 
-    def clean(self) -> None:
-        """
-        Sets the instance to default state.
-        """
-        self.X_S = None
-        self.X_T = None
-        self._neighbours = None
-        self._factors = None
-
-    def config(
-        self,
-        knn_backend: str | None = None,
-        k: int | None = None,
-        max_distance: Number | None = None,
-    ) -> None:
-        """
-        Updates the configuration of the instance.
-
-        Parameters
-        ----------
-        knn_backend: {"scipy", "sklearn"}, Optional
-            The backend to use for the KNN calculation. If None, the default backend
-            of the library is used. Default is None.
-        k: int, Optional
-            The number of neighbours to consider. Default is None.
-        max_distance: Number, Optional
-            The maximum distance to consider for the neighbours. Default is None.
-        """
-        if isinstance(knn_backend, str):
-            self._config["knn_backend"] = knn_backend
-        elif knn_backend is not None:  # pragma: no cover
-            raise ValueError(
-                f"Expected a string for parameter 'knn_backend', got {type(knn_backend)} instead."
-            )
-
-        if isinstance(k, int):
-            self._config["k"] = k
-        elif k is not None:  # pragma: no cover
-            raise ValueError(
-                f"Expected an integer for parameter 'k', got {type(k)} instead."
-            )
-
-        if isinstance(max_distance, Number):
-            self._config["max_distance"] = float(max_distance)
-        elif max_distance is not None:  # pragma: no cover
-            raise ValueError(
-                f"Expected a number for parameter 'max_distance', got {type(max_distance)} instead."
-            )
-
-    def fit(
-        self,
-        X_S: ndarray,
-        X_T: ndarray | None = None,
-    ) -> None:
-        """
-        Records and preprocesses the data if necessary.
-
-        Parameters
-        ----------
-        X_S: ndarray
-            The source points.
-        X_T: ndarray, Optional
-            The target points. Default is None.
-        """
-        self.X_S = X_S
-        self.X_T = X_T
-        self.neighbours = None
-
-        if X_T is not None:
-            self._calc_factors_and_neighbours(X_S, X_T)
-
     def _calc_factors_and_neighbours(self, X_S: ndarray, X_T: ndarray) -> None:
-        self.neighbours = MLSApproximator._get_neighbours(X_S, X_T, **self._config)
+        self.neighbours = self._get_neighbours(X_S, X_T, **self._knn_config)
         self.factors = np.ones_like(self.neighbours) / self.neighbours.shape[-1]
 
     @staticmethod
@@ -211,28 +175,23 @@ class MLSApproximator:
             X_S, X_T, k=k, max_distance=max_distance, backend=knn_backend
         )
 
-    def approximate(self, X: ndarray, data: ndarray) -> ndarray:
+    def approximate(self, X_T: ndarray) -> ndarray:
         """
         Estimates the value of the function at the given points.
 
         Parameters
         ----------
-        X: ndarray
+        X_T: ndarray
             The target points.
-        data: ndarray
-            The data to approximate. The shape of this array must match
-            the same of the source points.
         """
+        X_S = atleast2d(self.X_S, back=True)
+        X_T = atleast2d(X_T, back=True)
+        self._calc_factors_and_neighbours(X_S, X_T)
         neighbours = self.neighbours
         factors = self.factors
 
-        if neighbours is None or factors is None:
-            self._calc_factors_and_neighbours(self.X_S, X)
-
-        neighbours = self.neighbours
-        factors = self.factors
-
-        if len(data.shape) == 1:
+        data = self.Y_S
+        if len(self.Y_S.shape) == 1:
             data = atleast2d(data, back=True)
 
         if len(data.shape) == 2:
