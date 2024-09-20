@@ -553,6 +553,21 @@ class TestVector(LinalgTestCase):
         vA = Vector(aA, frame=A)
         vB = Vector(vA.show(B), frame=B)
         self.assertTrue(np.allclose(aA, vB.show(A)))
+        
+    def test_vector_objectivity(self):
+        arr = np.array([1, 0, 0])
+        frameA = ReferenceFrame(dim=3)
+        vectorA = Vector(arr, frame=frameA)
+        frameB = ReferenceFrame(dim=3)
+        vectorB = Vector(arr, frame=frameB)
+
+        for _ in range(3):
+            random_axes = random_posdef_matrix(3) * 100
+            frameA.axes = random_axes
+            random_axes = random_posdef_matrix(3) * 100
+            frameB.axes = random_axes
+            A_dot_B = dot(vectorA, vectorB)
+            self.assertTrue(np.isclose(A_dot_B, 1.0))
 
 
 class TestDCM(LinalgTestCase):
