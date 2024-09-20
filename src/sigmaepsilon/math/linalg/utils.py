@@ -918,12 +918,16 @@ def generalized_inverse(matrix: ndarray) -> ndarray:
     """
     Returns the generalized inverse of the input matrix, in any of the following
     cases:
-    1) The matrix is square and has full rank. In this case the returned matrix
-    is the usual inverse.
-    2) The matrix has more columns than rows and has full row rank. In this case
-    the generalized right inverse is returned.
-    3) The matrix has more rows than columns and has full column rank. In this case
-    the generalized left inverse is returned.
+    
+    1. The matrix is square and has full rank. In this case the returned matrix
+       is the usual inverse.
+    
+    2. The matrix has more columns than rows and has full row rank. In this case
+       the generalized right inverse is returned.
+    
+    3. The matrix has more rows than columns and has full column rank. In this case
+       the generalized left inverse is returned.
+    
     """
     if not len(matrix.shape) == 2:
         raise LinalgOperationInputError("The input must be a matrix")
