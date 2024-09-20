@@ -19,7 +19,7 @@ steps below:
 
 .. code-block:: shell
    
-   poetry install . --with dev,test,doc
+   poetry install --with dev,test,docs
    
 
 This process will install the library with all dependencies. Note that with `Poetry`, libraries are always installed in editable mode by default. 
