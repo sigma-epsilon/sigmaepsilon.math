@@ -11,7 +11,7 @@ are found in the :doc:`api`.
     getting_started
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Contents
     
     user_guide/linalg
