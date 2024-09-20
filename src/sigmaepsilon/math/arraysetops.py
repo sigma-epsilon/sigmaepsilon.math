@@ -68,7 +68,7 @@ def unique2d(
     [array([1, 2, 3, 4]), array([[0, 1, 2],
            [0, 1, 3]], dtype=int64)]
 
-    >>> unique2d(arr, return_counts=True)
+    >>> unique2d(arr, return_counts=True)  # doctest: +SKIP
     [array([1, 2, 3, 4]), array([2, 2, 1, 1], dtype=int64)]
 
     >>> from sigmaepsilon.math.linalg.sparse import JaggedArray

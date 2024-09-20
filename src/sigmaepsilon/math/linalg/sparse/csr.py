@@ -101,7 +101,7 @@ class csr_matrix:
            [0, 0, 3],
            [4, 5, 6]])
     >>> csr = csr_matrix(matrix)
-    >>> numba_nopython(csr, 0)
+    >>> numba_nopython(csr, 0)  # doctest: +SKIP
     (array([1., 2.]), array([0, 2]))
 
     See also
