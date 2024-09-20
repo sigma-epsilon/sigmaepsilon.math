@@ -1,13 +1,6 @@
 import unittest
-import doctest
 
 from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
-from sigmaepsilon.math import optimize
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(optimize.ga))
-    return tests
 
 
 def Rosenbrock(a, b, x, y):

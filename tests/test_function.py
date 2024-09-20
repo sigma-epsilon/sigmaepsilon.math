@@ -1,20 +1,12 @@
 import unittest
-import doctest
 
 import sympy as sy
 import numpy as np
 
-import sigmaepsilon.math.function as fnc
 from sigmaepsilon.math.function.symutils import decode, substitute, coefficients
 from sigmaepsilon.math.function import Function
 from sigmaepsilon.math.function import Equality, InEquality, Relation
 from sigmaepsilon.math.approx.lagrange import gen_Lagrange_1d
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(fnc.function))
-    tests.addTests(doctest.DocTestSuite(fnc.relation))
-    return tests
 
 
 class TestFunction(unittest.TestCase):

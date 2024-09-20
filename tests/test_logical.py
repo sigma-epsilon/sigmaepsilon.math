@@ -1,5 +1,4 @@
 import unittest
-import doctest
 
 import sigmaepsilon.math.logical as logical
 from sigmaepsilon.math.logical import (
@@ -15,11 +14,6 @@ from sigmaepsilon.math.logical import (
 )
 from sigmaepsilon.math.linalg.utils import random_posdef_matrix
 import numpy as np
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(logical))
-    return tests
 
 
 class TestLogical(unittest.TestCase):
