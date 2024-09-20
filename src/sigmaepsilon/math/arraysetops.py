@@ -54,6 +54,7 @@ def unique2d(
     Example
     -------
     >>> from sigmaepsilon.math.arraysetops import unique2d
+    >>> import numpy as np
     >>> arr = np.array([[1, 2, 3], [1, 2, 4]], dtype=int)
     >>> unique2d(arr)
     array([1, 2, 3, 4])
@@ -74,6 +75,7 @@ def unique2d(
     >>> arr = JaggedArray(np.array([1, 2, 1, 2, 3]), cuts=[2, 3])
     >>> unique2d(arr)
     array([1, 2, 3])
+    
     """
     if isinstance(arr, ndarray):
         unique, counts, inverse, indices = _unique2d_njit(arr)

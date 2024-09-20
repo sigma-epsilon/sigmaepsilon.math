@@ -64,34 +64,34 @@ class csr_matrix:
     >>> data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     >>> csr = JaggedArray(data, cuts=[3, 3, 4]).to_csr()
     >>> csr
-    3x4 CSR matrix with 10 nonzero values
+    3x4 CSR matrix of 10 values.
 
     You can watch it as a NumPy array
 
     >>> csr.to_numpy()
-    array([[ 1,  2,  3,  0],
-           [ 4,  5,  6,  0],
-           [ 7,  8,  9, 10]])
+    array([[ 1.,  2.,  3.,  0.],
+           [ 4.,  5.,  6.,  0.],
+           [ 7.,  8.,  9., 10.]])
 
     Create from a SciPy sparse matrix
 
     >>> from scipy.sparse import csr_matrix as csr_scipy
     >>> scipy_matrix = csr_scipy((3, 4), dtype=np.int8).toarray()
     >>> csr_matrix(scipy_matrix)
-    3x4 CSR matrix with 0 nonzero values
+    3x4 CSR matrix of 12 values.
 
     To create the 10 by 10 identity matrix, do this:
 
     >>> csr_matrix.eye(10)
-    10x10 CSR matrix with 10 nonzero values
+    10x10 CSR matrix of 10 values.
 
     You can access rows and row indices of a CSR matrix in Numba
     jitted code, even in 'nopython' mode:
 
     >>> from numba import jit
     >>> @jit(nopython=True)
-    >>> def numba_nopython(csr: csr_matrix, i: int):
-    >>>     return csr.row(i), csr.irow(i)
+    ... def numba_nopython(csr: csr_matrix, i: int):
+    ...     return csr.row(i), csr.irow(i)
     >>> row = np.array([0, 0, 1, 2, 2, 2])
     >>> col = np.array([0, 2, 2, 0, 1, 2])
     >>> data = np.array([1, 2, 3, 4, 5, 6])
@@ -99,7 +99,7 @@ class csr_matrix:
     >>> matrix.toarray()
     array([[1, 0, 2],
            [0, 0, 3],
-           [4, 5, 6]], dtype=int32)
+           [4, 5, 6]])
     >>> csr = csr_matrix(matrix)
     >>> numba_nopython(csr, 0)
     (array([1., 2.]), array([0, 2]))

@@ -88,6 +88,7 @@ class MLSApproximator:
     >>>
     >>> # check the results
     >>> assert np.allclose(target_values, np.ones_like(target_values))
+    
     """
 
     __slots__ = ["X_S", "Y_S", "_neighbours", "_factors", "_knn_config"]

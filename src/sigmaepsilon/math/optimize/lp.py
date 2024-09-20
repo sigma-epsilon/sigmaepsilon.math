@@ -68,7 +68,7 @@ class LinearProgrammingProblem:
     >>> bounds = [(0, None), (0, None), (0, None), (0, None)]
     >>> problem = LPP(obj, [eq1, eq2], variables=variables, bounds=bounds)
     >>> problem.solve().x
-    [0.0, 6.0, 0.0, 4.0]
+    array([0., 6., 0., 4.])
     
     In this example, bounds could have been specified as `bounds=(0, None)` as
     well, since all variables have the same bound.

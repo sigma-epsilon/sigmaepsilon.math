@@ -32,6 +32,7 @@ try:
         >>> import networkx as nx
         >>> grid = nx.grid_2d_graph(5, 5)  # 5x5 grid
         >>> G = Graph(grid)
+        
         """
 
         def adjacency_matrix(self, *args, to_csr: bool = False, **kwargs) -> csr_matrix:
@@ -55,11 +56,12 @@ try:
 
             Examples
             --------
-            >>> from sigmaepsilon.math.topology import Graph
+            >>> from sigmaepsilon.math.graph import Graph
             >>> G = Graph([(1, 1)])
             >>> A = G.adjacency_matrix()
             >>> print(A.todense())
             [[1]]
+            
             """
             adj = adjacency_matrix(self, *args, **kwargs)
             return csr_matrix(adj) if to_csr else adj

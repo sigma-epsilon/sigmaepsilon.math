@@ -91,15 +91,15 @@ def gen_Lagrange_1d(
 
     To generate approximation functions for a 2-noded line:
 
-    >>> gen_Lagrange_1d(x=[-1, 1])
+    >>> functions = gen_Lagrange_1d(x=[-1, 1])
 
     or equivalently
 
-    >>> gen_Lagrange_1d(N=2)
-
+    >>> functions = gen_Lagrange_1d(N=2)
+    
     To generate the same functions in symbolic form:
 
-    >>> gen_Lagrange_1d(i=[1, 2], sym=True)
+    >>> functions = gen_Lagrange_1d(i=[1, 2], sym=True)
 
     Notes
     -----
@@ -213,6 +213,7 @@ def approx_Lagrange_1d(
     >>> dfnc = fnc.diff('x')
     >>> str(dfnc)
     'L/2'
+    
     """
     xsym = "x"
     assert len(points) == len(values), "'source' and 'target' must have the same length"

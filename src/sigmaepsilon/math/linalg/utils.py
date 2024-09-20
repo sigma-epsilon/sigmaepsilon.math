@@ -108,7 +108,9 @@ def rotation_matrix(
     with 180 degrees:
 
     >>> from sigmaepsilon.math.linalg.utils import rotation_matrix
+    >>> import numpy as np
     >>> R = rotation_matrix('Space', [0, 0, np.pi], 'XYZ')
+    
     """
     source = SymPyFrame("S")
     target = source.orientnew("T", rot_type, amounts, rot_order)
@@ -189,6 +191,7 @@ def dot(
 
     >>> from sigmaepsilon.math.linalg import ReferenceFrame, Vector, Tensor2
     >>> from sigmaepsilon.math.linalg import dot
+    >>> import numpy as np
     >>> frame = ReferenceFrame(np.eye(3))
     >>> A = Tensor2(np.eye(3), frame=frame)
     >>> v = Vector(np.array([1., 0, 0]), frame=frame)
@@ -202,6 +205,7 @@ def dot(
     >>> B = Tensor(np.ones((3, 3, 3)), frame=frame)  # a tensor of order 3
     >>> dot(A, B, axes=(0, 0)).rank
     5
+    
     """
     if isinstance(a, TensorLike) and isinstance(b, TensorLike):
         ra, rb = a.rank, b.rank
@@ -291,6 +295,7 @@ def cross(
 
     >>> from sigmaepsilon.math.linalg import ReferenceFrame, Vector, Tensor2
     >>> from sigmaepsilon.math.linalg import cross
+    >>> import numpy as np
     >>> frame = ReferenceFrame(np.eye(3))
     >>> a = Vector(np.array([1., 0, 0]), frame=frame)
     >>> b = Vector(np.array([0, 1., 0]), frame=frame)
@@ -304,6 +309,7 @@ def cross(
     Array([[ 0.,  0., -1.],
            [ 0.,  0.,  0.],
            [ 1.,  0.,  0.]])
+           
     """
     if isinstance(a, TensorLike) and isinstance(b, TensorLike):
         ra, rb = a.rank, b.rank
@@ -605,6 +611,7 @@ def random_pos_semidef_matrix(N) -> ndarray:
     >>> arr = random_pos_semidef_matrix(2)
     >>> is_pos_semidef(arr)
     True
+    
     """
     A = np.random.rand(N, N)
     return A.T @ A
@@ -622,6 +629,7 @@ def random_posdef_matrix(N, alpha: float = 1e-12) -> ndarray:
     >>> arr = random_posdef_matrix(2)
     >>> is_pos_def(arr)
     True
+    
     """
     A = np.random.rand(N, N)
     return A @ A.T + alpha * np.eye(N)
