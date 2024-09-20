@@ -1,5 +1,4 @@
 import unittest
-import doctest
 import operator
 
 import numpy as np
@@ -46,16 +45,6 @@ from sigmaepsilon.math.linalg import utils as lautils
 from sigmaepsilon.math import repeat
 from sigmaepsilon.math.linalg import dot, cross
 from sigmaepsilon.math.linalg.tr import _tr_3333, _tr_3333_sym
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(linalg.frame))
-    tests.addTests(doctest.DocTestSuite(linalg.vector))
-    tests.addTests(doctest.DocTestSuite(linalg.tensor))
-    tests.addTests(doctest.DocTestSuite(linalg.utils))
-    tests.addTests(doctest.DocTestSuite(linalg.solve))
-    tests.addTests(doctest.DocTestSuite(linalg.sparse.jaggedarray))
-    return tests
 
 
 class TestArray(LinalgTestCase):
