@@ -51,14 +51,14 @@ class Genom(BaseModel):
             )
         return np.all(self.fittness < other.fittness)
 
-    def __gte__(self, other):
+    def __ge__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
         return np.all(self.fittness >= other.fittness)
 
-    def __lte__(self, other):
+    def __le__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
