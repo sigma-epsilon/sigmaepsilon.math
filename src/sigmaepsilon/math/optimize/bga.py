@@ -53,7 +53,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     --------
     :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`
     :class:`~sigmaepsilon.math.optimize.ga.Genom`
-    
+
     Examples
     --------
     Find the minimizer of the Rosenbrock function.
