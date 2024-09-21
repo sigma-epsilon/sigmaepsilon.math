@@ -23,15 +23,9 @@ jobs:
       - run:
           name: Run tests and generate coverage report
           command: poetry run pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.math
-      #- store_artifacts:
-      #    name: Store coverage report as artifact
-      #    path: htmlcov
-      #- run:
-      #    name: Upload coverage reports to Codecov
-      #    command: |
-      #      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      #      chmod +x codecov
-      #      ./codecov -t ${CODECOV_TOKEN}
+      - store_artifacts:
+          name: Store coverage report as artifact
+          path: coverage.xml
       - codecov/upload
       - store_test_results:
           name: Store test results
