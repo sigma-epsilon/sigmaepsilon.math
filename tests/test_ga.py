@@ -1,11 +1,63 @@
 import unittest
+import numpy as np
 
 from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
 from sigmaepsilon.math.function.functions import Rosenbrock as Rosenbrock_sym
+from sigmaepsilon.math.optimize.ga import Genom
 
 
 def Rosenbrock(a, b, x, y):
     return (a - x) ** 2 + b * (y - x**2) ** 2
+
+
+class TestGenom(unittest.TestCase):
+
+    def test_genom(self):
+        genom1 = Genom(
+            phenotype=np.array([1, 2]),
+            genotype=np.array([1, 0, 1, 0]),
+            fittness=1.0,
+        )
+
+        genom2 = Genom(
+            phenotype=np.array([1, 2]),
+            genotype=np.array([1, 0, 1, 0]),
+            fittness=1.0,
+        )
+
+        genom3 = Genom(
+            phenotype=np.array([1, 2]),
+            genotype=np.array([1, 0, 1, 1]),
+            fittness=2.0,
+        )
+
+        self.assertFalse(genom1 == 1)
+        self.assertFalse(genom1 == genom3)
+        hash(genom1)
+        self.assertEqual(genom1, genom2)
+        self.assertGreater(genom3, genom1)
+        self.assertLess(genom1, genom3)
+        self.assertGreaterEqual(genom3, genom1)
+        self.assertLessEqual(genom1, genom3)
+
+    def test_errors(self):
+        genom = Genom(
+            phenotype=np.array([1, 2]),
+            genotype=np.array([1, 0, 1, 0]),
+            fittness=1.0,
+        )
+
+        with self.assertRaises(TypeError):
+            genom > 1
+
+        with self.assertRaises(TypeError):
+            genom >= 1
+
+        with self.assertRaises(TypeError):
+            genom < 1
+
+        with self.assertRaises(TypeError):
+            genom <= 1
 
 
 class TestBGA(unittest.TestCase):
@@ -63,11 +115,9 @@ class TestBGA(unittest.TestCase):
         ranges = [[-10, 10], [-10, 10]]
         BGA = BinaryGeneticAlgorithm(f, ranges, length=12, nPop=200)
         BGA.solve()
-
-        BGA.genotypes = BGA.genotypes
         BGA.evolver()
         BGA.evolve()
-        
+
     def test_symbolic_function_bulk_eval(self):
         obj = Rosenbrock_sym()
         ranges = [[-10, 10], [-10, 10]]
