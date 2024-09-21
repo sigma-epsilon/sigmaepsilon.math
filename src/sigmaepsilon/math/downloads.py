@@ -26,4 +26,4 @@ def download_mls_testdata() -> np.ndarray:
     (102, 6)
 
     """
-    return np.loadtxt(download_file("mls_testdata.out"))
+    return np.loadtxt(download_file("mls_testdata.out"))  # pragma: no cover
