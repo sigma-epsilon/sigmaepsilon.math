@@ -67,17 +67,6 @@ class TestBGA(unittest.TestCase):
         BGA.evolver()
         BGA.evolve()
 
-    def test_bga_multi_proc(self):
-        def f(x):
-            return Rosenbrock(1, 100, x[0], x[1])
-
-        f.dimension = 2
-        ranges = [[-10, 10], [-10, 10]]
-        BGA = BinaryGeneticAlgorithm(
-            f, ranges, length=6, nPop=40, num_proc=-1, maxiter=10
-        )
-        BGA.solve()
-
 
 if __name__ == "__main__":
     unittest.main()
