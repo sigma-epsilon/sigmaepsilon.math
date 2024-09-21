@@ -11,33 +11,13 @@
 
 `SigmaEpsilon.Math` is a Python library that provides tools to formulate and solve problems related to all kinds of scientific disciplines. It is a part of the SigmaEpsilon ecosystem, which is designed mainly to solve problems related to computational solid mechanics, but if something is general enough, it ends up here. A good example is the included vector and tensor algebra modules, or the various optimizers, which are applicable in a much broader context than they were originally designed for.
 
-The most important features:
-
-* Linear Algebra
-  * A mechanism that guarantees to maintain the property of objectivity of tensorial quantities.
-  * A `ReferenceFrame` class for all kinds of frames, and dedicated `RectangularFrame` and `CartesianFrame` classes as special cases, all NumPy compliant.
-  * NumPy compliant classes like `Tensor` and `Vector` to handle various kinds of tensorial quantities efficiently.
-  * A `JaggedArray` and a Numba-jittable `csr_matrix` to handle sparse data.
-
-* Operations Research
-  * Classes to define and solve linear and nonlinear optimization problems.
-    * A `LinearProgrammingProblem` class to define and solve any kind of linear optimization problem.
-    * A `BinaryGeneticAlgorithm` class to tackle more complicated optimization problems.
-
-* Graph Theory
-  * Algorithms to calculate rooted level structures and pseudo peripheral nodes of a `networkx` graph, which are useful if you want to minimize the bandwidth of sparse symmetrix matrices.
-
-> **Note**
-> Be aware, that the library uses JIT-compilation through Numba, and as a result,
-> first calls to these functions may take longer, but it pays off big time in the long run.
-
-## **Documentation**
+## Documentation
 
 The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hosted on ReadTheDocs. You can find examples there.
 
-## **Installation and Testing**
+## Installation
 
-For instructions on installation and testing, please refer to the [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/).
+For instructions on installation, refer to the [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/).
 
 ## Changes and versioning
 
