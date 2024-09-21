@@ -65,7 +65,7 @@ def clip1d(a: ndarray, a_min: float, a_max: float) -> ndarray:
     ...
     >>> clip1d(np.array([0.9, 2.5]), 1.0, 1.5)
     array([1. , 1.5])
-    
+
     """
     a[a < a_min] = a_min
     a[a > a_max] = a_max
@@ -96,7 +96,7 @@ def atleastnd(
 
     >>> atleastnd(np.array([1, 1]), 3, back=True).shape
     (2, 1, 1)
-    
+
     """
     if not isinstance(a, Iterable):
         a = [
@@ -125,7 +125,7 @@ def atleast1d(a: Union[numbers.Number, Iterable]) -> ndarray:
     >>> from sigmaepsilon.math import atleast1d
     >>> atleast1d(1)
     array([1])
-    
+
     """
     if not isinstance(a, Iterable):
         a = [
@@ -143,7 +143,7 @@ def atleast2d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
     >>> from sigmaepsilon.math import atleast2d
     >>> atleast2d(1)
     array([[1]])
-    
+
     """
     return atleastnd(a, 2, **kwargs)
 
@@ -157,7 +157,7 @@ def matrixform(a: Union[numbers.Number, Iterable]) -> ndarray:
     >>> from sigmaepsilon.math import matrixform
     >>> matrixform(1)
     array([[1]])
-    
+
     """
     if not isinstance(a, Iterable):
         a = [
@@ -182,7 +182,7 @@ def atleast3d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
     >>> from sigmaepsilon.math import atleast3d
     >>> atleast3d(1)
     array([[[1]]])
-    
+
     """
     return atleastnd(a, 3, **kwargs)
 
@@ -196,7 +196,7 @@ def atleast4d(a: ndarray, **kwargs) -> ndarray:
     >>> from sigmaepsilon.math import atleast4d
     >>> atleast4d(1)
     array([[[[1]]]])
-    
+
     """
     return atleastnd(a, 4, **kwargs)
 
@@ -245,7 +245,7 @@ def bool_to_float(a: Iterable, true: float = 1.0, false: float = 0.0) -> ndarray
     >>> from sigmaepsilon.math import bool_to_float
     >>> bool_to_float([True, False], 1.0, -2.0)
     array([ 1., -2.])
-    
+
     """
     if not isinstance(a, ndarray):
         a = np.array(a)
@@ -277,7 +277,7 @@ def choice(choices: Iterable, size: Tuple, probs: Iterable = None) -> ndarray:
     array([[ True,  True],
            [ True,  True]])
     ```
-    
+
     """
     if probs is None:
         probs = np.full((len(choices),), 1 / len(choices))
@@ -322,7 +322,7 @@ def repeat(a: ndarray, N: int = 1) -> ndarray:
 
     >>> repeat(np.eye(2), 3).shape
     (3, 2, 2)
-    
+
     """
     res = np.zeros((N, a.shape[0], a.shape[1]), dtype=a.dtype)
     for i in prange(N):
@@ -342,7 +342,7 @@ def repeat1d(a: ndarray, N=1) -> ndarray:
     ...
     >>> repeat1d(np.array([1, 2]), 3)
     array([1, 2, 1, 2, 1, 2])
-    
+
     """
     M = a.shape[0]
     res = np.zeros(N * M, dtype=a.dtype)
@@ -368,7 +368,7 @@ def tile(a: ndarray, da: ndarray, N: int = 1) -> ndarray:
            [[ 1, -1]],
     <BLANKLINE>
            [[ 2, -2]]])
-           
+
     """
     res = np.zeros((N, a.shape[0], a.shape[1]), dtype=a.dtype)
     for i in prange(N):

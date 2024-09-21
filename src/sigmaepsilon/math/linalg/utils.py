@@ -110,7 +110,7 @@ def rotation_matrix(
     >>> from sigmaepsilon.math.linalg.utils import rotation_matrix
     >>> import numpy as np
     >>> R = rotation_matrix('Space', [0, 0, np.pi], 'XYZ')
-    
+
     """
     source = SymPyFrame("S")
     target = source.orientnew("T", rot_type, amounts, rot_order)
@@ -205,7 +205,7 @@ def dot(
     >>> B = Tensor(np.ones((3, 3, 3)), frame=frame)  # a tensor of order 3
     >>> dot(A, B, axes=(0, 0)).rank
     5
-    
+
     """
     if isinstance(a, TensorLike) and isinstance(b, TensorLike):
         ra, rb = a.rank, b.rank
@@ -309,7 +309,7 @@ def cross(
     Array([[ 0.,  0., -1.],
            [ 0.,  0.,  0.],
            [ 1.,  0.,  0.]])
-           
+
     """
     if isinstance(a, TensorLike) and isinstance(b, TensorLike):
         ra, rb = a.rank, b.rank
@@ -611,7 +611,7 @@ def random_pos_semidef_matrix(N) -> ndarray:
     >>> arr = random_pos_semidef_matrix(2)
     >>> is_pos_semidef(arr)
     True
-    
+
     """
     A = np.random.rand(N, N)
     return A.T @ A
@@ -629,7 +629,7 @@ def random_posdef_matrix(N, alpha: float = 1e-12) -> ndarray:
     >>> arr = random_posdef_matrix(2)
     >>> is_pos_def(arr)
     True
-    
+
     """
     A = np.random.rand(N, N)
     return A @ A.T + alpha * np.eye(N)
@@ -918,16 +918,16 @@ def generalized_inverse(matrix: ndarray) -> ndarray:
     """
     Returns the generalized inverse of the input matrix, in any of the following
     cases:
-    
+
     1. The matrix is square and has full rank. In this case the returned matrix
        is the usual inverse.
-    
+
     2. The matrix has more columns than rows and has full row rank. In this case
        the generalized right inverse is returned.
-    
+
     3. The matrix has more rows than columns and has full column rank. In this case
        the generalized left inverse is returned.
-    
+
     """
     if not len(matrix.shape) == 2:
         raise LinalgOperationInputError("The input must be a matrix")

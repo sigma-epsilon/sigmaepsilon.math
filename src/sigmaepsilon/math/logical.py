@@ -78,7 +78,7 @@ def isposdef(A: ndarray, tol=0) -> bool:
     >>> A[0, 0] = 0
     >>> isposdef(A)
     False
-    
+
     """
     return np.all(np.linalg.eigvals(A) > tol)
 
@@ -94,7 +94,7 @@ def ispossemidef(A: ndarray) -> bool:
     >>> A = random_pos_semidef_matrix(3)
     >>> ispossemidef(A)
     True
-    
+
     """
     return np.all(np.linalg.eigvals(A) >= 0)
 

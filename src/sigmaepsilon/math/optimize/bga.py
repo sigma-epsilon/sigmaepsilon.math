@@ -65,7 +65,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = [BGA.evolve(1) for _ in range(100)]
     >>> x = BGA.best_phenotype()
     >>> fx = Rosenbrock(x)
-    
+
     """
 
     def populate(self, genotypes: ndarray = None) -> ndarray:

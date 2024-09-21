@@ -96,7 +96,7 @@ def gen_Lagrange_1d(
     or equivalently
 
     >>> functions = gen_Lagrange_1d(N=2)
-    
+
     To generate the same functions in symbolic form:
 
     >>> functions = gen_Lagrange_1d(i=[1, 2], sym=True)
@@ -213,7 +213,7 @@ def approx_Lagrange_1d(
     >>> dfnc = fnc.diff('x')
     >>> str(dfnc)
     'L/2'
-    
+
     """
     xsym = "x"
     assert len(points) == len(values), "'source' and 'target' must have the same length"

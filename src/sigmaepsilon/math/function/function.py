@@ -153,7 +153,7 @@ class Function(MetaFunction):
     True
     >>> m([1, 2, -30])
     9
-    
+
     """
 
     __slots__ = ("f0", "f1", "f2", "dimension", "domain", "vmap", "from_str")
@@ -274,7 +274,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> linear_coefficients = f1.linear_coefficients()
-        
+
         """
         d = self.coefficients(normalize)
         if d:
@@ -299,7 +299,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> coefficients = f1.coefficients()
-        
+
         """
         if not self.is_symbolic:
             raise TypeError("This is exclusive to symbolic functions.")
@@ -333,7 +333,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> latex_string = f1.to_latex()
-        
+
         """
         if self.is_symbolic:
             return latex(self.expr)
@@ -351,7 +351,7 @@ class Function(MetaFunction):
         >>> from sigmaepsilon.math.function import Function
         >>> g = Function("3*x + 4*y - 2", variables=["x", "y", "z"])
         >>> g = g.subs([0, 0, 0], ["x", "y", "z"], inplace=True)
-        
+
         """
         if not self.is_symbolic:
             raise TypeError("This is exclusive to symbolic functions.")

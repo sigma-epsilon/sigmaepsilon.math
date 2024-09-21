@@ -85,7 +85,7 @@ def k_nearest_neighbours(
     ------
     ImportError
         In the abscence of a usable backend.
-    
+
     """
     tree_kwargs = {} if tree_kwargs is None else tree_kwargs
     query_kwargs = {} if query_kwargs is None else query_kwargs

@@ -97,7 +97,7 @@ def linsolve(
 
     >>> B
     array([11.,  6., 10.])
-    
+
     """
     # FIXME : check if presc_bool and presc_val have matching shape to A and B
     # FIXME : check if presc_bool is a boolean array

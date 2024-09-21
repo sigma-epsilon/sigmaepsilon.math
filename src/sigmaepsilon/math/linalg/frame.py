@@ -461,7 +461,7 @@ class ReferenceFrame(FrameLike):
 
         >>> A = ReferenceFrame(dim=3)
         >>> B = A.orient_new('Space', [0, 0, np.pi], 'XYZ')
-        
+
         """
         result = self.deepcopy(name=name)
         if (len(args) + len(kwargs)) == 0:

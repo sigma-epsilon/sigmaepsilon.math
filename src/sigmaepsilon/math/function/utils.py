@@ -13,7 +13,7 @@ def parse_expression(expression: str) -> tuple[str, str, str]:
     >>> from sigmaepsilon.math.function.utils import parse_expression
     >>> parse_expression("x <= 2")
     ('x', '<=', '2')
-    
+
     """
     # Regular expression to match the pattern (left side, operator, right side)
     pattern = r"(.+?)\s*(<=|>=|<|>|=)\s*(.+)"
@@ -50,7 +50,7 @@ def has_operator(expression: str) -> bool:
     >>> from sigmaepsilon.math.function.utils import has_operator
     >>> has_operator("x <= 2")
     True
-    
+
     """
     for op in valid_operators:
         if op in expression:
