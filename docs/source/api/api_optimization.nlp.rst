@@ -57,4 +57,3 @@ themselves to binary encoding, such as combinatorial optimization and certain
 engineering design tasks.
 
 .. autoclass:: sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm
-    :members:
