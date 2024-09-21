@@ -71,8 +71,8 @@ class TestBGA(unittest.TestCase):
     def test_symbolic_function_bulk_eval(self):
         obj = Rosenbrock_sym()
         ranges = [[-10, 10], [-10, 10]]
-        BGA = BinaryGeneticAlgorithm(obj, ranges, length=12, nPop=200)
-        BGA.evolve(1)
+        bga = BinaryGeneticAlgorithm(obj, ranges, length=12, nPop=200)
+        bga.evolve(2)
 
 
 if __name__ == "__main__":
