@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@2.1.1
-  #codecov: codecov/codecov@4.1.0
+  codecov: codecov/codecov@4.1.0
 
 executors:
   my-executor:
@@ -32,7 +32,7 @@ jobs:
             curl -Os https://uploader.codecov.io/latest/linux/codecov
             chmod +x codecov
             ./codecov -t ${CODECOV_TOKEN}
-      #- codecov/upload
+      - codecov/upload
       - store_test_results:
           name: Store test results
           path: test-results
