@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Tuple, Optional, Union, Generator
+from typing import Iterable, Callable, Tuple, Generator
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
@@ -145,14 +145,14 @@ class GeneticAlgorithm:
         fnc: Callable,
         ranges: Iterable,
         *,
-        length: Optional[int] = 5,
-        p_c: Optional[float] = 1,
-        p_m: Optional[float] = 0.2,
-        nPop: Optional[int] = 100,
-        maxiter: Optional[int] = 200,
-        miniter: Optional[int] = 0,
-        elitism: Optional[int] = 1,
-        maxage: Optional[int] = 5,
+        length: int = 5,
+        p_c: float = 1,
+        p_m: float = 0.2,
+        nPop: int = 100,
+        maxiter: int = 200,
+        miniter: int = 0,
+        elitism: int = 1,
+        maxage: int = 5,
     ):
         super().__init__()
         self.fnc = fnc
@@ -295,12 +295,11 @@ class GeneticAlgorithm:
         _ = yield
         yield self.genotypes
         while True:
-            self.genotypes = self.populate(
-                self.select(self._genotypes, self.phenotypes)
-            )
-            yield self._genotypes
+            genotypes = self.select(self.genotypes, self.phenotypes)
+            self.genotypes = self.populate(genotypes)
+            yield self.genotypes
 
-    def evolve(self, cycles: Optional[int] = 1) -> Iterable:
+    def evolve(self, cycles: int = 1) -> Iterable:
         """
         Performs a certain number of cycles of evolution and returns the
         genotypes.
@@ -309,7 +308,7 @@ class GeneticAlgorithm:
             next(self._evolver)
         return self.genotypes
 
-    def solve(self, recycle: Optional[bool] = False, **kwargs) -> Genom:
+    def solve(self, recycle: bool = False, **kwargs) -> Genom:
         """
         Solves the problem and returns the best phenotype.
 
@@ -334,14 +333,14 @@ class GeneticAlgorithm:
         while (not finished and nIter < self.maxiter) or (nIter < self.miniter):
             self.evolve()
             candidate: Genom = self.best_candidate()
-            self.celebrate(candidate)
+            self._celebrate(candidate)
             finished = self.stopping_criteria()
             nIter += 1
 
         self.nIter = nIter
         return self.champion
 
-    def evaluate(self, phenotypes: Optional[Union[Iterable, None]] = None) -> ndarray:
+    def evaluate(self, phenotypes: Iterable | None = None) -> ndarray:
         """
         Evaluates the objective for a list of phenotypes.
 
@@ -394,7 +393,7 @@ class GeneticAlgorithm:
             index=index,
         )
 
-    def celebrate(self, genom: Genom) -> None:
+    def _celebrate(self, genom: Genom) -> None:
         """
         Celebration of the winner. Curretly this means that the beast candidate is added
         to a history to keep track of the improvements across evolutions.
@@ -408,7 +407,7 @@ class GeneticAlgorithm:
                 self._champion.age = 0
         self._champion.age += 1
 
-    def divide(self, fittness: Optional[Union[ndarray, None]] = None) -> Tuple[list]:
+    def divide(self, fittness: ndarray | None = None) -> Tuple[list]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.
@@ -442,9 +441,7 @@ class GeneticAlgorithm:
         return list(elit), others
 
     @classmethod
-    def random_parents_generator(
-        cls, genotypes: Optional[Union[ndarray, None]] = None
-    ) -> Generator:
+    def random_parents_generator(cls, genotypes: ndarray) -> Generator:
         """
         Yields random pairs from a list of genotypes.
 
@@ -490,32 +487,28 @@ class GeneticAlgorithm:
         return self.champion.age > self.maxage
 
     @abstractmethod
-    def encode(self, phenotypes: Optional[Union[ndarray, None]] = None) -> ndarray:
+    def encode(self, phenotypes: ndarray | None = None) -> ndarray:
         """
         Turns phenotypes into genotypes.
         """
         return phenotypes
 
     @abstractmethod
-    def decode(self, genotypes: Optional[Union[ndarray, None]] = None) -> ndarray:
+    def decode(self, genotypes: ndarray) -> ndarray:
         """
         Turns genotypes into phenotypes.
         """
         return genotypes
 
     @abstractmethod
-    def populate(self, genotypes: Optional[Union[ndarray, None]] = None):
+    def populate(self, genotypes: ndarray | None = None) -> ndarray:
         """
         Ought to produce a pool of phenotypes.
         """
         ...
 
     @abstractmethod
-    def crossover(
-        self,
-        parent1: Optional[Union[ndarray, None]] = None,
-        parent2: Optional[Union[ndarray, None]] = None,
-    ) -> Tuple[ndarray]:
+    def crossover(self, parent1: ndarray, parent2: ndarray) -> Tuple[ndarray]:
         """
         Takes in two parents, returns two offspring. You'd probably want to use it inside
         the populator.
@@ -523,18 +516,14 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def mutate(self, child: Optional[Union[ndarray, None]] = None) -> ndarray:
+    def mutate(self, child: ndarray) -> ndarray:
         """
         Takes a child in, returns a mutant.
         """
         ...
 
     @abstractmethod
-    def select(
-        self,
-        genotypes: Optional[Union[ndarray, None]] = None,
-        phenotypes: Optional[Union[ndarray, None]] = None,
-    ):
+    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
         """
         Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
         tournament or other.

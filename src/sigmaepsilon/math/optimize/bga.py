@@ -13,9 +13,6 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     minimums of real valued unconstrained problems of continuous variables
     in n-dimensional vector spaces.
 
-    It is a subclass of the :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`,
-    refer to its documentation for more details about behaviour and customization.
-
     The class is able to solve unconstrained optimization problems of the form:
 
     .. math::
