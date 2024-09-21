@@ -1,9 +1,10 @@
 from abc import abstractmethod
-from typing import Iterable, Callable, Tuple, List, Optional, Union, Generator
+from typing import Iterable, Callable, Tuple, Optional, Union, Generator
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
-from joblib import Parallel, delayed
+
+from ..function import Function
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
@@ -21,8 +22,8 @@ class Genom(BaseModel):
     A data class for members of a population.
     """
 
-    phenotype: List[float] = Field(default_factory=list)
-    genotype: List[int] = Field(default_factory=list)
+    phenotype: list[float] = Field(default_factory=list)
+    genotype: list[int] = Field(default_factory=list)
     fittness: float
     age: int = Field(default=0)
     index: int = Field(default=-1)
@@ -74,7 +75,7 @@ class GeneticAlgorithm:
     a working genetic algorithm. These are :func:`populate`, :func:`decode`,
     :func:`crossover`, :func:`mutate` and :func:`select`. It is also possible to
     use a custom stopping criteria by implementing :func:`stopping_criteria`.
-    See :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` for an example.
+    See the :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` class for an example.
 
     Parameters
     ----------
@@ -103,24 +104,41 @@ class GeneticAlgorithm:
         The age is the number of generations a candidate spends at the top
         (being the best candidate). Setting an upper limit to this value is a kind
         of stopping criterion. Default is 5.
-    num_proc: int, Optional
-        The number of workers used to evaluate the population. Use a value of `-1` to use
-        all cores. Default is 1.
-
-        .. versionadded:: 1.1.0
 
     Note
     ----
     Be cautious what you use a genetic algorithm for. Like all metahauristic methods, a
     genetic algorithm can be wery demanding on the computational side. If the objective
-    unction takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
+    function takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
     approach, unless you have a dedicated evaluator that is able to run efficiently for a large
-    number of problems.
+    number of problems. If you want to customize the way the objective is evaluated, override
+    the :func:`evaluate` method.
 
     See also
     --------
     :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
     """
+
+    __slots__ = [
+        "fnc",
+        "ranges",
+        "dim",
+        "length",
+        "p_c",
+        "p_m",
+        "nPop",
+        "_genotypes",
+        "_phenotypes",
+        "_fittness",
+        "_champion",
+        "_evolver",
+        "maxiter",
+        "miniter",
+        "elitism",
+        "maxage",
+        "nIter",
+        "_is_symbolic_Function",
+    ]
 
     def __init__(
         self,
@@ -135,15 +153,12 @@ class GeneticAlgorithm:
         miniter: Optional[int] = 0,
         elitism: Optional[int] = 1,
         maxage: Optional[int] = 5,
-        num_proc: Optional[int] = 1,
     ):
         super().__init__()
         self.fnc = fnc
         self.ranges = np.array(ranges)
         self.dim = getattr(fnc, "dimension", self.ranges.shape[0])
         self.length = length
-        self.p_c = p_c
-        self.p_m = p_m
 
         if odd(nPop):
             nPop += 1
@@ -152,22 +167,24 @@ class GeneticAlgorithm:
         assert nPop % 4 == 0
         assert nPop >= 4
 
+        self._is_symbolic_Function = isinstance(fnc, Function) and fnc.is_symbolic
+
         self.nPop = nPop
+        self.p_c = None
+        self.p_m = None
         self._genotypes = None
         self._pnenotypes = None
         self._fittness = None
-        self._champion: Genom = None
-        self.reset()
-        self._set_solution_params(
+        self._champion: Genom | None = None
+        self.set_solution_params(
+            p_c=p_c,
+            p_m=p_m,
             maxiter=maxiter,
             miniter=miniter,
             elitism=elitism,
             maxage=maxage,
-            num_proc=num_proc,
         )
-
-        if self.miniter > self.maxiter:
-            raise ValueError("'maxiter' must be greater than 'miniter'")
+        self.reset()
 
     @property
     def champion(self) -> Genom:
@@ -224,15 +241,38 @@ class GeneticAlgorithm:
         self._champion = None
         return self
 
-    def _set_solution_params(
+    def set_solution_params(
         self,
         *,
-        maxiter: Optional[Union[int, None]] = None,
-        miniter: Optional[Union[int, None]] = None,
-        elitism: Optional[Union[int, None]] = None,
-        maxage: Optional[Union[int, None]] = None,
-        num_proc: Optional[Union[int, None]] = None,
+        p_c: float | None = None,
+        p_m: float | None = None,
+        maxiter: int | None = None,
+        miniter: int | None = None,
+        elitism: int | None = None,
+        maxage: int | None = None,
     ) -> "GeneticAlgorithm":
+        """
+        Sets the hyperparameters of the algorithm.
+
+        Parameters
+        ----------
+        p_c: float, Optional
+            Probability of crossover.
+        p_m: float, Optional
+            Probability of mutation.
+        maxiter: int, Optional
+            Maximum number of iterations.
+        miniter: int, Optional
+            Minimum number of iterations.
+        elitism: int, Optional
+            Elitism.
+        maxage: int, Optional
+            Maximum age of the champion.
+        """
+        if p_c is not None:
+            self.p_c = p_c
+        if p_m is not None:
+            self.p_m = p_m
         if maxiter is not None:
             self.maxiter = maxiter
         if miniter is not None:
@@ -241,8 +281,10 @@ class GeneticAlgorithm:
             self.elitism = elitism
         if maxage is not None:
             self.maxage = maxage
-        if num_proc is not None:
-            self.num_proc = num_proc
+
+        if self.miniter > self.maxiter:
+            raise ValueError("'maxiter' must be greater than 'miniter'")
+
         return self
 
     def evolver(self) -> Iterable:
@@ -276,6 +318,8 @@ class GeneticAlgorithm:
         recycle: bool, Optional
             If True, the leftover resources of the previous calculation are the starting
             point of the new solution.
+        kwargs: dict
+            Additional parameters to be passed to the :func:`set_solution_params`.
 
         Returns
         -------
@@ -283,7 +327,7 @@ class GeneticAlgorithm:
             The best candidate.
         """
         self.reset() if not recycle else None
-        self._set_solution_params(**kwargs)
+        self.set_solution_params(**kwargs)
 
         nIter, finished = 0, False
 
@@ -311,13 +355,10 @@ class GeneticAlgorithm:
             Default is None.
         """
         phenotypes = self.phenotypes if phenotypes is None else phenotypes
-        if self.num_proc == 1:
-            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        if self._is_symbolic_Function:
+            return self.fnc(phenotypes.T)
         else:
-            results = Parallel(n_jobs=self.num_proc)(
-                delayed(self.fnc)(x) for x in phenotypes
-            )
-            return np.array(results, dtype=float)
+            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
 
     def best_phenotype(self) -> ndarray:
         """
@@ -367,7 +408,7 @@ class GeneticAlgorithm:
                 self._champion.age = 0
         self._champion.age += 1
 
-    def divide(self, fittness: Optional[Union[ndarray, None]] = None) -> Tuple[List]:
+    def divide(self, fittness: Optional[Union[ndarray, None]] = None) -> Tuple[list]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.

@@ -13,7 +13,10 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     minimums of real valued unconstrained problems of continuous variables
     in n-dimensional vector spaces.
 
-    In other words, it solves the following problem:
+    It is a subclass of the :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`,
+    refer to its documentation for more details about behaviour and customization.
+
+    The class is able to solve unconstrained optimization problems of the form:
 
     .. math::
 
@@ -24,61 +27,78 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     Parameters
     ----------
     fnc: Callable
-        The fittness function.
+        The function to evaluate. It is assumed, that the function expects and N
+        number of scalar arguments as a 1d iterable.
     ranges: Iterable
-        sequence of pairs of limits for each variable
+        Ranges for each scalar argument to the objective function.
     length: int, Optional
-        Chromosome length (string length). Default is 5.
+        Chromosome length. The higher the value, the more precision. Default is 5.
     p_c: float, Optional
-        Probability of crossover, 0 <= p_c <= 1. Default is 1.
+        Probability of crossover. Default is 1.
     p_m: float, Optional
-        Probability of mutation, 0 <= p_m <= 1. Default is 0.2.
+        Probability of mutation. Default is 0.2.
     nPop: int, Optional
-        Number of members in the population. Default is 100.
+        The size of the population. Default is 100.
+    maxiter: int, Optional
+        The maximum number of iterations. Default is 200.
+    miniter: int, Optional
+        The minimum number of iterations. Default is 100.
     elitism: float or int, Optional
-        Value to control elitism. Default is 1.
+        Default is 1
+    ftol: float, Optional
+        Torelance for floating point operations. Default is 1e-12.
+    maxage: int, Optional
+        The age is the number of generations a candidate spends at the top
+        (being the best candidate). Setting an upper limit to this value is a kind
+        of stopping criterion. Default is 5.
 
+    See Also
+    --------
+    :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.ga.Genom`
+    
     Examples
     --------
     Find the minimizer of the Rosenbrock function.
     The exact value of the solution is x = [1.0, 1.0].
 
-    >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
+    >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm as BGA
+    >>>
     >>> def Rosenbrock(x):
     ...     a, b = 1, 100
     ...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
+    >>>
+    >>>
     >>> ranges = [[-10, 10], [-10, 10]]
-    >>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
-    >>> _ = BGA.solve()
-    >>> x = BGA.best_phenotype()
+    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=200)
+    >>> _ = bga.solve()
+    >>> x = bga.best_phenotype()
     >>> fx = Rosenbrock(x)
 
-    The following code prints the history using the `evolve` generator of
-    the object
+    The following code prints the history using the :func:`evolve` generator method of
+    the instance
 
-    >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
-    >>> def Rosenbrock(x):
-    ...     a, b = 1, 100
-    ...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
-    >>> ranges = [[-10, 10], [-10, 10]]
-    >>> BGA = BinaryGeneticAlgorithm(Rosenbrock, ranges, length=12, nPop=200)
-    >>> _ = [BGA.evolve(1) for _ in range(100)]
-    >>> x = BGA.best_phenotype()
+    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=200)
+    >>> _ = [bga.evolve(1) for _ in range(100)]
+    >>> x = bga.best_phenotype()
     >>> fx = Rosenbrock(x)
 
     """
 
-    def populate(self, genotypes: ndarray = None) -> ndarray:
+    def populate(self, genotypes: ndarray | None = None) -> ndarray:
         """
         Populates the model and returns the array of genotypes.
         """
         nPop = self.nPop
+
         if genotypes is None:
             poolshape = (int(nPop / 2), self.dim * self.length)
             genotypes = np.random.randint(2, size=poolshape)
         else:
             poolshape = genotypes.shape
+
         nParent = poolshape[0]
+
         if nParent < nPop:
             offspring = []
             g = self.random_parents_generator(genotypes)
@@ -87,11 +107,12 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
                     parent1, parent2 = next(g)
                     offspring.extend(self.crossover(parent1, parent2))
                 genotypes = np.vstack([genotypes, offspring])
-            except Exception:
+            except Exception:  # pragma: no cover
                 raise RuntimeError
+
         return genotypes
 
-    def decode(self, genotypes: ndarray = None) -> ndarray:
+    def decode(self, genotypes: ndarray) -> ndarray:
         """
         Decodes the genotypes to phenotypes and returns them as an array.
         """
@@ -109,7 +130,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         return phenotypes
 
     def crossover(
-        self, parent1: ndarray = None, parent2: ndarray = None, nCut: int = None
+        self, parent1: ndarray, parent2: ndarray, nCut: int | None = None
     ) -> Tuple[ndarray]:
         """
         Performs crossover on the parents `parent1` and `parent2`,
@@ -140,14 +161,14 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
         return self.mutate(child1), self.mutate(child2)
 
-    def mutate(self, child: ndarray = None) -> ndarray:
+    def mutate(self, child: ndarray) -> ndarray:
         """
         Returns a mutated genotype. Children come in, mutants go out.
         """
         p = np.random.rand(self.dim * self.length)
         return np.where(p > self.p_m, child, 1 - child)
 
-    def select(self, genotypes: ndarray = None, phenotypes: ndarray = None) -> ndarray:
+    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
         """
         Organizes a tournament and returns the genotypes of the winners.
         """
