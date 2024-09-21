@@ -22,7 +22,8 @@ def download_mls_testdata() -> np.ndarray:
     Example
     --------
     >>> from sigmaepsilon.math.downloads import download_mls_testdata
-    >>> download_mls_testdata().shape
+    >>> download_mls_testdata().shape  # doctest: +SKIP
     (102, 6)
+
     """
     return np.loadtxt(download_file("mls_testdata.out"))

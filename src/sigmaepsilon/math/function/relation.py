@@ -207,6 +207,7 @@ class Equality(Relation):
     >>> x1, x2, x3, x4 = syms = sy.symbols(variables, positive=True)
     >>> eq1 = Equality(x1 + 2*x3 + x4 - 4, variables=syms)
     >>> eq2 = Equality(x2 + x3 - x4 - 2, variables=syms)
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -228,6 +229,7 @@ class InEquality(Relation):
     >>> ge = InEquality('x + y', op='>=')
     >>> le = InEquality('x + y', op=lambda x, y: x <= y)
     >>> lt = InEquality('x + y', op=lambda x, y: x < y)
+
     """
 
     def __init__(self, *args, **kwargs):

@@ -114,12 +114,12 @@ class GeneticAlgorithm:
     Be cautious what you use a genetic algorithm for. Like all metahauristic methods, a
     genetic algorithm can be wery demanding on the computational side. If the objective
     unction takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
-    approach, unless you have a dedicated solver that is able to run efficiently for a large
+    approach, unless you have a dedicated evaluator that is able to run efficiently for a large
     number of problems.
 
     See also
     --------
-    :class:`~sigmaepsilon.math.optimize.ga.BinaryGeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
     """
 
     def __init__(

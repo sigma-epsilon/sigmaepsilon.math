@@ -40,6 +40,7 @@ def gauss_points(*args):
     are the locations, the second one are the weights.
 
     >>> from sigmaepsilon.math.numint import gauss_points
+    ...
     >>> gauss_points(2)
     array([[-0.57735027,  0.57735027],
            [ 1.        ,  1.        ]])
@@ -63,6 +64,7 @@ def gauss_points(*args):
            [ 0.57735027, -0.57735027,  0.57735027],
            [ 0.57735027,  0.57735027, -0.57735027],
            [ 0.57735027,  0.57735027,  0.57735027]]), array([1., 1., 1., 1., 1., 1., 1., 1.]))
+
     """
     nD = len(args)
     if nD == 1:

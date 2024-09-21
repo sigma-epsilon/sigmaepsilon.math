@@ -1,4 +1,4 @@
-.. _LinAlg:
+.. _api_linalg:
 
 ==============
 Linear Algebra

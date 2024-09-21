@@ -1,17 +1,21 @@
+==========
 User Guide
 ==========
 
-The user guide is an overview and explains the important features; details
-are found in the :doc:`api`.
+The user guide provides a detailed walkthrough of the library, touching
+the key features with useful background information and explanation.
+If you want to know about the details of specific classes and functions,
+please refer to the :doc:`api`.
 
 .. toctree::
     :maxdepth: 1
-    :titlesonly:
+    :caption: Getting Started
     
-    getting_started
+    user_guide/index
+    user_guide/installation
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :caption: Contents
     
     user_guide/linalg

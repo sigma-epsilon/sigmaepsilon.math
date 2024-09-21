@@ -166,6 +166,7 @@ class CubicWeightFunction(MLSWeightFunction):
     >>> w = CubicWeightFunction(core=[0.0, 0.0], sd=[0.5, 0.5])
     >>> w([0.0, 0.0])
     0.4444444444444444
+
     """
 
     def evaluate(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:

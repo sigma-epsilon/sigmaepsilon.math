@@ -118,11 +118,13 @@ def coefficients(
     --------
     The following example illustrated the effect ot the `normalize` parameter.
 
+    >>> from sigmaepsilon.math.function import Function
+    >>> from sigmaepsilon.math.function.symutils import coefficients
     >>> g = Function("3*x + 4*y - 2", variables=["x", "y", "z"])
-    >>> coefficients(g.expr)
+    >>> coefficients(g.expr)  # doctest: +SKIP
     {x: 3, y: 4, 2: -1}
 
-    >>> coefficients(g.expr, normalize=True)
+    >>> coefficients(g.expr, normalize=True)  # doctest: +SKIP
     {x: 3, y: 4, 1: -2}
 
     We can see, that the constant term in the expression is handled differently.

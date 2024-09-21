@@ -70,6 +70,7 @@ def isposdef(A: ndarray, tol=0) -> bool:
     --------
     >>> from sigmaepsilon.math.linalg import random_posdef_matrix
     >>> from sigmaepsilon.math.logical import isposdef
+    ...
     >>> A = random_posdef_matrix(3, 0.1)
     >>> isposdef(A)
     True
@@ -77,6 +78,7 @@ def isposdef(A: ndarray, tol=0) -> bool:
     >>> A[0, 0] = 0
     >>> isposdef(A)
     False
+
     """
     return np.all(np.linalg.eigvals(A) > tol)
 
@@ -92,6 +94,7 @@ def ispossemidef(A: ndarray) -> bool:
     >>> A = random_pos_semidef_matrix(3)
     >>> ispossemidef(A)
     True
+
     """
     return np.all(np.linalg.eigvals(A) >= 0)
 
@@ -159,8 +162,8 @@ def isclose(
 
 def allclose(*args, **kwargs) -> bool:
     """
-    Same as `isclose`, but it returns a single boolean that is True
-    ir False if all the values returned by `isclose` are True or False.
+    Same as `isclose`, but it returns a single boolean that is `True` or `False`
+    if all the values returned by `isclose` are `True` or `False`.
 
     See Also
     --------

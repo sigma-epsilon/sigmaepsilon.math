@@ -66,6 +66,7 @@ class Function(MetaFunction):
     --------
     >>> from sigmaepsilon.math.function import Function
     >>> import sympy as sy
+    >>> import numpy as np
 
     Define a symbolic function with positive variables. Note here that if it was not relevant
     from the aspect of the application to indicate that the variables are positive, it
@@ -87,10 +88,11 @@ class Function(MetaFunction):
     order of the arguments. If the function is defined without the variables being provided,
     it is derived from the input, but the order of the arguments may differ from what you would
     expect. Also defining the variables with SymPy might be important if you want to indicate
-    something about their nature, eg. that they are positive, as in the example above.
+    something about their nature, eg. that they are positive, as in the example above. For instance
+    if you execute the following code, the result my change from execution to execution.
 
     >>> f = Function("3*x1 + 9*x3 + x2 + x4")
-    >>> f.variables
+    >>> f.variables  # doctest: +SKIP
     (x3, x1, x4, x2)
 
     Define a numerical function. In this case the dimension of the input must be specified
@@ -100,7 +102,7 @@ class Function(MetaFunction):
     >>> def f1(x, y): return np.array([2*x, 1])
     >>> def f2(x, y): return np.array([[0, 0], [0, 0]])
     >>> f = Function(f0, f1, f2, d=2)
-    >>> f.linear
+    >>> f.is_linear
     False
 
     To call the function, call it like you would call the function `f0`:
@@ -151,6 +153,7 @@ class Function(MetaFunction):
     True
     >>> m([1, 2, -30])
     9
+
     """
 
     __slots__ = ("f0", "f1", "f2", "dimension", "domain", "vmap", "from_str")
@@ -271,6 +274,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> linear_coefficients = f1.linear_coefficients()
+
         """
         d = self.coefficients(normalize)
         if d:
@@ -295,6 +299,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> coefficients = f1.coefficients()
+
         """
         if not self.is_symbolic:
             raise TypeError("This is exclusive to symbolic functions.")
@@ -328,6 +333,7 @@ class Function(MetaFunction):
         >>> f = gen_Lagrange_1d(N=2)
         >>> f1 = Function(f[1][0], f[1][1], f[1][2])
         >>> latex_string = f1.to_latex()
+
         """
         if self.is_symbolic:
             return latex(self.expr)
@@ -345,6 +351,7 @@ class Function(MetaFunction):
         >>> from sigmaepsilon.math.function import Function
         >>> g = Function("3*x + 4*y - 2", variables=["x", "y", "z"])
         >>> g = g.subs([0, 0, 0], ["x", "y", "z"], inplace=True)
+
         """
         if not self.is_symbolic:
             raise TypeError("This is exclusive to symbolic functions.")

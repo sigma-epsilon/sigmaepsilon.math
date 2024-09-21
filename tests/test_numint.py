@@ -1,13 +1,6 @@
 import unittest
-import doctest
 
-from sigmaepsilon.math import numint
 from sigmaepsilon.math.numint import gauss_points
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(numint))
-    return tests
 
 
 class TestGaussNumInt(unittest.TestCase):

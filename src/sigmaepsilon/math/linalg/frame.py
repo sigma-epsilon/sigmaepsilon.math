@@ -102,6 +102,7 @@ class ReferenceFrame(FrameLike):
     Define a frame and rotate it around axis 'Z' with an amount of 180 degrees:
 
     >>> from sigmaepsilon.math.linalg import ReferenceFrame
+    >>> import numpy as np
     >>> A = ReferenceFrame(dim=3)
     >>> B = A.orient_new('Space', [0, 0, np.pi], 'XYZ')
 
@@ -356,6 +357,7 @@ class ReferenceFrame(FrameLike):
         >>> DCM = source.dcm(target=target)
         >>> arr_source = np.array([3 ** 0.5 / 2, 0.5, 0])
         >>> arr_target = DCM @ arr_source
+
         """
         if source is not None:
             S, T = source.dcm(), self.dual().dcm()
@@ -413,9 +415,11 @@ class ReferenceFrame(FrameLike):
         Define a standard Cartesian frame and rotate it around axis 'Z'
         with 180 degrees:
 
+        >>> from sigmaepsilon.math.linalg import ReferenceFrame
+        >>> import numpy as np
         >>> A = ReferenceFrame(dim=3)
         >>> A.orient('Space', [0, 0, np.pi], 'XYZ')
-        array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
+        Array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
                [-1.2246468e-16, -1.0000000e+00,  0.0000000e+00],
                [ 0.0000000e+00,  0.0000000e+00,  1.0000000e+00]])
 
@@ -457,6 +461,7 @@ class ReferenceFrame(FrameLike):
 
         >>> A = ReferenceFrame(dim=3)
         >>> B = A.orient_new('Space', [0, 0, np.pi], 'XYZ')
+
         """
         result = self.deepcopy(name=name)
         if (len(args) + len(kwargs)) == 0:
@@ -487,9 +492,11 @@ class ReferenceFrame(FrameLike):
         Define a standard Cartesian frame and rotate it around axis 'Z'
         with 180 degrees:
 
+        >>> from sigmaepsilon.math.linalg import ReferenceFrame
+        >>> import numpy as np
         >>> A = ReferenceFrame(dim=3)
         >>> A.rotate('Space', [0, 0, np.pi], 'XYZ')
-        array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
+        Array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
                [-1.2246468e-16, -1.0000000e+00,  0.0000000e+00],
                [ 0.0000000e+00,  0.0000000e+00,  1.0000000e+00]])
 
@@ -637,7 +644,7 @@ class RectangularFrame(ReferenceFrame):
     --------
     For operators *= and /= the type of the instance is unchanged
 
-    >>> from sigmaepsilon.math.linalg import ReferenceFrame
+    >>> from sigmaepsilon.math.linalg import RectangularFrame
     >>> A = RectangularFrame(dim=3)
     >>> A *= 2
     >>> type(A)
@@ -717,7 +724,8 @@ class CartesianFrame(RectangularFrame):
     --------
     For operators *= and /= the type of the instance is cast to RectangularFrame
 
-    >>> from sigmaepsilon.math.linalg import ReferenceFrame
+    >>> from sigmaepsilon.math.linalg import CartesianFrame
+    >>> import numpy as np
     >>> A = CartesianFrame(dim=3)
     >>> A *= 2
     >>> type(A)
@@ -733,7 +741,7 @@ class CartesianFrame(RectangularFrame):
 
     >>> A = CartesianFrame(dim=3)
     >>> A.orient('Space', [0, 0, np.pi], 'XYZ')
-    array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
+    Array([[-1.0000000e+00,  1.2246468e-16,  0.0000000e+00],
            [-1.2246468e-16, -1.0000000e+00,  0.0000000e+00],
            [ 0.0000000e+00,  0.0000000e+00,  1.0000000e+00]])
 

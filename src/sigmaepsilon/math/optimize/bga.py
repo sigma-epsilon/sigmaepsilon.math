@@ -16,10 +16,9 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     In other words, it solves the following problem:
 
     .. math::
-        :nowrap:
 
         \\begin{eqnarray}
-            & minimize&  \quad  f(\mathbf{x}) \quad in \quad \mathbf{x} \in \mathbf{R}^n.
+            & minimize&  \\quad  f(\\mathbf{x}) \\quad in \\quad \\mathbf{x} \\in \\mathbf{R}^n.
         \\end{eqnarray}
 
     Parameters
@@ -53,13 +52,11 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = BGA.solve()
     >>> x = BGA.best_phenotype()
     >>> fx = Rosenbrock(x)
-    ...
 
     The following code prints the history using the `evolve` generator of
     the object
 
     >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm
-    >>> import matplotlib.pyplot as plt
     >>> def Rosenbrock(x):
     ...     a, b = 1, 100
     ...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
@@ -68,7 +65,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = [BGA.evolve(1) for _ in range(100)]
     >>> x = BGA.best_phenotype()
     >>> fx = Rosenbrock(x)
-    ...
+
     """
 
     def populate(self, genotypes: ndarray = None) -> ndarray:

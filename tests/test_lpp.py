@@ -1,17 +1,9 @@
 import unittest
-import doctest
 import numpy as np
 
 from sigmaepsilon.math.function import Function, Equality, InEquality, Relation
 from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
 import sympy as sy
-
-from sigmaepsilon.math import optimize
-
-
-def load_tests(loader, tests, ignore):  # pragma: no cover
-    tests.addTests(doctest.DocTestSuite(optimize.lp))
-    return tests
 
 
 class TestLPP(unittest.TestCase):

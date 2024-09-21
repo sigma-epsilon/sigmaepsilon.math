@@ -64,6 +64,7 @@ def linsolve(
     To solve a simple system of equation:
 
     >>> from sigmaepsilon.math.linalg.solve import linsolve
+    >>> import numpy as np
     >>> A = np.array([[3, 1, 2], [1, 1, 1], [2, 1, 2]], dtype=float)
     >>> B = np.array([11, 6, 10], dtype=float)
     >>> X = linsolve(A, B, method='Gauss-Jordan')
@@ -96,6 +97,7 @@ def linsolve(
 
     >>> B
     array([11.,  6., 10.])
+
     """
     # FIXME : check if presc_bool and presc_val have matching shape to A and B
     # FIXME : check if presc_bool is a boolean array
