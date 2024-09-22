@@ -61,10 +61,12 @@ class LinearProgrammingProblem:
     >>> from sigmaepsilon.math.optimize import LinearProgrammingProblem as LPP
     >>> from sigmaepsilon.math.function import Function, Relation
     >>> import sympy as sy
+    >>> 
     >>> x1, x2, x3, x4 = variables = sy.symbols('x1:5')
     >>> obj = Function(3*x1 + 9*x3 + x2 + x4, variables=variables)
     >>> eq1 = Relation(x1 + 2*x3 + x4 - 4, variables=variables)
     >>> eq2 = Relation(x2 + x3 - x4 - 2, variables=variables)
+    >>>
     >>> bounds = [(0, None), (0, None), (0, None), (0, None)]
     >>> problem = LPP(obj, [eq1, eq2], variables=variables, bounds=bounds)
     >>> problem.solve().x

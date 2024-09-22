@@ -119,6 +119,20 @@ intersphinx_mapping = {
     "sigmaepsilon.deepdict": (r"https://sigmaepsilondeepdict.readthedocs.io/en/latest/", None),
 }
 
+# sphinx_copybutton configuration --------------------------------------------
+
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
+copybutton_only_copy_prompt_lines = True
+
+# napoleon config ---------------------------------------------------------
+
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = True
+napoleon_use_admonition_for_examples = True
+napoleon_use_ivar = True
+
 # -- bibtex configuration -------------------------------------------------
 # https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html
 

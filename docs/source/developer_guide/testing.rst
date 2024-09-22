@@ -7,7 +7,7 @@ The following command runs all tests and creates a html report in a folder named
 
 .. code-block:: shell
 
-   python -m pytest --cov-report html --cov-config=.coveragerc --cov sigmaepsilon.math
+   python -m pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.math
 
 Alternatively, you can use Poetry to test the package:
 
