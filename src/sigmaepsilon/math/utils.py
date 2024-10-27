@@ -127,11 +127,7 @@ def atleast1d(a: Union[numbers.Number, Iterable]) -> ndarray:
     array([1])
 
     """
-    if not isinstance(a, Iterable):
-        a = [
-            a,
-        ]
-    return np.array(a)
+    return np.atleast_1d(a)
 
 
 def atleast2d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:

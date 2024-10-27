@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sigmaepsilon.math"
-version = "2.1.0"
+version = "2.1.1"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
 classifiers=[  # https://pypi.org/classifiers/
         "Development Status :: 5 - Production/Stable",
