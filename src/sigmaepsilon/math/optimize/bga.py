@@ -77,19 +77,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = bga.solve()
     >>> champion = bga.champion
     >>> x = champion.phenotype
-    >>> fx = champion.fitness
-
-    The following code collects the history using the :func:`evolve` method of
-    the instance and inspecting the raigning champion after each iteration.
-
-    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=100, minimize=True)
-    >>> history = []
-    >>> for i in range(10):
-    ...     bga.evolve(1)
-    ...     champion = bga.champion
-    ...     x = champion.phenotype
-    ...     fx = champion.fitness
-    ...     history.append((x, fx))
+    >>> fx = champion.fittness
 
     """
 
