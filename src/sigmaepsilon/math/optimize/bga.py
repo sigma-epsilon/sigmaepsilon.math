@@ -18,8 +18,12 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     .. math::
 
         \\begin{eqnarray}
-            & minimize&  \\quad  f(\\mathbf{x}) \\quad in \\quad \\mathbf{x} \\in \\mathbf{R}^n.
+            & maximize&  \\quad  f(\\mathbf{x}) \\quad in \\quad \\mathbf{x} \\in \\mathbf{R}^n.
         \\end{eqnarray}
+
+    .. note::
+       This class is designed for maximizing the objective function. To minimize it, either negate
+       the objective function or pass ``minimize=True`` when instantiating the class.
 
     Parameters
     ----------
@@ -48,6 +52,8 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         The age is the number of generations a candidate spends at the top
         (being the best candidate). Setting an upper limit to this value is a kind
         of stopping criterion. Default is 5.
+    minimize: bool, Optional
+        If True, the objective function is minimized. Default is False.
 
     See Also
     --------
@@ -61,24 +67,29 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
     >>> from sigmaepsilon.math.optimize import BinaryGeneticAlgorithm as BGA
     >>>
-    >>> def Rosenbrock(x):
+    >>> def rosenbrock(x):
     ...     a, b = 1, 100
     ...     return (a-x[0])**2 + b*(x[1]-x[0]**2)**2
     >>>
     >>>
     >>> ranges = [[-10, 10], [-10, 10]]
-    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=200)
+    >>> bga = BGA(rosenbrock, ranges, length=12, nPop=100, minimize=True)
     >>> _ = bga.solve()
-    >>> x = bga.best_phenotype()
-    >>> fx = Rosenbrock(x)
+    >>> champion = bga.champion
+    >>> x = champion.phenotype
+    >>> fx = champion.fitness
 
-    The following code prints the history using the :func:`evolve` generator method of
-    the instance
+    The following code collects the history using the :func:`evolve` method of
+    the instance and inspecting the raigning champion after each iteration.
 
-    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=200)
-    >>> _ = [bga.evolve(1) for _ in range(100)]
-    >>> x = bga.best_phenotype()
-    >>> fx = Rosenbrock(x)
+    >>> bga = BGA(Rosenbrock, ranges, length=12, nPop=100, minimize=True)
+    >>> history = []
+    >>> for i in range(10):
+    ...     bga.evolve(1)
+    ...     champion = bga.champion
+    ...     x = champion.phenotype
+    ...     fx = champion.fitness
+    ...     history.append((x, fx))
 
     """
 

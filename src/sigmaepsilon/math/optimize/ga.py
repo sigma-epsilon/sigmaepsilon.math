@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
+import operator
+
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
@@ -77,6 +79,10 @@ class GeneticAlgorithm:
     use a custom stopping criteria by implementing :func:`stopping_criteria`.
     See the :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` class for an example.
 
+    .. note::
+       This class is designed for maximizing the objective function. To minimize it, either negate
+       the objective function or pass ``minimize=True`` when instantiating the class.
+
     Parameters
     ----------
     fnc: Callable
@@ -104,6 +110,8 @@ class GeneticAlgorithm:
         The age is the number of generations a candidate spends at the top
         (being the best candidate). Setting an upper limit to this value is a kind
         of stopping criterion. Default is 5.
+    minimize: bool, Optional
+        If True, the objective function is minimized. Default is False.
 
     Note
     ----
@@ -138,6 +146,7 @@ class GeneticAlgorithm:
         "maxage",
         "nIter",
         "_is_symbolic_Function",
+        "_celebrate_op",
     ]
 
     def __init__(
@@ -153,6 +162,7 @@ class GeneticAlgorithm:
         miniter: int = 0,
         elitism: int = 1,
         maxage: int = 5,
+        minimize: bool = False,
     ):
         super().__init__()
         self.fnc = fnc
@@ -176,6 +186,7 @@ class GeneticAlgorithm:
         self._pnenotypes = None
         self._fittness = None
         self._champion: Genom | None = None
+        self._celebrate_op = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -183,6 +194,7 @@ class GeneticAlgorithm:
             miniter=miniter,
             elitism=elitism,
             maxage=maxage,
+            minimize=minimize,
         )
         self.reset()
 
@@ -250,6 +262,7 @@ class GeneticAlgorithm:
         miniter: int | None = None,
         elitism: int | None = None,
         maxage: int | None = None,
+        minimize: bool | None = None,
     ) -> "GeneticAlgorithm":
         """
         Sets the hyperparameters of the algorithm.
@@ -268,6 +281,8 @@ class GeneticAlgorithm:
             Elitism.
         maxage: int, Optional
             Maximum age of the champion.
+        minimize: bool, Optional
+            If True, the objective function is minimized. Default is False.
         """
         if p_c is not None:
             self.p_c = p_c
@@ -284,6 +299,8 @@ class GeneticAlgorithm:
 
         if self.miniter > self.maxiter:
             raise ValueError("'maxiter' must be greater than 'miniter'")
+
+        self._celebrate_op = operator.lt if minimize else operator.gt
 
         return self
 
@@ -306,11 +323,18 @@ class GeneticAlgorithm:
         """
         for _ in range(cycles):
             next(self._evolver)
+            candidate: Genom = self.best_candidate()
+            self._celebrate(candidate)
         return self.genotypes
 
     def solve(self, recycle: bool = False, **kwargs) -> Genom:
         """
         Solves the problem and returns the best phenotype.
+
+        .. note::
+           This class is designed for maximizing the objective function. To minimize it,
+           either negate the objective function or pass ``minimize=True`` when instantiating
+           the class.
 
         Parameters
         ----------
@@ -324,6 +348,7 @@ class GeneticAlgorithm:
         -------
         :class:`~sigmaepsilon.math.optimize.ga.Genom`
             The best candidate.
+
         """
         self.reset() if not recycle else None
         self.set_solution_params(**kwargs)
@@ -331,9 +356,7 @@ class GeneticAlgorithm:
         nIter, finished = 0, False
 
         while (not finished and nIter < self.maxiter) or (nIter < self.miniter):
-            self.evolve()
-            candidate: Genom = self.best_candidate()
-            self._celebrate(candidate)
+            self.evolve(1)
             finished = self.stopping_criteria()
             nIter += 1
 
@@ -360,29 +383,13 @@ class GeneticAlgorithm:
             return np.array([self.fnc(x) for x in phenotypes], dtype=float)
 
     def best_phenotype(self) -> ndarray:
-        """
-        Returns the best phenotype.
-
-        Parameters
-        ----------
-        lastknown: bool, Optional
-            If True, the last evaluation is used. If False, the phenotypes
-            are evaluated before selecting the best. In this case the results
-            are not stored. Default is True.
-        """
+        """Returns the best phenotype."""
         return self.best_candidate().phenotype
 
     def best_candidate(self) -> Genom:
         """
         Returns data about the best candidate in the population like index,
         phenotype, genotype and fittness value.
-
-        Parameters
-        ----------
-        lastknown: bool, Optional
-            If True, the last evaluation is used. If False, the phenotypes
-            are evaluated before selecting the best. In this case the results
-            are not stored. Default is True.
         """
         fittness = self.fittness
         index = np.argmin(fittness)
@@ -402,7 +409,8 @@ class GeneticAlgorithm:
             self._champion = genom
             self._champion.age = 0
         else:
-            if genom > self.champion:
+            has_new_champion = self._celebrate_op(genom, self.champion)
+            if has_new_champion:
                 self._champion = genom
                 self._champion.age = 0
         self._champion.age += 1
