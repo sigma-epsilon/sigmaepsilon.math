@@ -45,7 +45,11 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     miniter: int, Optional
         The minimum number of iterations. Default is 100.
     elitism: float or int, Optional
-        Default is 1
+        Determines the portion of the population designated as elite, which automatically survives
+        to the next generation. If set to 1 (default), the entire population survives. If less than
+        or equal to 1, it specifies a fraction of the population. If greater than 1, it indicates the
+        exact number of individuals to be selected as elite. The default value of 1 assures that the
+        reigning champion is always preserved. Default is 1.
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
@@ -170,8 +174,10 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         """
         fittness = self.evaluate(phenotypes)
         winners, others = self.divide(fittness)
+        winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
             candidates = np.random.choice(others, 3, replace=False)
-            winner = np.argsort([fittness[ID] for ID in candidates])[0]
+            argsort = np.argsort([fittness[ID] for ID in candidates])
+            winner = argsort[0] if self._minimize else argsort[-1]
             winners.append(candidates[winner])
         return np.array([genotypes[w] for w in winners], dtype=float)
