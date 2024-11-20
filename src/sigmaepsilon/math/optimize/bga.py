@@ -1,4 +1,3 @@
-from typing import Tuple
 import numpy as np
 from numpy import ndarray
 
@@ -46,10 +45,10 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         The minimum number of iterations. Default is 100.
     elitism: float or int, Optional
         Determines the portion of the population designated as elite, which automatically survives
-        to the next generation. If set to 1 (default), the entire population survives. If less than
-        or equal to 1, it specifies a fraction of the population. If greater than 1, it indicates the
-        exact number of individuals to be selected as elite. The default value of 1 assures that the
-        reigning champion is always preserved. Default is 1.
+        to the next generation. If less than or equal to 1, it specifies a fraction of the population. 
+        If greater than 1, it indicates the exact number of individuals to be selected as elite. 
+        The default value of 1 assures that the reigning champion is always preserved. To turn this off, 
+        det the value to None. Default is 1.
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
@@ -131,12 +130,12 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
     def crossover(
         self, parent1: ndarray, parent2: ndarray, nCut: int | None = None
-    ) -> Tuple[ndarray]:
+    ) -> tuple[ndarray, ndarray]:
         """
         Performs crossover on the parents `parent1` and `parent2`,
         using an `nCut` number of cuts and returns two childs.
         """
-        if np.random.rand() > self.p_c:
+        if np.random.rand() > self.p_c:  # pragma: no cover
             return parent1, parent2
 
         if nCut is None:

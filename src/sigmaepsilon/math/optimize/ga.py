@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
+from types import NoneType
 import operator
 
 import numpy as np
@@ -102,12 +103,12 @@ class GeneticAlgorithm:
         The maximum number of iterations. Default is 200.
     miniter: int, Optional
         The minimum number of iterations. Default is 100.
-    elitism: float or int, Optional
+    elitism: float | int | None, Optional
         Determines the portion of the population designated as elite, which automatically survives
-        to the next generation. If set to 1 (default), the entire population survives. If less than
-        or equal to 1, it specifies a fraction of the population. If greater than 1, it indicates the
-        exact number of individuals to be selected as elite. The default value of 1 assures that the
-        reigning champion is always preserved. Default is 1.
+        to the next generation. If less than or equal to 1, it specifies a fraction of the population.
+        If greater than 1, it indicates the exact number of individuals to be selected as elite.
+        The default value of 1 assures that the reigning champion is always preserved. To turn this off,
+        det the value to None. Default is 1.
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
@@ -165,7 +166,7 @@ class GeneticAlgorithm:
         nPop: int = 100,
         maxiter: int = 200,
         miniter: int = 0,
-        elitism: int = 1,
+        elitism: int | float | NoneType = 1,
         maxage: int = 5,
         minimize: bool = False,
     ):
@@ -190,9 +191,10 @@ class GeneticAlgorithm:
         self._genotypes = None
         self._pnenotypes = None
         self._fittness = None
-        self._champion: Genom | None = None
+        self._champion: Genom | NoneType = None
         self._celebrate_op = None
         self._minimize = False
+        self.elitism = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -259,17 +261,7 @@ class GeneticAlgorithm:
         self._champion = None
         return self
 
-    def set_solution_params(
-        self,
-        *,
-        p_c: float | None = None,
-        p_m: float | None = None,
-        maxiter: int | None = None,
-        miniter: int | None = None,
-        elitism: float | int | None = None,
-        maxage: int | None = None,
-        minimize: bool | None = None,
-    ) -> "GeneticAlgorithm":
+    def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
         """
         Sets the hyperparameters of the algorithm.
 
@@ -285,32 +277,45 @@ class GeneticAlgorithm:
             Minimum number of iterations.
         elitism: float or int, Optional
             Determines the portion of the population designated as elite, which automatically survives
-            to the next generation. If set to 1 (default), the entire population survives. If less than
-            or equal to 1, it specifies a fraction of the population. If greater than 1, it indicates the
-            exact number of individuals to be selected as elite.
+            to the next generation. If less than or equal to 1, it specifies a fraction of the population.
+            If greater than 1, it indicates the exact number of individuals to be selected as elite.
+            A value of 1 assures that the reigning champion is always preserved. To turn this off,
+            set the value to None.
         maxage: int, Optional
             Maximum age of the champion.
         minimize: bool, Optional
             If True, the objective function is minimized. Default is False.
         """
-        if p_c is not None:
-            self.p_c = p_c
-        if p_m is not None:
-            self.p_m = p_m
-        if maxiter is not None:
-            self.maxiter = maxiter
-        if miniter is not None:
-            self.miniter = miniter
-        if elitism is not None:
-            self.elitism = elitism
-        if maxage is not None:
-            self.maxage = maxage
+        if "p_c" in kwargs:
+            self.p_c = kwargs["p_c"]
+        if "p_m" in kwargs:
+            self.p_m = kwargs["p_m"]
+        if "maxiter" in kwargs:
+            self.maxiter = kwargs["maxiter"]
+        if "miniter" in kwargs:
+            self.miniter = kwargs["miniter"]
+        if "elitism" in kwargs:
+            self.elitism = kwargs["elitism"]
+        if "maxage" in kwargs:
+            self.maxage = kwargs["maxage"]
+        if "minimize" in kwargs:
+            self._minimize = kwargs["minimize"]
+
+        if isinstance(self.elitism, (int, float)):
+            if self.elitism <= 0:
+                raise ValueError("'elitism' must be greater than 0")
+
+            if self.elitism > 1:
+                if not isinstance(self.elitism, int):
+                    raise ValueError("'elitism' must be an integer if greater than 1")
+
+                if self.elitism >= self.nPop:
+                    raise ValueError("'elitism' must be less than 'nPop'")
 
         if self.miniter > self.maxiter:
             raise ValueError("'maxiter' must be greater than 'miniter'")
 
-        self._celebrate_op = operator.lt if minimize else operator.gt
-        self._minimize = minimize
+        self._celebrate_op = operator.lt if self._minimize else operator.gt
 
         return self
 
