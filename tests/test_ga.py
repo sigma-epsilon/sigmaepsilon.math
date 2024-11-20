@@ -140,14 +140,11 @@ class TestBGA(unittest.TestCase):
         obj = Rosenbrock_sym()
         ranges = [[-10, 10], [-10, 10]]
         bga = BinaryGeneticAlgorithm(obj, ranges, length=12, nPop=10, minimize=True)
-        bga.evolve(1)
-        champion = bga.champion
-        best_phenotype = bga.best_phenotype()
-        self.assertTrue(np.all(champion.phenotype == best_phenotype))
-        bga.evolve(1)
-        champion = bga.champion
-        best_phenotype = bga.best_phenotype()
-        self.assertTrue(np.all(champion.phenotype == best_phenotype))
+        for i in range(15):
+            bga.evolve(1)
+            champion = bga.champion
+            best_phenotype = bga.best_phenotype()
+            self.assertTrue(np.all(champion.phenotype == best_phenotype))
 
 
 if __name__ == "__main__":
