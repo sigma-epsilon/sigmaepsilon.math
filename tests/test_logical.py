@@ -76,7 +76,7 @@ class TestLogical(unittest.TestCase):
         def assertAssert(fnc, *args, **kwargs):
             try:
                 fnc(*args, **kwargs)
-                self.assertTrue(False)
+                self.assertTrue(False)  # pragma: no cover
             except AssertionError as e:
                 pass
 
