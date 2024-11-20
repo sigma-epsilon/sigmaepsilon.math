@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
+from types import NoneType
 import operator
 
 import numpy as np
@@ -102,8 +103,12 @@ class GeneticAlgorithm:
         The maximum number of iterations. Default is 200.
     miniter: int, Optional
         The minimum number of iterations. Default is 100.
-    elitism: float or int, Optional
-        Default is 1
+    elitism: float | int | None, Optional
+        Determines the portion of the population designated as elite, which automatically survives
+        to the next generation. If less than or equal to 1, it specifies a fraction of the population.
+        If greater than 1, it indicates the exact number of individuals to be selected as elite.
+        The default value of 1 assures that the reigning champion is always preserved. To turn this off,
+        det the value to None. Default is 1.
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
@@ -147,6 +152,7 @@ class GeneticAlgorithm:
         "nIter",
         "_is_symbolic_Function",
         "_celebrate_op",
+        "_minimize",
     ]
 
     def __init__(
@@ -160,7 +166,7 @@ class GeneticAlgorithm:
         nPop: int = 100,
         maxiter: int = 200,
         miniter: int = 0,
-        elitism: int = 1,
+        elitism: int | float | NoneType = 1,
         maxage: int = 5,
         minimize: bool = False,
     ):
@@ -185,8 +191,10 @@ class GeneticAlgorithm:
         self._genotypes = None
         self._pnenotypes = None
         self._fittness = None
-        self._champion: Genom | None = None
+        self._champion: Genom | NoneType = None
         self._celebrate_op = None
+        self._minimize = False
+        self.elitism = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -253,17 +261,7 @@ class GeneticAlgorithm:
         self._champion = None
         return self
 
-    def set_solution_params(
-        self,
-        *,
-        p_c: float | None = None,
-        p_m: float | None = None,
-        maxiter: int | None = None,
-        miniter: int | None = None,
-        elitism: int | None = None,
-        maxage: int | None = None,
-        minimize: bool | None = None,
-    ) -> "GeneticAlgorithm":
+    def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
         """
         Sets the hyperparameters of the algorithm.
 
@@ -277,30 +275,47 @@ class GeneticAlgorithm:
             Maximum number of iterations.
         miniter: int, Optional
             Minimum number of iterations.
-        elitism: int, Optional
-            Elitism.
+        elitism: float or int, Optional
+            Determines the portion of the population designated as elite, which automatically survives
+            to the next generation. If less than or equal to 1, it specifies a fraction of the population.
+            If greater than 1, it indicates the exact number of individuals to be selected as elite.
+            A value of 1 assures that the reigning champion is always preserved. To turn this off,
+            set the value to None.
         maxage: int, Optional
             Maximum age of the champion.
         minimize: bool, Optional
             If True, the objective function is minimized. Default is False.
         """
-        if p_c is not None:
-            self.p_c = p_c
-        if p_m is not None:
-            self.p_m = p_m
-        if maxiter is not None:
-            self.maxiter = maxiter
-        if miniter is not None:
-            self.miniter = miniter
-        if elitism is not None:
-            self.elitism = elitism
-        if maxage is not None:
-            self.maxage = maxage
+        if "p_c" in kwargs:
+            self.p_c = kwargs["p_c"]
+        if "p_m" in kwargs:
+            self.p_m = kwargs["p_m"]
+        if "maxiter" in kwargs:
+            self.maxiter = kwargs["maxiter"]
+        if "miniter" in kwargs:
+            self.miniter = kwargs["miniter"]
+        if "elitism" in kwargs:
+            self.elitism = kwargs["elitism"]
+        if "maxage" in kwargs:
+            self.maxage = kwargs["maxage"]
+        if "minimize" in kwargs:
+            self._minimize = kwargs["minimize"]
+
+        if isinstance(self.elitism, (int, float)):
+            if self.elitism <= 0:
+                raise ValueError("'elitism' must be greater than 0")
+
+            if self.elitism > 1:
+                if not isinstance(self.elitism, int):
+                    raise ValueError("'elitism' must be an integer if greater than 1")
+
+                if self.elitism >= self.nPop:
+                    raise ValueError("'elitism' must be less than 'nPop'")
 
         if self.miniter > self.maxiter:
             raise ValueError("'maxiter' must be greater than 'miniter'")
 
-        self._celebrate_op = operator.lt if minimize else operator.gt
+        self._celebrate_op = operator.lt if self._minimize else operator.gt
 
         return self
 
@@ -383,16 +398,31 @@ class GeneticAlgorithm:
             return np.array([self.fnc(x) for x in phenotypes], dtype=float)
 
     def best_phenotype(self) -> ndarray:
-        """Returns the best phenotype."""
+        """
+        Returns the best phenotype from the active population.
+
+        .. note::
+           The value returned by this method is the phenotype of the best candidate
+           from the active population, but this is not necessarily the best known solution
+           to the optimization problem at hand. If you want to get the reignng champion, use
+           the :func:`champion` property.
+        """
         return self.best_candidate().phenotype
 
     def best_candidate(self) -> Genom:
         """
-        Returns data about the best candidate in the population like index,
-        phenotype, genotype and fittness value.
+        Returns the Genom of the best candidate in the active population.
+
+        .. note::
+           The value returned by this method is the Genom of the best candidate
+           from the active population, but this is not necessarily the best known solution
+           to the optimization problem at hand. If you want to get the reignng champion, use
+           the :func:`champion` property.
+
         """
         fittness = self.fittness
-        index = np.argmin(fittness)
+        argfunc = np.argmin if self._minimize else np.argmax
+        index = argfunc(fittness)
         return Genom(
             phenotype=self.phenotypes[index],
             genotype=self.genotypes[index],
@@ -415,7 +445,7 @@ class GeneticAlgorithm:
                 self._champion.age = 0
         self._champion.age += 1
 
-    def divide(self, fittness: ndarray | None = None) -> Tuple[list]:
+    def divide(self, fittness: ndarray | None = None) -> tuple[ndarray, ndarray]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.
@@ -435,18 +465,23 @@ class GeneticAlgorithm:
         """
         fittness = self.fittness if fittness is None else fittness
         assert fittness is not None, "No available fittness data detected."
-        if self.elitism < 1:
+
+        if self.elitism is None:
+            return [], list(range(self.nPop))
+
+        if self.elitism is not None:
             argsort = np.argsort(fittness)
+            if not self._minimize:
+                argsort = argsort[::-1]
+
+        if self.elitism < 1:
             elit = argsort[: int(self.nPop * self.elitism)]
             others = argsort[int(self.nPop * self.elitism) :]
-        elif self.elitism > 1:
-            argsort = np.argsort(fittness)
+        else:
             elit = argsort[: self.elitism]
             others = argsort[self.elitism :]
-        else:
-            elit = []
-            others = list(range(self.nPop))
-        return list(elit), others
+
+        return elit, others
 
     @classmethod
     def random_parents_generator(cls, genotypes: ndarray) -> Generator:

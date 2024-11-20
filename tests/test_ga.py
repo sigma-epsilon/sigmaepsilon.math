@@ -76,6 +76,34 @@ class TestBGA(unittest.TestCase):
         BGA.best_candidate()
         BGA.random_parents_generator(BGA.genotypes)
         BGA.reset()
+        
+    def test_miniter_gt_maxiter(self):
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        with self.assertRaises(ValueError):
+            BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, miniter=100, maxiter=10)
+
+    def test_invalid_elitism_value(self):
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+
+        with self.assertRaises(ValueError):
+            BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=-1)
+
+        with self.assertRaises(ValueError):
+            BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=0)
+
+        with self.assertRaises(ValueError):
+            BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=1.5)
+
+        with self.assertRaises(ValueError):
+            BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=101)
 
     def test_BGA_elitism_eq_1(self):
         def f(x):
@@ -84,6 +112,16 @@ class TestBGA(unittest.TestCase):
         f.dimension = 2
         ranges = [[-10, 10], [-10, 10]]
         BGA = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=1)
+        BGA.evolve()
+        BGA.divide()
+        
+    def test_BGA_elitism_eq_None(self):
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        BGA = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=100, elitism=None)
         BGA.evolve()
         BGA.divide()
 
@@ -123,7 +161,7 @@ class TestBGA(unittest.TestCase):
         ranges = [[-10, 10], [-10, 10]]
         bga = BinaryGeneticAlgorithm(obj, ranges, length=12, nPop=200)
         bga.evolve(2)
-        
+
     def test_celebration_operators(self):
         obj = Rosenbrock_sym()
         ranges = [[-10, 10], [-10, 10]]
@@ -135,19 +173,16 @@ class TestBGA(unittest.TestCase):
         self.assertEqual(bga._celebrate_op, operator.lt)
         bga.set_solution_params(minimize=False)
         self.assertEqual(bga._celebrate_op, operator.gt)
-        
+
     def test_champion_consistency(self):
         obj = Rosenbrock_sym()
         ranges = [[-10, 10], [-10, 10]]
         bga = BinaryGeneticAlgorithm(obj, ranges, length=12, nPop=10, minimize=True)
-        bga.evolve(1)
-        champion = bga.champion
-        best_phenotype = bga.best_phenotype()
-        self.assertTrue(np.all(champion.phenotype == best_phenotype))
-        bga.evolve(1)
-        champion = bga.champion
-        best_phenotype = bga.best_phenotype()
-        self.assertTrue(np.all(champion.phenotype == best_phenotype))
+        for i in range(15):
+            bga.evolve(1)
+            champion = bga.champion
+            best_phenotype = bga.best_phenotype()
+            self.assertTrue(np.all(champion.phenotype == best_phenotype))
 
 
 if __name__ == "__main__":
