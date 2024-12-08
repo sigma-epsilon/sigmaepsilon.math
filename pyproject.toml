@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sigmaepsilon.math"
-version = "2.2.0"
+version = "2.2.1"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
 classifiers=[  # https://pypi.org/classifiers/
         "Development Status :: 5 - Production/Stable",
@@ -31,8 +31,8 @@ packages = [{ include = "sigmaepsilon", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-sigmaepsilon-core = ">=1.2.1"
-sigmaepsilon-deepdict = ">=1.2.4"
+sigmaepsilon-core = "^1.2.2"
+sigmaepsilon-deepdict = "^3.0.1"
 numba = ">=0.56.4"
 numpy = "^1.26.4"
 scipy = "^1.12.0"
@@ -41,7 +41,16 @@ sympy = ">=1.11.1"
 pydantic = ">=2.0.2"
 
 # packages pinned for vulnerability reasons
-zipp = ">=3.19.1"  
+zipp = ">=3.19.1"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.2"
