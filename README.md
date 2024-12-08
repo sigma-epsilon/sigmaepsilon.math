@@ -6,7 +6,7 @@
 ![[PyPI - Version]](https://img.shields.io/pypi/v/sigmaepsilon.math)
 [![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math/graph/badge.svg?token=GP9FSFQW34)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.math)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/e2dc5070cbb44277b01303db2ef6cac9)](https://app.codacy.com/gh/sigma-epsilon/sigmaepsilon.math/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Python](https://img.shields.io/badge/python-3.10|3.11|3.12-blue)](https://www.python.org)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sigmaepsilon.math)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 `SigmaEpsilon.Math` is a Python library that provides tools to formulate and solve problems related to all kinds of scientific disciplines. It is a part of the SigmaEpsilon ecosystem, which is designed mainly to solve problems related to computational solid mechanics, but if something is general enough, it ends up here. A good example is the included vector and tensor algebra modules, or the various optimizers, which are applicable in a much broader context than they were originally designed for.
