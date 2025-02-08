@@ -16,7 +16,7 @@ concepts. For example, you might see statements like
   (from an article -sadly- written by someone with a PhD in machine learning)
 - "A Tensor is a N-dimensional Matrix." (from a blog post on a popular educational website)
 - "A vector is a 1-dimensional tensor." (from a blog post on a popular educational website)
-- "A matrix is a vector of vectors." (from somewhere I don't remember)
+- "A matrix is a two-dimensional list of vectors." (from an article on Medium)
 - "Tensors are multi-dimensional arrays with a uniform type." (from the learning materials of a popular deep-learning library)
 
 When misconceptions like this become widespread, they can cause confusion in at least two 
@@ -48,7 +48,7 @@ and its terminology has evolved over time, making it understandable that people 
 simply to provide clarity and ensure that we share a common understanding.**
 
 Learning objectives
-============
+===================
 
 By the end of this setion of the theory guide, you should be able to:
 
@@ -56,11 +56,6 @@ By the end of this setion of the theory guide, you should be able to:
 - Understand vectors, vector spaces, linear maps, matrices, norms, the essential building blocks of 
   linear algebra.
 - To be able to point out the incorrectness of the statements above.
-
-.. note::
-
-   Throughout this section, we use the conventional notation where vectors are written in boldface
-   (e.g. :math:`\mathbf{v}`) and scalars are typically written in plain type (e.g. :math:`\alpha`).
 
 Introduction
 ============
@@ -123,7 +118,7 @@ Vectors and Vector Spaces
       (x_1, \ldots, x_n).
 
    Two lists are equal if and only if they have the same length and the same elements in the same order. In the list
-   above, $x_j$ is the $j^{th}$ **coordinate** of the list.
+   above, $x_j$ is the $j^{th}$ **coordinate** (or component) of the list.
 
 This definition aligns well with the definition of a list in Python. A list differs from a set in terms of order 
 and repetition of elements. A set is an unordered collection of unique elements, while a list is an ordered collection 
@@ -137,8 +132,8 @@ as we will see shortly.
 .. admonition:: **Definition** (field, :math:`\mathbf{F}^{n}`)
    :class: definition-box
 
-   A **field** is a set of numbers that can be added, subtracted, multiplied, and divided. The most common fields are the real numbers
-   :math:`\mathbf{R}` and the complex numbers :math:`\mathbf{C}`. 
+   A **field** is a set of numbers that can be added, subtracted, multiplied, and divided. The most common fields 
+   are the real numbers :math:`\mathbf{R}` and the complex numbers :math:`\mathbf{C}`. 
    
    The set of all lists of length $n$ with elements from a field :math:`\mathbf{F}`
    is denoted :math:`\mathbf{F}^{n}`.
@@ -184,31 +179,31 @@ vectors over a field, saying "vectors are 1d arrays" is too narrow.
 .. admonition:: **Definition** (span, spans)
    :class: definition-box
 
-   The set of all linear combinations of a list of vectors $v_1, \\ldots, v_m$ in V is called the **span** of $v_1, \\ldots, v_m$,
-   denoted $span(v_1, \\ldots, v_m)$. In other words,
+   The set of all linear combinations of a list of vectors $v_1, \\ldots, v_m$ in $V$ is called the **span** of $v_1, 
+   \\ldots, v_m$, denoted $span(v_1, \\ldots, v_m)$. In other words,
 
    :math:`span(v_1, \ldots, v_m) = \{ a_1 v_1 + \ldots + a_m v_m : a_1, \ldots, a_m \in \mathbf{F} \}`.
 
-   The span of the empty list $()$ is defined to be $\{0\}$. If $span(v_1, \\ldots, v_m)$ equals $V$, we say that $v_1, \\ldots, v_m$ 
-   **spans** $V$.
+   The span of the empty list $()$ is defined to be $\{0\}$. If $span(v_1, \\ldots, v_m)$ equals $V$, we say that $v_1, 
+   \\ldots, v_m$ **spans** $V$.
 
 Now we can make one of the key definitions in linear algebra. Remember, that by definition, every list has finite length.
 
 .. admonition:: **Definition** (finite-dimensional vector space)
    :class: definition-box
 
-   A vector space $V$ is said to be **finite-dimensional** if some list of vectors in it spans the space. If no finite list of vectors
-   spans $V$, then $V$ is said to be **infinite-dimensional**.
+   A vector space $V$ is said to be **finite-dimensional** if some list of vectors in it spans the space. If no finite 
+   list of vectors spans $V$, then $V$ is said to be **infinite-dimensional**.
 
-Another fundamental concept in linear algebra is the notion of a basis, but before we define it, we need to introduce the concept of 
-linear independence.
+Another fundamental concept in linear algebra is the notion of a basis, but before we define it, we need to introduce the 
+concept of linear independence.
 
 .. admonition:: **Definition** (linear independence)
    :class: definition-box
 
-   A list of vectors $v_1, \\ldots, v_m$ in a vector space $V$ is said to be **linearly independent** if the only way to write the zero vector
-   as a linear combination of $v_1, \\ldots, v_m$ is to take all coefficients to be zero. In other words, the list $v_1, \\ldots, v_m$ is linearly
-   independent if the equation
+   A list of vectors $v_1, \\ldots, v_m$ in a vector space $V$ is said to be **linearly independent** if the only way to 
+   write the zero vector as a linear combination of $v_1, \\ldots, v_m$ is to take all coefficients to be zero. In other words, 
+   the list $v_1, \\ldots, v_m$ is linearly independent if the equation
 
    :math:`a_1 v_1 + \ldots + a_m v_m = 0`
 
@@ -295,8 +290,11 @@ We continue by defining some important properties of linear maps.
 
    for all :math:`v \in V`.
 
-With the operations of addition and scalar multiplication defined above, the set :math:`\mathcal{L}(V, W)` of linear 
-maps from :math:`V` to :math:`W` forms a vector space.
+.. admonition:: :math:`\mathcal{L}(V, W)` is a vector space
+   :class: definition-box
+
+   With the operations of addition and scalar multiplication defined above, the set :math:`\mathcal{L}(V, W)` of linear 
+   maps from :math:`V` to :math:`W` forms a vector space.
 
 Matrices
 --------
@@ -368,6 +366,36 @@ Another way to think about the matrix of a linear map is by using the definition
 If you think of elements of :math:`\mathbf{F}^m` as columns of $m$ numbers, then you can think of the 
 :math:`k^{\text{th}}` column of :math:`\mathcal{M}(T)` as the column of numbers that you get when you apply
 :math:`T` to the :math:`k^{\text{th}}` standard basis vector of :math:`\mathbf{F}^n`.
+
+.. admonition:: **Notation** :math:`\mathbf{F}^{m,n}`
+   :class: definition-box
+
+   For $m$ and $n$ positive integers, the set of all $m$-by-$n$ matrices with entries from :math:`\mathbf{F}` 
+   is denoted :math:`\mathbf{F}^{m,n}`.
+
+Now comes the fun part.
+
+.. admonition:: :math:`\mathbf{F}^{m,n}` is a vector space
+   :class: definition-box
+
+   With the usual definitions of matrix addition and scalar multiplication, the set :math:`\mathbf{F}^{m,n}` of all
+   :math:`m`-by-:math:`n` matrices forms a vector space over :math:`\mathbf{F}`.
+
+In other words, matrices are vectors. It only follows that rows and columns of matrices are also vectors, but this doesn't
+mean that matrices are vectors of vectors. If we consider the definition of a list, we can say that a particular $m$-by-$n$ 
+matrix is an m-tuple of vectors of length $n$, whose first element is the first row of the matrix, and so on. Threfore, to
+say that a matrix is a list of vectors, is a valid interpretation. Note however, that the implication in the other way is not
+generally true, because not all lists of vectors satisfy the structural properties of a matrix. For instance, the following list
+(of length 2) of vectors is not a matrix because it can't be represented as a rectangular array of numbers:
+
+.. math::
+
+   \left( \left( 1, 2 \right), \left( 4, 5, 6 \right) \right).
+
+
+Polynomials
+===========
+
 
 Tensors
 =======
