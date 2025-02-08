@@ -2,6 +2,8 @@
 Theory Guide
 ============
 
+:doc:`TheoryGuide - LinAlg <linalg/index>`
+
 ---------------
 Linear Algebra
 ---------------

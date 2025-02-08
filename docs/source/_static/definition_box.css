@@ -1,0 +1,58 @@
+.admonition.definition-box {
+    /* background-color: transparent !important; */
+    border: 1px solid #968eff;
+    border-radius: 5px;
+    padding: 1em;
+    margin: 1em 0;
+  }
+
+/* Dark-mode overrides: */
+html[data-theme="dark"] .admonition.definition-box {
+    border: 1px solid #666666;   /* darker border */
+}
+
+.admonition.definition-box > .admonition-title {
+    font-weight: bold;
+    color: #000000;
+    background-color: #DCE7FC;
+    margin: 0;
+  }
+
+html[data-theme="dark"]  .admonition.definition-box > .admonition-title {
+    font-weight: bold;
+    color: #e9f3fe;
+    background-color: #06245D;
+    margin: 0;
+  }
+
+/* Style the bold “Definition” text differently */
+.admonition.definition-box > .admonition-title strong {
+    color: #535e72; /* highlight “Definition” */
+    font-weight: bold;
+    background-color: #DCE7FC;
+    margin: 0;
+}
+
+html[data-theme="dark"] .admonition.definition-box > .admonition-title strong {
+    color: #7b9aff; /* highlight “Definition” */
+    font-weight: bold;
+    background-color: #06245D;
+    margin: 0;
+}
+
+/* The body (the content below the title) */
+.admonition.definition-box .admonition-body {
+    background-color: #fffbe6;  /* e.g. a cream color for the body */
+    padding: 1em;
+    border-radius: 0 0 5px 5px; /* bottom corners only */
+    margin: 0;
+}
+
+/* The body (the content below the title) */
+html[data-theme="dark"] .admonition.definition-box .admonition-body {
+    background-color: #222832;  /* e.g. a cream color for the body */
+    padding: 1em;
+    border-radius: 0 0 5px 5px; /* bottom corners only */
+    margin: 0;
+    color: #ffffff;              /* white text */
+}

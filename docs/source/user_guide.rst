@@ -15,8 +15,14 @@ please refer to the :doc:`api`.
     user_guide/installation
 
 .. toctree::
+    :maxdepth: 1
+    :caption: Theory Guide
+    
+    theory/index
+
+.. toctree::
     :maxdepth: 3
-    :caption: Contents
+    :caption: User Guide
     
     user_guide/linalg
     user_guide/function
