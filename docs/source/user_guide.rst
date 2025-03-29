@@ -15,12 +15,6 @@ please refer to the :doc:`api`.
     user_guide/installation
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Theory Guide
-    
-    theory/index
-
-.. toctree::
     :maxdepth: 3
     :caption: User Guide
     

@@ -24,5 +24,5 @@ they are intended within this library.
     :maxdepth: 2
     :caption: Contents
     
-    linalg/index
+    linalg
     optimization

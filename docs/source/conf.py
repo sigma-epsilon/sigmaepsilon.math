@@ -142,6 +142,10 @@ bibtex_default_style = "unsrt"
 # If no encoding is specified, utf-8-sig is assumed.
 # bibtex_encoding = 'latin'
 
+# -- LaTeX configuration -------------------------------------------------
+
+latex_engine = "pdflatex"
+
 # -- MathJax Configuration -------------------------------------------------
 
 mathjax3_config = {

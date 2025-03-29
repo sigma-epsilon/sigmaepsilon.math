@@ -7,6 +7,7 @@
    :hidden:
 
    User Guide <user_guide>
+   Theory Guide <theory/index>
    API Reference <api>
    Development <development>
 
