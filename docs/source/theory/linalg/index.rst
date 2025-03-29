@@ -14,6 +14,8 @@ concepts. For example, you might see statements like
 
 - "A vector is an array of numbers that encapsulates magnitude and direction." 
   (from an article -sadly- written by someone with a PhD in machine learning)
+- A vector is a one dimensional matrix :cite:p:`Ananthaswamy2024whymachineslearn`
+- Functions are vectors in an infinite dimensional space :cite:p:`Ananthaswamy2024whymachineslearn`
 - "A Tensor is a N-dimensional Matrix." (from a blog post on a popular educational website)
 - "A vector is a 1-dimensional tensor." (from a blog post on a popular educational website)
 - "A matrix is a two-dimensional list of vectors." (from an article on Medium)

@@ -113,9 +113,11 @@ Contents
 
             To the contributor's guide
 
-Indices and tables
-==================
 
+Bibliography, indices and tables
+================================
+
+* :doc:`Bibliography <bibliography>`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
