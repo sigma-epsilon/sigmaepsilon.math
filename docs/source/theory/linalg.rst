@@ -178,6 +178,20 @@ without explicitly mentioning it. Nevertheless, it is important to keep in mind 
 represented in many ways an while a 1d array is a perfectly valid (and common) *coordinate representation* for finite-dimensional 
 vectors over a field, saying "vectors are 1d arrays" is too narrow.
 
+.. admonition:: **Notation** :math:`\mathbf{F}^S`
+   :class: definition-box
+
+   If :math:`S` is a set, then :math:`\mathbf{F}^S` denotes the set of all functions
+   from :math:`S` to :math:`\mathbf{F}`.
+
+You can verify that :math:`\mathbf{F}^S` is a vector space.
+As an example, if :math:`S` is the interval :math:`[0, 1]` and :math:`F = R`, then :math:`\mathbf{R}^{[0, 1]}`
+is the vector space of real-valued functions in the interval :math:`[0, 1]`.
+Moreover, the vector spaces :math:`\mathbf{F}^n` and :math:`\mathbf{F}^{\{1,2,\ldots\}}` are special cases of this
+definition, where :math:`\mathbf{F}^n` is the vector space of all functions from the set :math:`\{1, \ldots, n\}` to
+:math:`\mathbf{F}` and :math:`\mathbf{F}^{\{1,2,\ldots\}}` is the vector space of all functions from the set of natural numbers
+:math:`\mathbb{N}` to :math:`\mathbf{F}`.
+
 .. admonition:: **Definition** (span, spans)
    :class: definition-box
 
@@ -240,6 +254,38 @@ We have defined finite dimensional vector spaces, but we haven't defined what th
 Any two bases for a finite-dimensional vector space have the same number of vectors. Because the vectors of the basis 
 must be linearly independent, the dimension of a vector space is well-defined.
 
+.. admonition:: **Definition** (supspace)
+   :class: definition-box
+
+   A subset :math:`U` of :math:`V` is a supspace of :math:`V` if :math:`U` is also a vector space.
+
+The next result helps to quickly tell if a subset of a vector space is a subspace.
+
+.. admonition:: Conditions for a subspace
+   :class: definition-box
+
+   The easiest way to check if a subset :math:`U` of :math:`V` is a subspace of :math:`V` is to check the following 
+   three conditions:
+
+   **additive identity**
+
+   .. math::
+
+      0 \in U;
+
+   **closure under addition**
+
+   .. math::
+
+      u, w \in U \quad \text{implies} \quad u + w \in U;
+
+   **closure under scalar multiplication**
+
+   .. math::
+
+      u \in U, a \in \mathbf{F} \quad \text{implies} \quad a\,u \in U.
+   
+
 Linear Maps
 ===========
 
@@ -275,6 +321,9 @@ Also, be aware that the term "linear map" is synonymous with "linear transformat
    The set of all linear maps from :math:`V` to :math:`W` is denoted
    :math:`\mathcal{L}(V, W)`.
 
+An example for a linear map is :math:`T \in \mathcal{L}(\mathcal{P}(\mathbf{R}), \mathbf{R})` defined by
+:math:`T(p) = \int_0^1 p(x) dx`. 
+
 We continue by defining some important properties of linear maps.
 
 .. admonition:: **Definition** addition and scalar multiplication of linear maps
@@ -297,6 +346,29 @@ We continue by defining some important properties of linear maps.
 
    With the operations of addition and scalar multiplication defined above, the set :math:`\mathcal{L}(V, W)` of linear 
    maps from :math:`V` to :math:`W` forms a vector space.
+
+This of course implies that linear maps are vectors themselves too. From the section about matrices of linear maps,
+it will be obvious why the statement "a vector is a 1d array" is incorrect.
+
+Null space and range
+--------------------
+
+Injectivity and surjectivity
+----------------------------
+
+Invertibility
+-------------
+
+Special linear maps
+-------------------
+
+- operators
+- linear functionals
+- endomorphisms
+- isomorphisms
+- automorphisms
+- projections
+- reflections
 
 Matrices
 --------
@@ -349,8 +421,11 @@ We've come to another key definition.
 
    is used.
 
-The important thing to note here that the matrix of a linear map depends on the linear map, and the bases of the 
-vector spaces involved. The matrix of a linear map is not an intrinsic property of the linear map itself, but rather
+In other words, the matrix of a linear map tells how the basis vectors of :math:`V` can be composed as linear combinations
+of the basis vectors of :math:`W`.
+
+The important thing to note here that **the matrix of a linear map depends on the linear map, and the bases of the 
+vector spaces involved**. The matrix of a linear map is not an intrinsic property of the linear map itself, but rather
 a representation of the linear map with respect to a particular choice of bases. **This is the primary reason why the
 statement "a tensor is a multi-dimensional array" is incorrect.** A tensor is a multi-linear map (as it will be defined
 later), and a multi-linear map is not a multi-dimensional array. A multi-linear map can be represented as a multi-dimensional
@@ -395,17 +470,95 @@ generally true, because not all lists of vectors satisfy the structural properti
    \left( \left( 1, 2 \right), \left( 4, 5, 6 \right) \right).
 
 
+.. admonition:: **Definition** (matrix of a vector, :math:`\mathcal{M}(v)`)
+   :class: definition-box
+
+   Suppose :math:`v \in V` and :math:`v_1, \dots, v_n` is a basis of
+   :math:`V`. The **matrix** of :math:`v` with respect to this basis is the
+   :math:`n`-by-:math:`1` matrix
+
+   .. math::
+
+      \mathcal{M}(v) =
+      \begin{pmatrix}
+      c_1 \\
+      \vdots \\
+      c_n
+      \end{pmatrix},
+
+   where :math:`c_1, \dots, c_n` are scalars such that
+
+   .. math::
+
+      v = c_1 v_1 + \cdots + c_n v_n.
+
+Duality
+-------
+
+
+
 Polynomials
 ===========
 
+You might wonder why we are talking about polynomials in a linear algebra guide. The reason is that polynomials are
+vectors. This means that we can use the tools of linear algebra to study polynomials.
+
+.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}(\mathbf{F})`)
+   :class: definition-box
+
+   A function :math:`p:\mathbf{F} \to \mathbf{F}` is called a **polynomial** with
+   coefficients in :math:`\mathbf{F}` if there exist :math:`a_0, \dots, a_m \in \mathbf{F}`
+   such that
+
+   .. math::
+
+      p(x) = a_0 + a_1 x + \cdots + a_m x^m
+
+   for all :math:`x \in \mathbf{F}`.
+
+   :math:`\mathcal{P}(\mathbf{F})` is the set of all polynomials with coefficients in :math:`\mathbf{F}`.
+
+With the usual operations of addition and scalar multiplication, the set :math:`\mathcal{P}(\mathbf{F})` 
+forms a vector space over :math:`\mathbf{F}`. Note that :math:`\mathcal{P}(\mathbf{F})` is an infinite
+dimensional vector space, because it has no finite basis. Note that the fact that :math:`\mathcal{P}(\mathbf{F})` is
+a vector space makes polynomials vectors. This is important because it allows us to use the tools of linear algebra 
+to study polynomials.
+
+.. admonition:: **Definition** (degree of a polynomial, :math:`\text{deg} \, p`)
+   :class: definition-box
+
+   The **degree** of a polynomial :math:`p \in \mathcal{P}(\mathbf{F})` is the largest integer :math:`m` such that
+   :math:`a_m \neq 0`. If :math:`p` has degree :math:`m`, we write :math:`\text{deg} \, p = m`.
+
+   The degree of the zero polynomial is defined to be :math:`-\infty`.
+
+For practical applications, we are often interested in polynomials of a finite degree.
+
+.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}_{m}(\mathbf{F})`)
+   :class: definition-box
+
+   For :math:`m` a nonnegative integer, :math:`\mathcal{P}_{m}(\mathbf{F})` denotes the set of all polynomials
+   with coefficients in :math:`\mathbf{F}` and degree at most :math:`m`.
+
+
+Don't get mislead by all this. Just because polynomials can be described as vectors, doesn't mean
+that all functions can be. For instance, let's consider the set of all functions from real numbers
+to integers:
+
+.. math::
+
+   \mathcal{S} = \{ f: \mathbf{R} \to \mathbf{R} : f(x) \in \mathbf{Z} \text{ for all } x \in \mathbf{R} \}.
+
+It is up to the reader to verify, that this set is not closed under scalar multiplication (among other things), therefore
+it is not a vector space.
 
 Tensors
 =======
 
 
 
-Arrays
-------
+Arrays of tensors
+-----------------
 
 
 
