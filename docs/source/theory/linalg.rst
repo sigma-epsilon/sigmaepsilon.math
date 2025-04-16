@@ -74,9 +74,7 @@ If we can make decisions, we can **optimize**. And if we can optimize, we can **
 That’s why linear algebra is so powerful—it’s not just about numbers and equations. It’s about structure, reasoning, 
 and ultimately, making better choices.
 
-**Linear algebra makes things better.**
-
-Isn't there something you want to make better?
+**Linear algebra enables us to make things better.**
 
 A little bit of history
 -----------------------
@@ -286,6 +284,62 @@ The next result helps to quickly tell if a subset of a vector space is a subspac
       u \in U, a \in \mathbf{F} \quad \text{implies} \quad a\,u \in U.
    
 
+Polynomials
+===========
+
+You might wonder why we are talking about polynomials in a linear algebra guide. The reason is that polynomials are
+vectors. This means that we can use the tools of linear algebra to study polynomials.
+
+.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}(\mathbf{F})`)
+   :class: definition-box
+
+   A function :math:`p:\mathbf{F} \to \mathbf{F}` is called a **polynomial** with
+   coefficients in :math:`\mathbf{F}` if there exist :math:`a_0, \dots, a_m \in \mathbf{F}`
+   such that
+
+   .. math::
+
+      p(x) = a_0 + a_1 x + \cdots + a_m x^m
+
+   for all :math:`x \in \mathbf{F}`.
+
+   :math:`\mathcal{P}(\mathbf{F})` is the set of all polynomials with coefficients in :math:`\mathbf{F}`.
+
+With the usual operations of addition and scalar multiplication, the set :math:`\mathcal{P}(\mathbf{F})` 
+forms a vector space over :math:`\mathbf{F}`. Note that :math:`\mathcal{P}(\mathbf{F})` is an infinite
+dimensional vector space, because it has no finite basis. Note that the fact that :math:`\mathcal{P}(\mathbf{F})` is
+a vector space makes polynomials vectors. This is important because it allows us to use the tools of linear algebra 
+to study polynomials.
+
+.. admonition:: **Definition** (degree of a polynomial, :math:`\text{deg} \, p`)
+   :class: definition-box
+
+   The **degree** of a polynomial :math:`p \in \mathcal{P}(\mathbf{F})` is the largest integer :math:`m` such that
+   :math:`a_m \neq 0`. If :math:`p` has degree :math:`m`, we write :math:`\text{deg} \, p = m`.
+
+   The degree of the zero polynomial is defined to be :math:`-\infty`.
+
+For practical applications, we are often interested in polynomials of a finite degree.
+
+.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}_{m}(\mathbf{F})`)
+   :class: definition-box
+
+   For :math:`m` a nonnegative integer, :math:`\mathcal{P}_{m}(\mathbf{F})` denotes the set of all polynomials
+   with coefficients in :math:`\mathbf{F}` and degree at most :math:`m`.
+
+
+Don't get mislead by all this. Just because polynomials can be described as vectors, doesn't mean
+that all functions can be. For instance, let's consider the set of all functions from real numbers
+to integers:
+
+.. math::
+
+   \mathcal{S} = \{ f: \mathbf{R} \to \mathbf{R} : f(x) \in \mathbf{Z} \text{ for all } x \in \mathbf{R} \}.
+
+It is up to the reader to verify, that this set is not closed under scalar multiplication (among other things), therefore
+it is not a vector space.
+
+
 Linear Maps
 ===========
 
@@ -353,22 +407,115 @@ it will be obvious why the statement "a vector is a 1d array" is incorrect.
 Null space and range
 --------------------
 
+.. admonition:: **Definition** (null space, null :math:`T`)
+   :class: definition-box
+
+   The **null space** of a linear map :math:`T \in \mathcal{L}(V, W)` is the set of all vectors :math:`v \in V` such that
+   :math:`T v = 0`. The null space of :math:`T` is denoted :math:`\text{null} \, T`.
+
+   Some mathematicians use the term **kernel** instead of null space.
+
+.. admonition:: **Definition** (range, range :math:`T`)
+   :class: definition-box
+
+   The **range** of a linear map :math:`T \in \mathcal{L}(V, W)` is the set of all vectors :math:`w \in W` such that
+   :math:`w = T v` for some :math:`v \in V`. The range of :math:`T` is denoted :math:`\text{range} \, T`.
+
+   Some mathematicians use the term **image** instead of range.
+
+.. admonition:: The null space and the range are subspaces
+   :class: definition-box
+
+   The null space and the range of a linear map are subspaces of the vector spaces :math:`V` and :math:`W`, respectively.
+
 Injectivity and surjectivity
 ----------------------------
 
-Invertibility
--------------
+Injectivity and surjectivity are important properties of linear maps, because they tell us about the
+structure of the map and the relationship between the vector spaces involved. They are heaviliy used in the study of
+linear maps, and they are also important in the study of linear equations and systems of equations.
 
-Special linear maps
--------------------
+.. admonition:: **Definition** injective
+   :class: definition-box
 
-- operators
-- linear functionals
-- endomorphisms
-- isomorphisms
-- automorphisms
-- projections
-- reflections
+   A linear map :math:`T \in \mathcal{L}(V, W)` is said to be **injective** if :math:`T u = T v` implies :math:`u = v` 
+   for all :math:`u, v \in V`. 
+
+   In other words, :math:`T` is injective if it maps distinct vectors in :math:`V` to distinct vectors in :math:`W`.
+
+   Also, it can be shown that a linear map being injective is equivalent to :math:`\text{null} \, T = \{0\}`. 
+   In other words, :math:`T` is injective if and only if the only vector in the null space of :math:`T` is the zero vector.
+
+   Many mathematicians use the term **one-to-one** instead of injective.
+
+.. admonition:: **Definition** surjective
+   :class: definition-box
+
+   A linear map :math:`T \in \mathcal{L}(V, W)` is said to be **surjective** if :math:`T v = w` for all :math:`w \in W`
+   and some :math:`v \in V`.
+
+   In other words, :math:`T` is surjective if it maps all vectors in :math:`V` to all vectors in :math:`W`.
+
+   It follows that a linear map being surjective is equivalent to :math:`\text{range} \, T = W`.
+
+Fundamental theorem of linear maps
+----------------------------------
+
+The following result is so important, that it gets a dramatic name.
+
+.. admonition:: Fundamental theorem of linear maps
+   :class: definition-box
+
+   Suppose :math:`V` is finite dimensional and :math:`T \in \mathcal{L}(V, W)`. Then :math:`\text{range} T` is finite
+   dimensional and the following equation holds:
+   
+   .. math::
+
+      \text{dim} \, V = \text{dim} \, \text{null} \, T + \text{dim} \, \text{range} \, T.
+
+It might be challenging to see the importance of this theorem at first, but it is a powerful result that
+was used to derive some very important statements. The following two results can both be proven very easily 
+using the fundamental theorem of linear maps.
+
+.. admonition:: A map to a smaller dimensional space is not injective
+   :class: definition-box
+
+   Suppose :math:`T \in \mathcal{L}(V, W)` and :math:`\text{dim} \, V > \text{dim} \, W`. Then :math:`T` is not injective.
+
+   In other words, if the dimension of the domain of a linear map is greater than the dimension of the codomain, 
+   then the map cannot be injective.
+
+One can use the fundamental theorem of linear maps to show that the null space of a linear map is not :math:`\{0\}` if the 
+dimension of the domain is greater than the dimension of the codomain. It follows directly, that the map cannot be injective.
+
+This has an important implication for the study of systems of linear equations.
+
+.. admonition:: Homogeneous systems of linear equations
+   :class: definition-box
+
+   A homogeneous system of linear equations with more variables than equations has nonzero solutions.
+
+Yet another important result follows from the fundamental theorem of linear maps.
+
+.. admonition:: A map to a larger dimensional space is not surjective
+   :class: definition-box
+
+   Suppose :math:`T \in \mathcal{L}(V, W)` and :math:`\text{dim} \, V < \text{dim} \, W`. Then :math:`T` is not surjective.
+
+   In other words, if the dimension of the domain of a linear map is less than the dimension of the codomain, 
+   then the map cannot be surjective.
+
+Again, we can use this result to make a statement about systems of linear equations.
+
+.. admonition:: Inhomogeneous systems of linear equations
+   :class: definition-box
+
+   An inhomogeneous system of linear equations with more equations than variables has no solution for some choice
+   of the constant terms.
+
+These results truly show the significance of the fundamental theorem of linear maps. These results are merely consequences of the
+fundamental theorem applied to specific cases of linear maps. Needless to say, the implications of these results are far-reaching
+and have a profound impact on the study of many engineering and scientific disciplines.
 
 Matrices
 --------
@@ -492,65 +639,201 @@ generally true, because not all lists of vectors satisfy the structural properti
 
       v = c_1 v_1 + \cdots + c_n v_n.
 
+Matrix multiplication
+^^^^^^^^^^^^^^^^^^^^^
+
+Upper-triangular matrices
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Invertibility
+-------------
+
+.. admonition:: **Definition** (invertible, inverse)
+   :class: definition-box
+
+   - A linear map :math:`T \in \mathcal{L}(V, W)` is said to be **invertible** if there exists a linear map
+     :math:`S \in \mathcal{L}(W, V)` such that :math:`ST` equals the identity map on :math:`V` and :math:`TS` 
+     equals the identity map on :math:`W`.
+
+   - A linear map :math:`S \in \mathcal{L}(W, V)` satisfying :math:`ST = I` and :math:`TS = I` is called
+     an inverse of :math:`T` (note that the first :math:`I` is the identity map on :math:`V` and the second
+     :math:`I` is the identity map on :math:`W`). 
+   
+It can be proven fairly easily that the inverse of a linear map is unique, if it exists, and so the following
+notation makes sense.
+
+.. admonition:: **Notation** :math:`T^{-1}`
+   :class: definition-box
+
+   If :math:`T` is invertible, then its inverse is denoted by :math:`T^{-1}`.
+
+If you are not familiar with how this works, note that introducing the notation for the inverse consisted of two steps. First we
+defined the meaning, and then we showed that the meaning is unique. Only after that we introduced the notation.
+
+The following result characterizes invertible linear maps.
+
+.. admonition:: Invertibility is equivalent to injectivity and surjectivity
+   :class: definition-box
+
+   A linear map is invertible if and only if it is both injective and surjective.
+   
+We only mention here, that there is such a thing as a pseudo-inverse of a linear map, which is not
+injective or surjective. The pseudo-inverse is a generalization of the inverse of a linear map, and it is used in
+many applications. However, pseudo-inverses and generalized inverses are beyond the scope of this guide.
+
+Operators and functionals
+-------------------------
+
+There are some linear maps that are so important, that they get a special name and notation.
+
+.. admonition:: **Definition** (operator, :math:`\mathcal{L}(V)`)
+   :class: definition-box
+
+   * A linear map from a vector space to itself is called an **operator**.
+
+   * The set of all operators on a vector space :math:`V` is denoted
+     :math:`\mathcal{L}(V)`. In other words, :math:`\mathcal{L}(V) = \mathcal{L}(V, V)`.
+
+One of the main reasons that a richer theory exists for operators than for general linear maps is that
+operators can be raised to powers, which is key for applying polynomials to operators.
+
+Operators are important, because a physical system can very often be described as a vector space, and
+the evolution of the system can be described as an operator acting on the vector space. Moreover, in
+computational mechanics, we are interested in discrete solutions, which means that we are working with
+finite-dimensional vector spaces. Because of this, the following result is significant.
+
+.. admonition:: Injectivity is equivalent to surjectivity in finite-dimensional operators
+   :class: definition-box
+
+   Suppose :math:`V` is finite-dimensional and :math:`T \in \mathcal{L}(V)`. Then the following are
+   equivalent:
+
+   - :math:`T` is injective;
+   - :math:`T` is surjective;
+   - :math:`T` is invertible.
+
+Another special type of linear map is a linear functional.
+
+.. admonition:: **Definition** linear functional
+   :class: definition-box
+
+   A linear map from a vector space to its field is called a **linear functional**.
+   In other words, a linear functional is an element of :math:`\mathcal{L}(V, \mathbf{F})`.
+   
+Here are a few examples:
+
+- Define :math:`\varphi : \mathbf{R}^3 \to \mathbf{R}` by :math:`\varphi(x, y, z) = 4x - 5y + 2z`. 
+  Then :math:`\varphi` is a linear functional on :math:`\mathbf{R}^3`.
+
+- Define :math:`\varphi : \mathcal{P}(\mathbf{R}) \to \mathbf{R}` by :math:`\varphi(p) = \int_0^1 p(x)\,dx`.
+  Then :math:`\varphi` is a linear functional on :math:`\mathcal{P}(\mathbf{R})`.
+
 Duality
 -------
 
+Duality is an advanced topic, but it doesn't hurt if you know a little about it.
 
-
-Polynomials
-===========
-
-You might wonder why we are talking about polynomials in a linear algebra guide. The reason is that polynomials are
-vectors. This means that we can use the tools of linear algebra to study polynomials.
-
-.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}(\mathbf{F})`)
+.. admonition:: **Definition** (dual space, :math:`V'`)
    :class: definition-box
 
-   A function :math:`p:\mathbf{F} \to \mathbf{F}` is called a **polynomial** with
-   coefficients in :math:`\mathbf{F}` if there exist :math:`a_0, \dots, a_m \in \mathbf{F}`
+   The dual space of  :math:`V`, denoted :math:`V'`, is the vector space of all linear functionals
+   on :math:`V`. In other words, :math:`V' = \mathcal{L}(V, \mathbf{F})`.
+
+.. admonition:: **Definition** dual basis
+   :class: definition-box
+
+   If :math:`v_1, \ldots, v_n` is a basis of :math:`V`, then the **dual basis** of
+   of :math:`v_1, \ldots, v_n` is the list of elements :math:`\varphi_1, \ldots, \varphi_n`
+   of elements of :math:`V'`, where each :math:`\varphi_j` is the linear functional on :math:`V`
    such that
 
    .. math::
+      
+      \varphi_j(v_k) = \begin{cases}
+      1 & \text{if } j = k, \\
+      0 & \text{if } j \neq k.
+      \end{cases}
 
-      p(x) = a_0 + a_1 x + \cdots + a_m x^m
-
-   for all :math:`x \in \mathbf{F}`.
-
-   :math:`\mathcal{P}(\mathbf{F})` is the set of all polynomials with coefficients in :math:`\mathbf{F}`.
-
-With the usual operations of addition and scalar multiplication, the set :math:`\mathcal{P}(\mathbf{F})` 
-forms a vector space over :math:`\mathbf{F}`. Note that :math:`\mathcal{P}(\mathbf{F})` is an infinite
-dimensional vector space, because it has no finite basis. Note that the fact that :math:`\mathcal{P}(\mathbf{F})` is
-a vector space makes polynomials vectors. This is important because it allows us to use the tools of linear algebra 
-to study polynomials.
-
-.. admonition:: **Definition** (degree of a polynomial, :math:`\text{deg} \, p`)
+.. admonition:: Dual basis is a basis of the dual space
    :class: definition-box
 
-   The **degree** of a polynomial :math:`p \in \mathcal{P}(\mathbf{F})` is the largest integer :math:`m` such that
-   :math:`a_m \neq 0`. If :math:`p` has degree :math:`m`, we write :math:`\text{deg} \, p = m`.
+   Suppose :math:`V` is finite-dimensional. Then the dual basis of a basis of :math:`V` is a basis
+   of the dual space :math:`V'`.
 
-   The degree of the zero polynomial is defined to be :math:`-\infty`.
-
-For practical applications, we are often interested in polynomials of a finite degree.
-
-.. admonition:: **Definition** (polynomial, :math:`\mathcal{P}_{m}(\mathbf{F})`)
+.. admonition:: **Definition** (dual map, :math:`T'`)
    :class: definition-box
 
-   For :math:`m` a nonnegative integer, :math:`\mathcal{P}_{m}(\mathbf{F})` denotes the set of all polynomials
-   with coefficients in :math:`\mathbf{F}` and degree at most :math:`m`.
+   If :math:`T \in \mathcal{L}(V, W)`, then the **dual map** of :math:`T` is the linear map
+   :math:`T' \in \mathcal{L}(W', V')` defined by
+   
+   .. math::
+
+      T' (\varphi) = \varphi \circ T \quad \text{for} \varphi \in W'.
+
+It might not be obvious at this point why, but duality is huge in both the theory
+and applications of linear algebra. To give you a few examples:
+
+- In machine learning we exploit duality theory to find
+  separating hyperplanes by transforming the primal problem into a dual problem, which is easier to solve
+  computationally and gives access to kernel methods. 
+- In physics, we use duality to express conservation laws in a coordinate invariant way. 
+- In computational mechanics, we use duality to express the weak form of the
+  governing equations in a coordinate invariant way. 
+
+In summary, duality is a powerful tool that often allows us to express complex problems in a more manageable form. 
+It is also a powerful tool for proving theorems and deriving results in linear algebra.
+
+The matrix of the dual of a linear map
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. admonition:: **Definition** (transpose, :math:`A^t`)
+   :class: definition-box
+
+   The **transpose** of a matrix :math:`A` is the matrix :math:`A^t` obtained from
+   :math:`A` by interchanging its rows and columns. More specifically, if :math:`A` is an
+   :math:`m\text{-by-}n` matrix, then :math:`A^t` is an :math:`n\text{-by-}m` matrix
+   whose entries are given by the equation
+
+   .. math::
+
+      A^t_{k,j} = A_{j,k}.
+
+.. admonition:: The matrix of :math:`T'` is the transpose of the matrix of :math:`T`
+   :class: definition-box
+
+   Suppose :math:`T \in \mathcal{L}(V, W)`. Then :math:`\mathcal{M}(T') = \mathcal{M}(T)^t`.
+
+Eigenvalues and eigenvectors
+============================
 
 
-Don't get mislead by all this. Just because polynomials can be described as vectors, doesn't mean
-that all functions can be. For instance, let's consider the set of all functions from real numbers
-to integers:
+Diagonalization
+---------------
 
-.. math::
+Gram-Schmidt process
+--------------------
 
-   \mathcal{S} = \{ f: \mathbf{R} \to \mathbf{R} : f(x) \in \mathbf{Z} \text{ for all } x \in \mathbf{R} \}.
 
-It is up to the reader to verify, that this set is not closed under scalar multiplication (among other things), therefore
-it is not a vector space.
+Inner product spaces
+====================
+
+
+Operators on inner product spaces
+=================================
+
+
+Operators on complex vector spaces
+==================================
+
+
+Operators on real vector spaces
+===============================
+
+
+Trace and determinant
+=====================
+
+
 
 Tensors
 =======
