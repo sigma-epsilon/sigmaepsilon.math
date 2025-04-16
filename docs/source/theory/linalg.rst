@@ -642,8 +642,20 @@ generally true, because not all lists of vectors satisfy the structural properti
 Matrix multiplication
 ^^^^^^^^^^^^^^^^^^^^^
 
-Upper-triangular matrices
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Upper-triangular and diagonal matrices
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A central goal of linear algenra is to show that given an operator :math:`T \in \mathcal{L}(V)`,
+there exists a basis of :math:`V` such that the matrix of :math:`T` with respect to this basis 
+has a reasonably simple matrix. The term 'reasonably simple' is a bit vague, but it usually means 
+that the matrix is upper-triangular or diagonal. This is big because in practice, when solving linear
+systems of equations, the coefficient matrix can be enormously large, at it would be very useful if
+we could somehow transform it using a suitable base, so that the matrix is upper-triangular or diagonal.
+Then, we would solve the system in that basis, and transform the solution back to the original basis.
+For this reason, it is quite important to know when this simplification is possible. For this, we
+need to cover eigenvalues and eigenvectors first, which are the key to this simplification. Here, we
+only introduce the concepts of upper-triangular and diagonal matrices, and we will cover eigenvalues
+and eigenvectors in a later section.
 
 Invertibility
 -------------
@@ -810,6 +822,7 @@ Eigenvalues and eigenvectors
 Diagonalization
 ---------------
 
+
 Gram-Schmidt process
 --------------------
 
@@ -817,9 +830,35 @@ Gram-Schmidt process
 Inner product spaces
 ====================
 
+Riesz representation theorem
+----------------------------
+
+
+Orthogonal complement and minimization problems
+-----------------------------------------------
+
+
+Minimization problems
+^^^^^^^^^^^^^^^^^^^^^
+
 
 Operators on inner product spaces
 =================================
+
+The deepest results related to inner product spaces deal with operators on inner product spaces.
+
+
+The spectral theorem
+--------------------
+
+The complex spectral theorem
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The real spectral theorem
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Polar decomposition and singular value decomposition
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 Operators on complex vector spaces
