@@ -101,8 +101,8 @@ class MLSApproximator:
         k: int | None = None,
         max_distance: Number | None = None,
     ) -> None:
-        self.X_S = X_S
-        self.Y_S = Y_S
+        self.X_S = X_S.astype(float)
+        self.Y_S = Y_S.astype(float)
         self._neighbours = None
         self._factors = None
         self._knn_config = dict()
@@ -158,20 +158,25 @@ class MLSApproximator:
         """
         self._factors = val
 
-    def _calc_factors_and_neighbours(self, X_S: ndarray, X_T: ndarray) -> None:
+    def _calc_neighbours(self, X_S: ndarray, X_T: ndarray) -> None:
         self.neighbours = self._get_neighbours(X_S, X_T, **self._knn_config)
+    
+    def _calc_factors(self, X_S: ndarray, X_T: ndarray) -> None:
         self.factors = np.ones_like(self.neighbours) / self.neighbours.shape[-1]
+        
+    def _calc_factors_and_neighbours(self, X_S: ndarray, X_T: ndarray) -> None:
+        self._calc_neighbours(X_S, X_T)
+        self._calc_factors(X_S, X_T)
 
     @staticmethod
     def _get_neighbours(
         X_S: ndarray,
-        X_T,
+        X_T: ndarray,
         *,
         k: int = 4,
         max_distance: float | None = None,
         knn_backend: str = "scipy",
     ) -> ndarray:
-        k = 4 if not k else k
         return k_nearest_neighbours(
             X_S, X_T, k=k, max_distance=max_distance, backend=knn_backend
         )
