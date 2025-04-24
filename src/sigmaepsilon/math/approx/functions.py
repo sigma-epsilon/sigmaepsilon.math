@@ -159,6 +159,7 @@ class SingularWeightFunction(MLSWeightFunction):
 class CubicWeightFunction(MLSWeightFunction):
     """
     A cubic weight function for the moving least squares method.
+    This function is defined only in 1D and 2D.
 
     Example
     -------
@@ -175,7 +176,9 @@ class CubicWeightFunction(MLSWeightFunction):
         elif self.dimension == 2:
             return self._evaluate_2d(x)
 
-        raise NotImplementedError
+        raise NotImplementedError(
+            f"Evaluation not implemented for dimension {self.dimension}"
+        )
 
     def _evaluate_1d(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:
         d = np.subtract(self.core, x)
