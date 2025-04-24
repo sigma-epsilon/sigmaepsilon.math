@@ -1,7 +1,7 @@
 from typing import Iterable, Callable
 
 import sympy as sy
-from sympy import latex
+from sympy import latex, Expr
 import numpy as np
 
 from sigmaepsilon.deepdict import DeepDict
@@ -164,9 +164,10 @@ def gen_Lagrange_1d(
 
 def approx_Lagrange_1d(
     points: Iterable, values: Iterable, lambdify: bool = False
-) -> Callable:
+) -> Callable | Expr:
     """
-    Returns a callable that maps from 'source' to 'target' in 1d.
+    Returns a SymPy expression or a Callable approximates in 1d using
+    Lagrange polynomials.
 
     Parameters
     ----------
@@ -175,12 +176,13 @@ def approx_Lagrange_1d(
     values: Iterable[float]
         The values at the data points.
     lambdify: bool, Optional
-        If `True`, the returned function is turned into a `NumPy` function via
-        `sympy.lambdify`, otherwise it is left as a `SymPy` expression. Default is `False`.
+        If `True`, the generated `SymPy` expression is turned into a `NumPy` function via
+        `sympy.lambdify`, otherwise it is left as an instance of :class:`SymPy.Expr`. 
+        Default is `False`.
 
     Returns
     -------
-    Callable
+    Callable | Expr
         A vectorized function if 'lambdify' is True, or a SymPy expression otherwise.
 
     Example
