@@ -173,7 +173,11 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
             fitness = self.fitness
             genotypes = self.genotypes
         else:
-            raise NotImplementedError
+            raise NotImplementedError(
+                "Selection with both 'genotypes' and 'phenotypes' provided is not implemented. "
+                "This branch is reached when both arguments are given to 'select', "
+                "but only the default case (both None) is currently supported."
+            )
         winners, others = self.divide(fitness)
         winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
