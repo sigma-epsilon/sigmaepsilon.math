@@ -16,19 +16,19 @@ class TestGenom(unittest.TestCase):
         genom1 = Genom(
             phenotype=np.array([1, 2]),
             genotype=np.array([1, 0, 1, 0]),
-            fittness=1.0,
+            fitness=1.0,
         )
 
         genom2 = Genom(
             phenotype=np.array([1, 2]),
             genotype=np.array([1, 0, 1, 0]),
-            fittness=1.0,
+            fitness=1.0,
         )
 
         genom3 = Genom(
             phenotype=np.array([1, 2]),
             genotype=np.array([1, 0, 1, 1]),
-            fittness=2.0,
+            fitness=2.0,
         )
 
         self.assertFalse(genom1 == 1)
@@ -44,7 +44,7 @@ class TestGenom(unittest.TestCase):
         genom = Genom(
             phenotype=np.array([1, 2]),
             genotype=np.array([1, 0, 1, 0]),
-            fittness=1.0,
+            fitness=1.0,
         )
 
         with self.assertRaises(TypeError):
@@ -71,7 +71,8 @@ class TestBGA(unittest.TestCase):
         BGA.evolver()
         BGA.evolve()
         BGA.genotypes = BGA.genotypes
-        BGA.fittness
+        BGA.fitness
+        BGA.state.to_scipy()
         BGA.best_phenotype()
         BGA.best_candidate()
         BGA.random_parents_generator(BGA.genotypes)

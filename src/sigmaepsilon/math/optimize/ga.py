@@ -1,22 +1,25 @@
 from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
 from types import NoneType
+from numbers import Number
 import operator
+from enum import Enum, unique
 
 import numpy as np
 from numpy import ndarray
 from pydantic import BaseModel, Field
 
 from ..function import Function
+from .state import OptimizerState
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
 
-def even(n):
+def even(n: Number) -> bool:
     return n % 2 == 0
 
 
-def odd(n):
+def odd(n: Number) -> bool:
     return not even(n)
 
 
@@ -27,7 +30,7 @@ class Genom(BaseModel):
 
     phenotype: list[float] = Field(default_factory=list)
     genotype: list[int] = Field(default_factory=list)
-    fittness: float
+    fitness: float
     age: int = Field(default=0)
     index: int = Field(default=-1)
 
@@ -45,28 +48,38 @@ class Genom(BaseModel):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness > other.fittness)
+        return np.all(self.fitness > other.fitness)
 
     def __lt__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness < other.fittness)
+        return np.all(self.fitness < other.fitness)
 
     def __ge__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness >= other.fittness)
+        return np.all(self.fitness >= other.fitness)
 
     def __le__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness <= other.fittness)
+        return np.all(self.fitness <= other.fitness)
+
+    @property
+    def fittness(self) -> float:  # pragma: no cover
+        import warnings
+        warnings.warn(
+            "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.fitness
 
 
 class GeneticAlgorithm:
@@ -112,9 +125,8 @@ class GeneticAlgorithm:
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the number of generations a candidate spends at the top
-        (being the best candidate). Setting an upper limit to this value is a kind
-        of stopping criterion. Default is 5.
+        The age is the maximum number of generations a candidate spends at the top
+        (being the best candidate). Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
 
@@ -124,13 +136,22 @@ class GeneticAlgorithm:
     genetic algorithm can be wery demanding on the computational side. If the objective
     function takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
     approach, unless you have a dedicated evaluator that is able to run efficiently for a large
-    number of problems. If you want to customize the way the objective is evaluated, override
-    the :func:`evaluate` method.
+    number of problems or if the long running time is not an issue. If you want to customize the way the
+    objective is evaluated, override the :func:`evaluate` method.
 
     See also
     --------
     :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
     """
+
+    @unique
+    class Status(Enum):
+        """Status codes for the genetic algorithm."""
+
+        INITIALIZED = 0
+        MAX_ITERATIONS_REACHED = 1
+        CONVERGED = 2
+        ERROR = -1
 
     __slots__ = [
         "fnc",
@@ -142,17 +163,18 @@ class GeneticAlgorithm:
         "nPop",
         "_genotypes",
         "_phenotypes",
-        "_fittness",
+        "_fitness",
         "_champion",
         "_evolver",
         "maxiter",
         "miniter",
         "elitism",
         "maxage",
-        "nIter",
         "_is_symbolic_Function",
         "_celebrate_op",
         "_minimize",
+        "_state",
+        "_status",
     ]
 
     def __init__(
@@ -190,11 +212,13 @@ class GeneticAlgorithm:
         self.p_m = None
         self._genotypes = None
         self._pnenotypes = None
-        self._fittness = None
+        self._fitness = None
         self._champion: Genom | NoneType = None
         self._celebrate_op = None
         self._minimize = False
         self.elitism = None
+        self._state = None
+        self._status = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -205,6 +229,18 @@ class GeneticAlgorithm:
             minimize=minimize,
         )
         self.reset()
+
+    @property
+    def state(self) -> OptimizerState:
+        """
+        Returns the state of the optimizer.
+        """
+        return self._state
+
+    @property
+    def nIter(self) -> int:  # pragma: no cover
+        """For backwards compatibility. Returns the number of iterations performed."""
+        return self.state.n_iter
 
     @property
     def champion(self) -> Genom:
@@ -221,13 +257,13 @@ class GeneticAlgorithm:
         return self._genotypes
 
     @genotypes.setter
-    def genotypes(self, value: Iterable):
+    def genotypes(self, value: Iterable) -> None:
         """
         Sets the genotypes of the population.
         """
         self._genotypes = value
         self._phenotypes = None
-        self._fittness = None
+        self._fitness = None
 
     @property
     def phenotypes(self) -> Iterable:
@@ -240,25 +276,46 @@ class GeneticAlgorithm:
                 self._phenotypes = self.decode(genotypes)
         return self._phenotypes
 
+
     @property
-    def fittness(self) -> ndarray:
+    def fitness(self) -> ndarray:
         """
-        Returns the actual fittness values of the population, or the fittness
+        Returns the actual fitness values of the population, or the fitness
         of the population described by the argument `phenotypes`.
         """
-        if self._fittness is None:
-            self._fittness = self.evaluate(self.phenotypes)
-        return self._fittness
+        if self._fitness is not None:
+            return self._fitness
+
+        self._fitness = self.evaluate(self.phenotypes)
+        return self._fitness
+
+    @property
+    def fittness(self) -> ndarray: # pragma: no cover
+        import warnings
+        warnings.warn(
+            "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.fitness
 
     def reset(self) -> "GeneticAlgorithm":
         """
         Resets the solver and returns the object. Only use it if you want to have
         a completely clean sheet. Also, the function is called for every object at
         instantiation.
+
+        Note
+        ----
+        This method resets the internal state of the genetic algorithm, including
+        the population and champion. Use this method when you want to start a new
+        optimization process from scratch.
         """
         self._evolver = self.evolver()
         self._evolver.send(None)
         self._champion = None
+        self._state = OptimizerState()
+        self._status = GeneticAlgorithm.Status.INITIALIZED
         return self
 
     def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
@@ -327,7 +384,7 @@ class GeneticAlgorithm:
         _ = yield
         yield self.genotypes
         while True:
-            genotypes = self.select(self.genotypes, self.phenotypes)
+            genotypes = self.select()
             self.genotypes = self.populate(genotypes)
             yield self.genotypes
 
@@ -344,7 +401,7 @@ class GeneticAlgorithm:
 
     def solve(self, recycle: bool = False, **kwargs) -> Genom:
         """
-        Solves the problem and returns the best phenotype.
+        Solves the problem and returns the champion.
 
         .. note::
            This class is designed for maximizing the objective function. To minimize it,
@@ -365,17 +422,39 @@ class GeneticAlgorithm:
             The best candidate.
 
         """
-        self.reset() if not recycle else None
+        if not recycle:
+            self.reset()
         self.set_solution_params(**kwargs)
 
-        nIter, finished = 0, False
+        finished = False
+        self._status = GeneticAlgorithm.Status.INITIALIZED
 
-        while (not finished and nIter < self.maxiter) or (nIter < self.miniter):
-            self.evolve(1)
-            finished = self.stopping_criteria()
-            nIter += 1
+        try:
+            while not finished:
+                self.evolve(1)
+                self.state.n_iter += 1
+                min_iter_reached = self.state.n_iter >= self.miniter
+                max_iter_reached = self.state.n_iter >= self.maxiter
+                finished = (
+                    self.stopping_criteria() or max_iter_reached
+                ) and min_iter_reached
 
-        self.nIter = nIter
+            if finished:
+                if max_iter_reached:
+                    self._status = GeneticAlgorithm.Status.MAX_ITERATIONS_REACHED
+                elif self.stopping_criteria():
+                    self._status = GeneticAlgorithm.Status.CONVERGED
+                self._state.success = True
+            else:  # pragma: no cover
+                self._state.success = False
+        except Exception as e:
+            self._state.success = False
+            self._state.message = str(e)
+            self._status = GeneticAlgorithm.Status.ERROR
+            raise e
+        finally:
+            self._state.stage = self._status.value
+
         return self.champion
 
     def evaluate(self, phenotypes: Iterable | None = None) -> ndarray:
@@ -391,11 +470,19 @@ class GeneticAlgorithm:
             The phenotypes the objective function is to be evaluated for.
             Default is None.
         """
-        phenotypes = self.phenotypes if phenotypes is None else phenotypes
-        if self._is_symbolic_Function:
-            return self.fnc(phenotypes.T)
-        else:
-            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        try:
+            phenotypes = self.phenotypes if phenotypes is None else phenotypes
+            if self._is_symbolic_Function:
+                result = self.fnc(phenotypes.T)
+            else:
+                result = np.array([self.fnc(x) for x in phenotypes], dtype=float)
+            self.state.n_fev += len(phenotypes)
+        except Exception as e:  # pragma: no cover
+            result = None
+            raise RuntimeError(
+                "Error during evaluation of the objective function."
+            ) from e
+        return result
 
     def best_phenotype(self) -> ndarray:
         """
@@ -420,13 +507,13 @@ class GeneticAlgorithm:
            the :func:`champion` property.
 
         """
-        fittness = self.fittness
+        fitness = self.fitness
         argfunc = np.argmin if self._minimize else np.argmax
-        index = argfunc(fittness)
+        index = argfunc(fitness)
         return Genom(
             phenotype=self.phenotypes[index],
             genotype=self.genotypes[index],
-            fittness=fittness[index],
+            fitness=fitness[index],
             index=index,
         )
 
@@ -443,17 +530,19 @@ class GeneticAlgorithm:
             if has_new_champion:
                 self._champion = genom
                 self._champion.age = 0
+        self.state.x = self.champion.phenotype
+        self.state.fun = self.champion.fitness
         self._champion.age += 1
 
-    def divide(self, fittness: ndarray | None = None) -> tuple[ndarray, ndarray]:
+    def divide(self, fitness: ndarray | None = None) -> tuple[ndarray, ndarray]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.
 
         Parameters
         ----------
-        fittness: numpy.ndarray, Optional
-            Fittness values. If not provided, values from the latest
+        fitness: numpy.ndarray, Optional
+            Fitness values. If not provided, values from the latest
             evaluation are used. Default is None.
 
         Returns
@@ -463,14 +552,14 @@ class GeneticAlgorithm:
         list
             Indices of the members of the others.
         """
-        fittness = self.fittness if fittness is None else fittness
-        assert fittness is not None, "No available fittness data detected."
+        fitness = self.fitness if fitness is None else fitness
+        assert fitness is not None, "No available fitness data detected."
 
         if self.elitism is None:
             return [], list(range(self.nPop))
 
         if self.elitism is not None:
-            argsort = np.argsort(fittness)
+            argsort = np.argsort(fitness)
             if not self._minimize:
                 argsort = argsort[::-1]
 
@@ -566,9 +655,11 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
+    def select(
+        self, genotypes: ndarray, phenotypes: ndarray
+    ) -> ndarray:
         """
-        Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
-        tournament or other.
+        Ought to implement some kind of selection mechanism, e.g., a roulette wheel,
+        tournament, or other. Both `genotypes` and `phenotypes` must be provided.
         """
         ...

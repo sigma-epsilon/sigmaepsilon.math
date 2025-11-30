@@ -52,15 +52,13 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the number of generations a candidate spends at the top
-        (being the best candidate). Setting an upper limit to this value is a kind
-        of stopping criterion. Default is 5.
+        The age is the maximum number of generations a candidate spends at the top
+        (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
 
     See Also
     --------
-    :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`
     :class:`~sigmaepsilon.math.optimize.ga.Genom`
 
     Examples
@@ -80,7 +78,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = bga.solve()
     >>> champion = bga.champion
     >>> x = champion.phenotype
-    >>> fx = champion.fittness
+    >>> fx = champion.fitness
 
     """
 
@@ -167,16 +165,28 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         p = np.random.rand(self.dim * self.length)
         return np.where(p > self.p_m, child, 1 - child)
 
-    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
+    def select(self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None) -> ndarray:
         """
         Organizes a tournament and returns the genotypes of the winners.
+
+        .. note::
+           Providing either ``genotypes`` or ``phenotypes`` (or both) is not currently supported
+           and will raise a NotImplementedError. Only the default case (both None) is implemented.
         """
-        fittness = self.evaluate(phenotypes)
-        winners, others = self.divide(fittness)
+        if (genotypes is None) and (phenotypes is None):
+            fitness = self.fitness
+            genotypes = self.genotypes
+        else:
+            raise NotImplementedError(
+                "Selection with either 'genotypes' or 'phenotypes' (or both) provided is not implemented. "
+                "This branch is reached when at least one of these arguments is given to 'select', "
+                "but only the default case (both None) is currently supported."
+            )
+        winners, others = self.divide(fitness)
         winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
             candidates = np.random.choice(others, 3, replace=False)
-            argsort = np.argsort([fittness[ID] for ID in candidates])
+            argsort = np.argsort([fitness[ID] for ID in candidates])
             winner = argsort[0] if self._minimize else argsort[-1]
             winners.append(candidates[winner])
         return np.array([genotypes[w] for w in winners], dtype=float)
