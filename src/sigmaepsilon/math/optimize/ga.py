@@ -136,7 +136,7 @@ class GeneticAlgorithm:
     genetic algorithm can be wery demanding on the computational side. If the objective
     function takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
     approach, unless you have a dedicated evaluator that is able to run efficiently for a large
-    number of problems or if the long running time is not an issue. If you want to customize the way the 
+    number of problems or if the long running time is not an issue. If you want to customize the way the
     objective is evaluated, override the :func:`evaluate` method.
 
     See also
