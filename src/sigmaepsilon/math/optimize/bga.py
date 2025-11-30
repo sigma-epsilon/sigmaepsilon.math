@@ -174,8 +174,8 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
             genotypes = self.genotypes
         else:
             raise NotImplementedError(
-                "Selection with both 'genotypes' and 'phenotypes' provided is not implemented. "
-                "This branch is reached when both arguments are given to 'select', "
+                "Selection with either 'genotypes' or 'phenotypes' (or both) provided is not implemented. "
+                "This branch is reached when at least one of these arguments is given to 'select', "
                 "but only the default case (both None) is currently supported."
             )
         winners, others = self.divide(fitness)
