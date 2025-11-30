@@ -54,8 +54,8 @@ class OptimizerState(BaseModel):
     message: str = Field(
         default="", description="Description of the cause of termination."
     )
-    stage: int = Field(
-        default=-100, description="Termination status of the optimizer. Its value depends on the underlying solver. Refer to the solver being used for more details."
+    stage: int | NoneType = Field(
+        default=None, description="Termination status of the optimizer. Its value depends on the underlying solver. Refer to the solver being used for more details."
     )
 
     def to_scipy(self) -> OptimizeResult:
