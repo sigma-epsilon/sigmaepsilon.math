@@ -174,7 +174,6 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
             genotypes = self.genotypes
         else:
             raise NotImplementedError
-        
         winners, others = self.divide(fitness)
         winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
