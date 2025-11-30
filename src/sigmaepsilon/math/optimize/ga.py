@@ -126,7 +126,7 @@ class GeneticAlgorithm:
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
         The age is the maximum number of generations a candidate spends at the top
-        (being the best candidate) before termination. Default is 5.
+        (being the best candidate). Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
 
@@ -136,8 +136,8 @@ class GeneticAlgorithm:
     genetic algorithm can be wery demanding on the computational side. If the objective
     function takes a lot of time to evaluate, it is probably not a good idea to use a heuristic
     approach, unless you have a dedicated evaluator that is able to run efficiently for a large
-    number of problems. If you want to customize the way the objective is evaluated, override
-    the :func:`evaluate` method.
+    number of problems or if the long running time is not an issue. If you want to customize the way the 
+    objective is evaluated, override the :func:`evaluate` method.
 
     See also
     --------
@@ -426,16 +426,15 @@ class GeneticAlgorithm:
             self.reset()
         self.set_solution_params(**kwargs)
 
-        nIter, finished = 0, False
+        finished = False
         self._status = GeneticAlgorithm.Status.INITIALIZED
 
         try:
             while not finished:
                 self.evolve(1)
                 self.state.n_iter += 1
-                nIter += 1
-                min_iter_reached = nIter >= self.miniter
-                max_iter_reached = nIter >= self.maxiter
+                min_iter_reached = self.state.n_iter >= self.miniter
+                max_iter_reached = self.state.n_iter >= self.maxiter
                 finished = (
                     self.stopping_criteria() or max_iter_reached
                 ) and min_iter_reached
