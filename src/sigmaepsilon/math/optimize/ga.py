@@ -8,6 +8,7 @@ from numpy import ndarray
 from pydantic import BaseModel, Field
 
 from ..function import Function
+from .state import OptimizerState
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
@@ -112,9 +113,8 @@ class GeneticAlgorithm:
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the number of generations a candidate spends at the top
-        (being the best candidate). Setting an upper limit to this value is a kind
-        of stopping criterion. Default is 5.
+        The age is the maximum number number of generations a candidate spends at the top
+        (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
 
@@ -149,10 +149,11 @@ class GeneticAlgorithm:
         "miniter",
         "elitism",
         "maxage",
-        "nIter",
+        "patience"
         "_is_symbolic_Function",
         "_celebrate_op",
         "_minimize",
+        "_state",
     ]
 
     def __init__(
@@ -195,6 +196,7 @@ class GeneticAlgorithm:
         self._celebrate_op = None
         self._minimize = False
         self.elitism = None
+        self._state = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -206,6 +208,18 @@ class GeneticAlgorithm:
         )
         self.reset()
 
+    @property
+    def state(self) -> OptimizerState:
+        """
+        Returnes the state of the optimizer.
+        """
+        return self._state
+    
+    @property
+    def nIter(self) -> int:
+        """For backwards compacibility. Returns the number of iterations performed."""
+        return self.state.n_iter
+    
     @property
     def champion(self) -> Genom:
         """
@@ -221,7 +235,7 @@ class GeneticAlgorithm:
         return self._genotypes
 
     @genotypes.setter
-    def genotypes(self, value: Iterable):
+    def genotypes(self, value: Iterable) -> None:
         """
         Sets the genotypes of the population.
         """
@@ -246,8 +260,10 @@ class GeneticAlgorithm:
         Returns the actual fittness values of the population, or the fittness
         of the population described by the argument `phenotypes`.
         """
-        if self._fittness is None:
-            self._fittness = self.evaluate(self.phenotypes)
+        if self._fittness is not None:
+            return self._fittness
+        
+        self._fittness = self.evaluate(self.phenotypes)
         return self._fittness
 
     def reset(self) -> "GeneticAlgorithm":
@@ -255,10 +271,17 @@ class GeneticAlgorithm:
         Resets the solver and returns the object. Only use it if you want to have
         a completely clean sheet. Also, the function is called for every object at
         instantiation.
+        
+        Note
+        ----
+        This method resets the internal state of the genetic algorithm, including
+        the population and champion. Use this method when you want to start a new
+        optimization process from scratch.
         """
         self._evolver = self.evolver()
         self._evolver.send(None)
         self._champion = None
+        self._state = OptimizerState()
         return self
 
     def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
@@ -327,7 +350,7 @@ class GeneticAlgorithm:
         _ = yield
         yield self.genotypes
         while True:
-            genotypes = self.select(self.genotypes, self.phenotypes)
+            genotypes = self.select()
             self.genotypes = self.populate(genotypes)
             yield self.genotypes
 
@@ -344,7 +367,7 @@ class GeneticAlgorithm:
 
     def solve(self, recycle: bool = False, **kwargs) -> Genom:
         """
-        Solves the problem and returns the best phenotype.
+        Solves the problem and returns the champion.
 
         .. note::
            This class is designed for maximizing the objective function. To minimize it,
@@ -373,9 +396,9 @@ class GeneticAlgorithm:
         while (not finished and nIter < self.maxiter) or (nIter < self.miniter):
             self.evolve(1)
             finished = self.stopping_criteria()
+            self.state.n_iter += 1
             nIter += 1
 
-        self.nIter = nIter
         return self.champion
 
     def evaluate(self, phenotypes: Iterable | None = None) -> ndarray:
@@ -391,11 +414,17 @@ class GeneticAlgorithm:
             The phenotypes the objective function is to be evaluated for.
             Default is None.
         """
-        phenotypes = self.phenotypes if phenotypes is None else phenotypes
-        if self._is_symbolic_Function:
-            return self.fnc(phenotypes.T)
-        else:
-            return np.array([self.fnc(x) for x in phenotypes], dtype=float)
+        try:
+            phenotypes = self.phenotypes if phenotypes is None else phenotypes
+            if self._is_symbolic_Function:
+                result = self.fnc(phenotypes.T)
+            else:
+                result = np.array([self.fnc(x) for x in phenotypes], dtype=float)
+            self.state.n_fev += len(phenotypes)
+        except Exception as e:  # pragma: no cover
+            result = None
+            raise RuntimeError("Error during evaluation of the objective function.") from e
+        return result
 
     def best_phenotype(self) -> ndarray:
         """
@@ -443,6 +472,8 @@ class GeneticAlgorithm:
             if has_new_champion:
                 self._champion = genom
                 self._champion.age = 0
+        self.state.x = self.champion.phenotype
+        self.state.fun = self.champion.fittness
         self._champion.age += 1
 
     def divide(self, fittness: ndarray | None = None) -> tuple[ndarray, ndarray]:
@@ -566,7 +597,7 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
+    def select(self, genotypes: ndarray | None=None, phenotypes: ndarray | None = None) -> ndarray:
         """
         Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
         tournament or other.

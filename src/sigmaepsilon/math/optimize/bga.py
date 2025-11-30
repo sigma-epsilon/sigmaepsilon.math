@@ -52,15 +52,13 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the number of generations a candidate spends at the top
-        (being the best candidate). Setting an upper limit to this value is a kind
-        of stopping criterion. Default is 5.
+        The age is the maximum number number of generations a candidate spends at the top
+        (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
 
     See Also
     --------
-    :class:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm`
     :class:`~sigmaepsilon.math.optimize.ga.Genom`
 
     Examples
@@ -167,11 +165,18 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         p = np.random.rand(self.dim * self.length)
         return np.where(p > self.p_m, child, 1 - child)
 
-    def select(self, genotypes: ndarray, phenotypes: ndarray | None = None) -> ndarray:
+    def select(self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None) -> ndarray:
         """
         Organizes a tournament and returns the genotypes of the winners.
         """
-        fittness = self.evaluate(phenotypes)
+        if (genotypes is None) and (phenotypes is None):
+            fittness = self.fittness
+            genotypes = self.genotypes
+        elif phenotypes is not None:
+            fittness = self.evaluate(phenotypes)
+        else:
+            raise NotImplementedError
+        
         winners, others = self.divide(fittness)
         winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
