@@ -30,7 +30,7 @@ class Genom(BaseModel):
 
     phenotype: list[float] = Field(default_factory=list)
     genotype: list[int] = Field(default_factory=list)
-    fittness: float
+    fitness: float
     age: int = Field(default=0)
     index: int = Field(default=-1)
 
@@ -48,28 +48,38 @@ class Genom(BaseModel):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness > other.fittness)
+        return np.all(self.fitness > other.fitness)
 
     def __lt__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness < other.fittness)
+        return np.all(self.fitness < other.fitness)
 
     def __ge__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness >= other.fittness)
+        return np.all(self.fitness >= other.fitness)
 
     def __le__(self, other):
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
             )
-        return np.all(self.fittness <= other.fittness)
+        return np.all(self.fitness <= other.fitness)
+
+    @property
+    def fittness(self):
+        import warnings
+        warnings.warn(
+            "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.fitness
 
 
 class GeneticAlgorithm:
@@ -266,10 +276,11 @@ class GeneticAlgorithm:
                 self._phenotypes = self.decode(genotypes)
         return self._phenotypes
 
+
     @property
-    def fittness(self) -> ndarray:
+    def fitness(self) -> ndarray:
         """
-        Returns the actual fittness values of the population, or the fittness
+        Returns the actual fitness values of the population, or the fitness
         of the population described by the argument `phenotypes`.
         """
         if self._fittness is not None:
@@ -277,6 +288,16 @@ class GeneticAlgorithm:
 
         self._fittness = self.evaluate(self.phenotypes)
         return self._fittness
+
+    @property
+    def fittness(self) -> ndarray:
+        import warnings
+        warnings.warn(
+            "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.fitness
 
     def reset(self) -> "GeneticAlgorithm":
         """
@@ -488,13 +509,13 @@ class GeneticAlgorithm:
            the :func:`champion` property.
 
         """
-        fittness = self.fittness
+        fitness = self.fitness
         argfunc = np.argmin if self._minimize else np.argmax
-        index = argfunc(fittness)
+        index = argfunc(fitness)
         return Genom(
             phenotype=self.phenotypes[index],
             genotype=self.genotypes[index],
-            fittness=fittness[index],
+            fitness=fitness[index],
             index=index,
         )
 
@@ -512,10 +533,10 @@ class GeneticAlgorithm:
                 self._champion = genom
                 self._champion.age = 0
         self.state.x = self.champion.phenotype
-        self.state.fun = self.champion.fittness
+        self.state.fun = self.champion.fitness
         self._champion.age += 1
 
-    def divide(self, fittness: ndarray | None = None) -> tuple[ndarray, ndarray]:
+    def divide(self, fitness: ndarray | None = None) -> tuple[ndarray, ndarray]:
         """
         Divides population to elit and others, and returns the corresponding
         index arrays.
@@ -533,14 +554,14 @@ class GeneticAlgorithm:
         list
             Indices of the members of the others.
         """
-        fittness = self.fittness if fittness is None else fittness
-        assert fittness is not None, "No available fittness data detected."
+        fitness = self.fitness if fitness is None else fitness
+        assert fitness is not None, "No available fitness data detected."
 
         if self.elitism is None:
             return [], list(range(self.nPop))
 
         if self.elitism is not None:
-            argsort = np.argsort(fittness)
+            argsort = np.argsort(fitness)
             if not self._minimize:
                 argsort = argsort[::-1]
 

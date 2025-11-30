@@ -170,18 +170,18 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         Organizes a tournament and returns the genotypes of the winners.
         """
         if (genotypes is None) and (phenotypes is None):
-            fittness = self.fittness
+            fitness = self.fitness
             genotypes = self.genotypes
         elif phenotypes is not None:
-            fittness = self.evaluate(phenotypes)
+            fitness = self.evaluate(phenotypes)
         else:
             raise NotImplementedError
         
-        winners, others = self.divide(fittness)
+        winners, others = self.divide(fitness)
         winners = winners.tolist()
         while len(winners) < int(self.nPop / 2):
             candidates = np.random.choice(others, 3, replace=False)
-            argsort = np.argsort([fittness[ID] for ID in candidates])
+            argsort = np.argsort([fitness[ID] for ID in candidates])
             winner = argsort[0] if self._minimize else argsort[-1]
             winners.append(candidates[winner])
         return np.array([genotypes[w] for w in winners], dtype=float)
