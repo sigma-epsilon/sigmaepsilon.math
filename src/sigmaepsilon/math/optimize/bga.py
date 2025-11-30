@@ -168,6 +168,10 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     def select(self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None) -> ndarray:
         """
         Organizes a tournament and returns the genotypes of the winners.
+
+        .. note::
+           Providing either ``genotypes`` or ``phenotypes`` (or both) is not currently supported
+           and will raise a NotImplementedError. Only the default case (both None) is implemented.
         """
         if (genotypes is None) and (phenotypes is None):
             fitness = self.fitness
