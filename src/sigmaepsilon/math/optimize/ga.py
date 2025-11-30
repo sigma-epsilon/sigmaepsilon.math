@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
 from types import NoneType
+from numbers import Number
 import operator
 from enum import Enum, unique
 
@@ -14,11 +15,11 @@ from .state import OptimizerState
 __all__ = ["GeneticAlgorithm", "Genom"]
 
 
-def even(n):
+def even(n: Number) -> bool:
     return n % 2 == 0
 
 
-def odd(n):
+def odd(n: Number) -> bool:
     return not even(n)
 
 
