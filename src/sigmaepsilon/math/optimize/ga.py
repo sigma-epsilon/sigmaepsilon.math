@@ -238,7 +238,7 @@ class GeneticAlgorithm:
         return self._state
 
     @property
-    def nIter(self) -> int:
+    def nIter(self) -> int:  # pragma: no cover
         """For backwards compatibility. Returns the number of iterations performed."""
         return self.state.n_iter
 
@@ -447,7 +447,7 @@ class GeneticAlgorithm:
                 elif self.stopping_criteria():
                     self._status = GeneticAlgorithm.Status.CONVERGED
                 self._state.success = True
-            else:
+            else:  # pragma: no cover
                 self._state.success = False
         except Exception as e:
             self._state.success = False

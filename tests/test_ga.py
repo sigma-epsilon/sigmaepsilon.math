@@ -72,6 +72,7 @@ class TestBGA(unittest.TestCase):
         BGA.evolve()
         BGA.genotypes = BGA.genotypes
         BGA.fitness
+        BGA.state.to_scipy()
         BGA.best_phenotype()
         BGA.best_candidate()
         BGA.random_parents_generator(BGA.genotypes)

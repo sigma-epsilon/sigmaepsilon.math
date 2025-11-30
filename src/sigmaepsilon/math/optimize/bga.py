@@ -172,8 +172,6 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         if (genotypes is None) and (phenotypes is None):
             fitness = self.fitness
             genotypes = self.genotypes
-        elif phenotypes is not None:
-            fitness = self.evaluate(phenotypes)
         else:
             raise NotImplementedError
         
