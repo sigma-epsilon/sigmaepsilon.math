@@ -61,7 +61,7 @@ class OptimizerState(BaseModel):
     def to_scipy(self) -> OptimizeResult:
         """Returns the state as a SciPy OptimizeResult object."""
         return OptimizeResult(
-            x=np.array(self.x),
+            x=np.array(self.x) if self.x is not None else None,
             fun=self.fun,
             status=self.stage,
             nfev=self.n_fev,
