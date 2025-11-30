@@ -52,7 +52,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the maximum number number of generations a candidate spends at the top
+        The age is the maximum number of generations a candidate spends at the top
         (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
