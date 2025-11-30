@@ -72,7 +72,7 @@ class Genom(BaseModel):
         return np.all(self.fitness <= other.fitness)
 
     @property
-    def fittness(self):
+    def fittness(self) -> float:  # pragma: no cover
         import warnings
         warnings.warn(
             "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
@@ -163,7 +163,7 @@ class GeneticAlgorithm:
         "nPop",
         "_genotypes",
         "_phenotypes",
-        "_fittness",
+        "_fitness",
         "_champion",
         "_evolver",
         "maxiter",
@@ -212,7 +212,7 @@ class GeneticAlgorithm:
         self.p_m = None
         self._genotypes = None
         self._pnenotypes = None
-        self._fittness = None
+        self._fitness = None
         self._champion: Genom | NoneType = None
         self._celebrate_op = None
         self._minimize = False
@@ -263,7 +263,7 @@ class GeneticAlgorithm:
         """
         self._genotypes = value
         self._phenotypes = None
-        self._fittness = None
+        self._fitness = None
 
     @property
     def phenotypes(self) -> Iterable:
@@ -283,14 +283,14 @@ class GeneticAlgorithm:
         Returns the actual fitness values of the population, or the fitness
         of the population described by the argument `phenotypes`.
         """
-        if self._fittness is not None:
-            return self._fittness
+        if self._fitness is not None:
+            return self._fitness
 
-        self._fittness = self.evaluate(self.phenotypes)
-        return self._fittness
+        self._fitness = self.evaluate(self.phenotypes)
+        return self._fitness
 
     @property
-    def fittness(self) -> ndarray:
+    def fittness(self) -> ndarray: # pragma: no cover
         import warnings
         warnings.warn(
             "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
@@ -543,8 +543,8 @@ class GeneticAlgorithm:
 
         Parameters
         ----------
-        fittness: numpy.ndarray, Optional
-            Fittness values. If not provided, values from the latest
+        fitness: numpy.ndarray, Optional
+            Fitness values. If not provided, values from the latest
             evaluation are used. Default is None.
 
         Returns

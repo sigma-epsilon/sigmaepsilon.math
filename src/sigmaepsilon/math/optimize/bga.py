@@ -78,7 +78,7 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
     >>> _ = bga.solve()
     >>> champion = bga.champion
     >>> x = champion.phenotype
-    >>> fx = champion.fittness
+    >>> fx = champion.fitness
 
     """
 
