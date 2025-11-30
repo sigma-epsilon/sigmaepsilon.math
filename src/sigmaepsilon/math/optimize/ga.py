@@ -427,7 +427,6 @@ class GeneticAlgorithm:
         self.set_solution_params(**kwargs)
 
         nIter, finished = 0, False
-        min_iter_reached, max_iter_reached = False, False
         self._status = GeneticAlgorithm.Status.INITIALIZED
 
         try:
