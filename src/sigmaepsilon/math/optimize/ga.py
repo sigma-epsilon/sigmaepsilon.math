@@ -656,10 +656,10 @@ class GeneticAlgorithm:
 
     @abstractmethod
     def select(
-        self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
+        self, genotypes: ndarray, phenotypes: ndarray
     ) -> ndarray:
         """
-        Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
-        tournament or other.
+        Ought to implement some kind of selection mechanism, e.g., a roulette wheel,
+        tournament, or other. Both `genotypes` and `phenotypes` must be provided.
         """
         ...
