@@ -49,10 +49,13 @@ class OptimizerState(BaseModel):
     )
     n_iter: int = Field(default=0, description="The number of iterations completed.")
     success: bool = Field(
-        default=False, description="Indicates if the optimizer exited successfully."
+        default=True, description="Indicates if the optimizer exited successfully."
     )
     message: str = Field(
         default="", description="Description of the cause of termination."
+    )
+    stage: int = Field(
+        default=-100, description="Termination status of the optimizer. Its value depends on the underlying solver. Refer to the solver being used for more details."
     )
 
     def to_scipy(self) -> OptimizeResult:
@@ -60,7 +63,7 @@ class OptimizerState(BaseModel):
         return OptimizeResult(
             x=np.array(self.x),
             fun=self.fun,
-            status=None,
+            status=self.stage,
             nfev=self.n_fev,
             njev=self.n_jev,
             nhev=self.n_hev,

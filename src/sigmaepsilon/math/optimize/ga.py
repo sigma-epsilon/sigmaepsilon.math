@@ -2,6 +2,7 @@ from abc import abstractmethod
 from typing import Iterable, Callable, Tuple, Generator
 from types import NoneType
 import operator
+from enum import Enum, unique
 
 import numpy as np
 from numpy import ndarray
@@ -132,6 +133,15 @@ class GeneticAlgorithm:
     :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
     """
 
+    @unique
+    class Status(Enum):
+        """Status codes for the genetic algorithm."""
+
+        INITIALIZED = 0
+        MAX_ITERATIONS_REACHED = 1
+        CONVERGED = 2
+        ERROR = -1
+
     __slots__ = [
         "fnc",
         "ranges",
@@ -149,11 +159,11 @@ class GeneticAlgorithm:
         "miniter",
         "elitism",
         "maxage",
-        "patience"
-        "_is_symbolic_Function",
+        "patience" "_is_symbolic_Function",
         "_celebrate_op",
         "_minimize",
         "_state",
+        "_status",
     ]
 
     def __init__(
@@ -197,6 +207,7 @@ class GeneticAlgorithm:
         self._minimize = False
         self.elitism = None
         self._state = None
+        self._status = None
         self.set_solution_params(
             p_c=p_c,
             p_m=p_m,
@@ -214,12 +225,12 @@ class GeneticAlgorithm:
         Returnes the state of the optimizer.
         """
         return self._state
-    
+
     @property
     def nIter(self) -> int:
         """For backwards compacibility. Returns the number of iterations performed."""
         return self.state.n_iter
-    
+
     @property
     def champion(self) -> Genom:
         """
@@ -262,7 +273,7 @@ class GeneticAlgorithm:
         """
         if self._fittness is not None:
             return self._fittness
-        
+
         self._fittness = self.evaluate(self.phenotypes)
         return self._fittness
 
@@ -271,7 +282,7 @@ class GeneticAlgorithm:
         Resets the solver and returns the object. Only use it if you want to have
         a completely clean sheet. Also, the function is called for every object at
         instantiation.
-        
+
         Note
         ----
         This method resets the internal state of the genetic algorithm, including
@@ -282,6 +293,7 @@ class GeneticAlgorithm:
         self._evolver.send(None)
         self._champion = None
         self._state = OptimizerState()
+        self._status = GeneticAlgorithm.Status.INITIALIZED
         return self
 
     def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
@@ -388,16 +400,40 @@ class GeneticAlgorithm:
             The best candidate.
 
         """
-        self.reset() if not recycle else None
+        if not recycle:
+            self.reset()
         self.set_solution_params(**kwargs)
 
         nIter, finished = 0, False
+        min_iter_reached, max_iter_reached = False, False
+        self._status = GeneticAlgorithm.Status.INITIALIZED
 
-        while (not finished and nIter < self.maxiter) or (nIter < self.miniter):
-            self.evolve(1)
-            finished = self.stopping_criteria()
-            self.state.n_iter += 1
-            nIter += 1
+        try:
+            while not finished:
+                self.evolve(1)
+                min_iter_reached = nIter >= self.miniter
+                max_iter_reached = nIter >= self.maxiter
+                finished = (
+                    self.stopping_criteria() or max_iter_reached
+                ) and min_iter_reached
+                self.state.n_iter += 1
+                nIter += 1
+
+            if finished:
+                if max_iter_reached:
+                    self._status = GeneticAlgorithm.Status.MAX_ITERATIONS_REACHED
+                elif self.stopping_criteria():
+                    self._status = GeneticAlgorithm.Status.CONVERGED
+                self._state.success = True
+            else:
+                self._state.success = False
+        except Exception as e:
+            self._state.success = False
+            self._state.message = str(e)
+            self._status = GeneticAlgorithm.Status.ERROR
+            raise e
+        finally:
+            self._state.stage = self._status.value
 
         return self.champion
 
@@ -423,7 +459,9 @@ class GeneticAlgorithm:
             self.state.n_fev += len(phenotypes)
         except Exception as e:  # pragma: no cover
             result = None
-            raise RuntimeError("Error during evaluation of the objective function.") from e
+            raise RuntimeError(
+                "Error during evaluation of the objective function."
+            ) from e
         return result
 
     def best_phenotype(self) -> ndarray:
@@ -597,7 +635,9 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def select(self, genotypes: ndarray | None=None, phenotypes: ndarray | None = None) -> ndarray:
+    def select(
+        self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
+    ) -> ndarray:
         """
         Ought to implement dome kind of selection mechanism, eg. a roulette wheel,
         tournament or other.
