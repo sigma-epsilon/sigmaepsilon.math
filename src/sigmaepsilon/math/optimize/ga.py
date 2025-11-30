@@ -432,13 +432,13 @@ class GeneticAlgorithm:
         try:
             while not finished:
                 self.evolve(1)
+                self.state.n_iter += 1
+                nIter += 1
                 min_iter_reached = nIter >= self.miniter
                 max_iter_reached = nIter >= self.maxiter
                 finished = (
                     self.stopping_criteria() or max_iter_reached
                 ) and min_iter_reached
-                self.state.n_iter += 1
-                nIter += 1
 
             if finished:
                 if max_iter_reached:
