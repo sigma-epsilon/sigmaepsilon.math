@@ -125,7 +125,7 @@ class GeneticAlgorithm:
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
     maxage: int, Optional
-        The age is the maximum number number of generations a candidate spends at the top
+        The age is the maximum number of generations a candidate spends at the top
         (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
@@ -170,7 +170,7 @@ class GeneticAlgorithm:
         "miniter",
         "elitism",
         "maxage",
-        "patience" "_is_symbolic_Function",
+        "_is_symbolic_Function",
         "_celebrate_op",
         "_minimize",
         "_state",
@@ -233,13 +233,13 @@ class GeneticAlgorithm:
     @property
     def state(self) -> OptimizerState:
         """
-        Returnes the state of the optimizer.
+        Returns the state of the optimizer.
         """
         return self._state
 
     @property
     def nIter(self) -> int:
-        """For backwards compacibility. Returns the number of iterations performed."""
+        """For backwards compatibility. Returns the number of iterations performed."""
         return self.state.n_iter
 
     @property
