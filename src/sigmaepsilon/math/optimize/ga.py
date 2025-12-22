@@ -74,6 +74,7 @@ class Genom(BaseModel):
     @property
     def fittness(self) -> float:  # pragma: no cover
         import warnings
+
         warnings.warn(
             "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
             DeprecationWarning,
@@ -276,7 +277,6 @@ class GeneticAlgorithm:
                 self._phenotypes = self.decode(genotypes)
         return self._phenotypes
 
-
     @property
     def fitness(self) -> ndarray:
         """
@@ -290,8 +290,9 @@ class GeneticAlgorithm:
         return self._fitness
 
     @property
-    def fittness(self) -> ndarray: # pragma: no cover
+    def fittness(self) -> ndarray:  # pragma: no cover
         import warnings
+
         warnings.warn(
             "'fittness' was a typo and is deprecated; it will be removed in a future version. Use 'fitness' instead.",
             DeprecationWarning,
@@ -655,9 +656,7 @@ class GeneticAlgorithm:
         ...
 
     @abstractmethod
-    def select(
-        self, genotypes: ndarray, phenotypes: ndarray
-    ) -> ndarray:
+    def select(self, genotypes: ndarray, phenotypes: ndarray) -> ndarray:
         """
         Ought to implement some kind of selection mechanism, e.g., a roulette wheel,
         tournament, or other. Both `genotypes` and `phenotypes` must be provided.

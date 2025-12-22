@@ -97,6 +97,12 @@ class TestLPP(unittest.TestCase):
         x_ = np.array(x)
         _x = np.array([1.0, 1.0])
         self.assertTrue(np.all(np.isclose(_x, x_)))
+        # test solution using dense matrices
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds, sparsify=False)
+        x = lpp.solve().x
+        x_ = np.array(x)
+        _x = np.array([1.0, 1.0])
+        self.assertTrue(np.all(np.isclose(_x, x_)))
 
     def test_no_solution(self):
         """
@@ -109,6 +115,10 @@ class TestLPP(unittest.TestCase):
         eq32 = Equality(x2 + x3 - x4 - 2, variables=syms)
         bounds = [(0, None), (0, None), (0, None), (0, None)]
         lpp = LPP(obj3, [eq31, eq32], variables=syms, bounds=bounds)
+        solution = lpp.solve()
+        self.assertFalse(solution.success)
+        # test solution using dense matrices
+        lpp = LPP(obj3, [eq31, eq32], variables=syms, bounds=bounds, sparsify=False)
         solution = lpp.solve()
         self.assertFalse(solution.success)
 
@@ -167,6 +177,19 @@ class TestLPP(unittest.TestCase):
         x = np.array(solution.x)
         self.assertTrue(np.all(np.isclose(x, np.array([2, 0.5, 0]))))
         self.assertTrue(np.isclose(solution.fun, 1.5))
+        
+    def test_mixed_integer_problem_dense(self):
+        variables = x1, x2, x3 = sy.symbols(["x1", "x2", "x3"])
+        f = Function(3 * x2 + 2 * x3, variables=variables)
+        eq1 = Relation(2 * x1 + 2 * x2 - 4 * x3 - 5, op="=", variables=variables)
+        bounds = (0, None)
+        integrality = [1, 0, 1]
+        lpp = LPP(f, [eq1], variables=variables, bounds=bounds, integrality=integrality, sparsify=False)
+        solution = lpp.solve()
+        self.assertTrue(solution.success)
+        x = np.array(solution.x)
+        self.assertTrue(np.all(np.isclose(x, np.array([2, 0.5, 0]))))
+        self.assertTrue(np.isclose(solution.fun, 1.5))
 
     def test_cyclic_problem(self):
         syms = x1, x2 = sy.symbols(["X2", "x2"])
@@ -216,6 +239,17 @@ class TestLPP(unittest.TestCase):
         ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
         ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
         lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds)
+        success = lpp.solve().success
+        self.assertTrue(success)
+        
+        # test solution using dense matrices
+        x1, x2 = sy.symbols(["x1", "x2"])
+        syms = [x1, x2]
+        f = Function(x1 + x2, variables=syms)
+        ieq1 = InEquality(x1 - 1, op=">=", variables=syms)
+        ieq2 = InEquality(x2 - 1, op=">=", variables=syms)
+        ieq3 = InEquality(x1 + x2 - 4, op=">=", variables=syms)
+        lpp = LPP(f, [ieq1, ieq2, ieq3], variables=syms, bounds=bounds, sparsify=False)
         success = lpp.solve().success
         self.assertTrue(success)
 
