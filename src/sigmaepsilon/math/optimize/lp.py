@@ -4,6 +4,7 @@ import numpy as np
 from numpy import ndarray
 from sympy import Symbol
 from scipy.optimize import linprog, OptimizeResult
+from scipy import sparse
 
 from ..function import Function, InEquality, Equality
 from ..function.relation import Relations, Relation
@@ -36,6 +37,10 @@ class LinearProgrammingProblem:
         See the `bounds` parameter in `scipy.optimize.linprog` for more details.
     integrality : Iterable[int] | int, Optional
         See the `integrality` parameter in `scipy.optimize.linprog` for more details.
+    sparsify : bool, Optional
+        If `True`, the constraint matrices will be converted to sparse format before passing
+        them to the solver. This can improve performance for large problems with many zero
+        coefficients. Default is `True`.
         
     See Also
     --------
@@ -117,6 +122,7 @@ class LinearProgrammingProblem:
         "_variables",
         "bounds",
         "integrality",
+        "_sparsify",
     ]
 
     def __init__(
@@ -127,6 +133,7 @@ class LinearProgrammingProblem:
         variables: Sequence[Symbol] | None = None,
         bounds: BoundsLike = (0, None),
         integrality: Iterable[int] | int = None,
+        sparsify: bool = True,
     ):
         super().__init__()
         self.obj = None
@@ -134,6 +141,7 @@ class LinearProgrammingProblem:
         self._variables = []
         self.bounds = bounds
         self.integrality = integrality
+        self._sparsify = sparsify
 
         _variables = []
 
@@ -197,37 +205,79 @@ class LinearProgrammingProblem:
         SMALLNUM = np.nextafter(0, 1)
 
         if n_eq > 0:
-            A_eq = np.zeros((n_eq, n_x))
+            if self._sparsify:
+                A_eq_data = []
+                A_eq_rows = []
+                A_eq_cols = []
+            else:
+                A_eq = np.zeros((n_eq, n_x))
+            
             b_eq = np.zeros((n_eq,))
             equalities: Iterable[Equality] = filter(
                 lambda c: isinstance(c, Equality), self.constraints
             )
             for i, eq in enumerate(equalities):
                 coeffs = eq.linear_coefficients(normalize=True)
-                A_eq[i] = [coeffs[x_] for x_ in self.variables]
+                if self._sparsify:
+                    for j, x_ in enumerate(self.variables):
+                        val = coeffs[x_]
+                        if val != 0:
+                            A_eq_data.append(val)
+                            A_eq_rows.append(i)
+                            A_eq_cols.append(j)
+                else:
+                    A_eq[i] = [coeffs[x_] for x_ in self.variables]
+                    
                 b_eq[i] = -eq(x_zero)
+            
+            if self._sparsify:
+                A_eq = sparse.csr_matrix((A_eq_data, (A_eq_rows, A_eq_cols)), shape=(n_eq, n_x), dtype=float)
+                del A_eq_data, A_eq_rows, A_eq_cols
 
         if n_ieq > 0:
-            A_ub = np.zeros((n_ieq, n_x))
+            if self._sparsify:
+                A_ub_data = []
+                A_ub_rows = []
+                A_ub_cols = []
+            else:
+                A_ub = np.zeros((n_ieq, n_x))
+                
             b_ub = np.zeros((n_ieq,))
             inequalities: Iterable[InEquality] = filter(
                 lambda c: isinstance(c, InEquality), self.constraints
             )
             for i, ieq in enumerate(inequalities):
                 coeffs = ieq.linear_coefficients(normalize=True)
-                A_ub[i] = [coeffs[x_] for x_ in self.variables]
-                b_ub[i] = -ieq(x_zero)
-
+                
+                A_ub_multiplier = 1
+                b_ub_multiplier = 1
+                b_ub_adjustment = 0.0
                 if ieq.op == Relations.ge:
-                    A_ub[i] *= -1
-                    b_ub[i] *= -1
+                    A_ub_multiplier = -1
+                    b_ub_multiplier = -1
                 elif ieq.op == Relations.gt:
-                    A_ub[i] *= -1
-                    b_ub[i] *= -1
-                    b_ub[i] -= SMALLNUM
+                    A_ub_multiplier = -1
+                    b_ub_multiplier = -1
+                    b_ub_adjustment = -SMALLNUM
                 elif ieq.op == Relations.lt:
-                    b_ub[i] -= SMALLNUM
-
+                    b_ub_adjustment = -SMALLNUM
+                
+                if self._sparsify:
+                    for j, x_ in enumerate(self.variables):
+                        val = coeffs[x_] * A_ub_multiplier
+                        if val != 0:
+                            A_ub_data.append(val)
+                            A_ub_rows.append(i)
+                            A_ub_cols.append(j)
+                else:
+                    A_ub[i] = [coeffs[x_] * A_ub_multiplier for x_ in self.variables]
+                
+                b_ub[i] = -ieq(x_zero) * b_ub_multiplier + b_ub_adjustment
+                
+            if self._sparsify:
+                A_ub = sparse.csr_matrix((A_ub_data, (A_ub_rows, A_ub_cols)), shape=(n_ieq, n_x), dtype=float)
+                del A_ub_data, A_ub_rows, A_ub_cols
+                    
         integrality = self.integrality
         if integrality is None:
             is_int = [v.is_integer for v in self.variables]
