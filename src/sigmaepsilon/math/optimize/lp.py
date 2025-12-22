@@ -211,7 +211,7 @@ class LinearProgrammingProblem:
                 A_eq_cols = []
             else:
                 A_eq = np.zeros((n_eq, n_x))
-            
+
             b_eq = np.zeros((n_eq,))
             equalities: Iterable[Equality] = filter(
                 lambda c: isinstance(c, Equality), self.constraints
@@ -227,11 +227,13 @@ class LinearProgrammingProblem:
                             A_eq_cols.append(j)
                 else:
                     A_eq[i] = [coeffs[x_] for x_ in self.variables]
-                    
+
                 b_eq[i] = -eq(x_zero)
-            
+
             if self._sparsify:
-                A_eq = sparse.csr_matrix((A_eq_data, (A_eq_rows, A_eq_cols)), shape=(n_eq, n_x), dtype=float)
+                A_eq = sparse.csr_matrix(
+                    (A_eq_data, (A_eq_rows, A_eq_cols)), shape=(n_eq, n_x), dtype=float
+                )
                 del A_eq_data, A_eq_rows, A_eq_cols
 
         if n_ieq > 0:
@@ -241,14 +243,14 @@ class LinearProgrammingProblem:
                 A_ub_cols = []
             else:
                 A_ub = np.zeros((n_ieq, n_x))
-                
+
             b_ub = np.zeros((n_ieq,))
             inequalities: Iterable[InEquality] = filter(
                 lambda c: isinstance(c, InEquality), self.constraints
             )
             for i, ieq in enumerate(inequalities):
                 coeffs = ieq.linear_coefficients(normalize=True)
-                
+
                 A_ub_multiplier = 1
                 b_ub_multiplier = 1
                 b_ub_adjustment = 0.0
@@ -261,7 +263,7 @@ class LinearProgrammingProblem:
                     b_ub_adjustment = -SMALLNUM
                 elif ieq.op == Relations.lt:
                     b_ub_adjustment = -SMALLNUM
-                
+
                 if self._sparsify:
                     for j, x_ in enumerate(self.variables):
                         val = coeffs[x_] * A_ub_multiplier
@@ -271,13 +273,15 @@ class LinearProgrammingProblem:
                             A_ub_cols.append(j)
                 else:
                     A_ub[i] = [coeffs[x_] * A_ub_multiplier for x_ in self.variables]
-                
+
                 b_ub[i] = -ieq(x_zero) * b_ub_multiplier + b_ub_adjustment
-                
+
             if self._sparsify:
-                A_ub = sparse.csr_matrix((A_ub_data, (A_ub_rows, A_ub_cols)), shape=(n_ieq, n_x), dtype=float)
+                A_ub = sparse.csr_matrix(
+                    (A_ub_data, (A_ub_rows, A_ub_cols)), shape=(n_ieq, n_x), dtype=float
+                )
                 del A_ub_data, A_ub_rows, A_ub_cols
-                    
+
         integrality = self.integrality
         if integrality is None:
             is_int = [v.is_integer for v in self.variables]

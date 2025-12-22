@@ -45,9 +45,9 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         The minimum number of iterations. Default is 100.
     elitism: float or int, Optional
         Determines the portion of the population designated as elite, which automatically survives
-        to the next generation. If less than or equal to 1, it specifies a fraction of the population. 
-        If greater than 1, it indicates the exact number of individuals to be selected as elite. 
-        The default value of 1 assures that the reigning champion is always preserved. To turn this off, 
+        to the next generation. If less than or equal to 1, it specifies a fraction of the population.
+        If greater than 1, it indicates the exact number of individuals to be selected as elite.
+        The default value of 1 assures that the reigning champion is always preserved. To turn this off,
         det the value to None. Default is 1.
     ftol: float, Optional
         Torelance for floating point operations. Default is 1e-12.
@@ -165,7 +165,9 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         p = np.random.rand(self.dim * self.length)
         return np.where(p > self.p_m, child, 1 - child)
 
-    def select(self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None) -> ndarray:
+    def select(
+        self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
+    ) -> ndarray:
         """
         Organizes a tournament and returns the genotypes of the winners.
 
