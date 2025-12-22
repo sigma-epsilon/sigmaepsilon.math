@@ -84,3 +84,11 @@ pydata-sphinx-theme = "^0.15.2"
 networkx = "^3.2.1"
 plotly = "^5.19.0"
 matplotlib = "^3.9.2"
+
+[tool.poetry.group.app_llm_optimizer.dependencies]
+python-dotenv = "^1.2.1"
+openai = "^2.14.0"
+gradio = "^6.2.0"
+langchain = "^1.2.0"
+langchain-openai = "^1.1.6"
+

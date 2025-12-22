@@ -1,0 +1,99 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{Optimization of Chair Production for Maximum Profit}
+\author{Manufacturing Company}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem Summary}
+
+A small manufacturing company produces two types of office chairs: \textbf{Standard} and \textbf{Ergonomic}. The goal is to determine the optimal number of units of each chair to produce next month in order to maximize profit, while respecting production capacity and market constraints.
+
+\subsection*{Profit per Unit}
+\begin{itemize}
+    \item Standard chair: €30
+    \item Ergonomic chair: €50
+\end{itemize}
+
+\subsection*{Production Capacity}
+\begin{itemize}
+    \item \textbf{Carpentry Department:}
+    \begin{itemize}
+        \item Time per Standard chair: 2 hours
+        \item Time per Ergonomic chair: 3 hours
+        \item Total available hours: 600 hours
+    \end{itemize}
+    \item \textbf{Upholstery Department:}
+    \begin{itemize}
+        \item Time per Standard chair: 1 hour
+        \item Time per Ergonomic chair: 2 hours
+        \item Total available hours: 400 hours
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Market and Policy Constraints}
+\begin{itemize}
+    \item At most 150 Ergonomic chairs can be sold.
+    \item At least 100 Standard chairs must be produced.
+    \item Production quantities cannot be negative.
+\end{itemize}
+
+\section*{Mathematical Model}
+
+Let:
+\[
+x = \text{number of Standard chairs produced}
+\]
+\[
+y = \text{number of Ergonomic chairs produced}
+\]
+
+\subsection*{Objective Function}
+Maximize profit:
+\[
+\max Z = 30x + 50y
+\]
+which is equivalent to minimizing the negative profit:
+\[
+\min -Z = -30x - 50y
+\]
+
+\subsection*{Constraints}
+\[
+\begin{cases}
+2x + 3y \leq 600 & \text{(Carpentry hours)} \\
+x + 2y \leq 400 & \text{(Upholstery hours)} \\
+y \leq 150 & \text{(Demand limit for Ergonomic chairs)} \\
+x \geq 100 & \text{(Minimum Standard chairs)} \\
+x \geq 0, \quad y \geq 0 & \text{(Non-negativity)} \\
+x, y \in \mathbb{Z} & \text{(Integer quantities)}
+\end{cases}
+\]
+
+\section*{Optimal Solution}
+
+The optimal production plan is:
+\[
+x = 102 \quad \text{Standard chairs}
+\]
+\[
+y = 132 \quad \text{Ergonomic chairs}
+\]
+
+This yields a maximum profit of:
+\[
+Z = 30(102) + 50(132) = 3060 + 6600 = 9660 \text{ euros}
+\]
+
+\section*{Interpretation}
+
+The company should produce 102 Standard chairs and 132 Ergonomic chairs next month to maximize profit while respecting all production and market constraints. This plan fully utilizes the available resources efficiently and meets the demand and policy requirements.
+
+\end{document}
