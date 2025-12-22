@@ -164,3 +164,6 @@ cython_debug/
 .vscode/
 /*.ipynb
 .DS_Store
+*.aux
+*.bbl
+*.blg
