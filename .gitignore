@@ -163,3 +163,13 @@ cython_debug/
 
 .vscode/
 /*.ipynb
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+
+# MacOS
+.DS_Store
+
+# Misc
+*.aux
+*.log
