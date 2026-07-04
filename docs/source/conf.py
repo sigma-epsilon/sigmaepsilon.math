@@ -46,35 +46,63 @@ release = "v" + library.__version__
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    # allows to work with markdown files
-    "myst_parser",  # pip install myst-parser for this
-    # to plot summary about durations of file generations
+    # Parses Markdown (.md) files as Sphinx documents, alongside reStructuredText.
+    # pip install myst-parser for this.
+    "myst_parser",
+    # Measures and reports how long each document took to build; prints a
+    # "slowest documents" summary at the end of the build.
     "sphinx.ext.duration",
-    # to test code snippets in docstrings
+    # Runs doctest-style (>>> ...) code blocks/examples embedded in docstrings
+    # and documents as executable tests (via `make doctest`).
     "sphinx.ext.doctest",
-    # for automatic exploration of the source files
+    # Pulls docstrings from Python modules/classes/functions into the docs
+    # (the basis for the API reference pages).
     "sphinx.ext.autodoc",
-    # to enable cross referencing other documents on the internet
+    # Enables cross-referencing to the docs of other Sphinx projects (see
+    # `intersphinx_mapping` below), e.g. linking to NumPy/SciPy API docs.
     "sphinx.ext.intersphinx",
-    # Napoleon is a extension that enables Sphinx to parse both NumPy and Google style docstrings
+    # Lets autodoc understand NumPy- and Google-style docstrings (this project
+    # uses NumPy style) and renders them as proper reStructuredText.
     "sphinx.ext.napoleon",
     #'sphinx_gallery.gen_gallery',
     #'sphinx_gallery.load_style',  # load CSS for gallery (needs SG >= 0.6)
-    "nbsphinx",  # to handle jupyter notebooks
+    # Renders Jupyter notebooks (.ipynb) as documentation pages, executing
+    # them (or using saved outputs) and embedding the resulting cells/plots.
+    "nbsphinx",
     # "nbsphinx_link",  # for including notebook files from outside the sphinx source root
-    "sphinx_copybutton",  # for "copy to clipboard" buttons
-    "sphinx.ext.mathjax",  # for math equations
-    "sphinxcontrib.bibtex",  # for bibliographic references
-    "sphinxcontrib.rsvgconverter",  # for SVG->PDF conversion in LaTeX output
-    "sphinx.ext.viewcode",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.doctest",
-    "sphinx.ext.todo",
-    "sphinx.ext.coverage",
-    "sphinx.ext.extlinks",
+    # Adds a "copy to clipboard" button to code blocks; configured below to
+    # strip prompts (>>>, $, In [1]:, ...) when copying.
+    "sphinx_copybutton",
+    # Renders LaTeX math (via MathJax); configured further down in
+    # `mathjax3_config`.
     "sphinx.ext.mathjax",
+    # Adds support for BibTeX citations/bibliographies (see
+    # `bibtex_bibfiles`/`bibtex_default_style` below).
+    "sphinxcontrib.bibtex",
+    # Converts SVG images to PDF when building LaTeX/PDF output, since LaTeX
+    # cannot embed SVGs directly.
+    "sphinxcontrib.rsvgconverter",
+    # Adds "[source]" links from API docs to highlighted source code pages.
+    "sphinx.ext.viewcode",
+    # Auto-generates summary tables/stub pages for documented modules,
+    # classes and functions (paired with `autosummary_generate` below).
+    "sphinx.ext.autosummary",
+    # Enables `..todo::` directives and a `.. todolist::` summary of
+    # outstanding TODOs in the docs.
+    "sphinx.ext.todo",
+    # Adds the `make coverage` builder, reporting which objects are missing
+    # documentation.
+    "sphinx.ext.coverage",
+    # Allows defining shorthand link roles (e.g. `:issue:`) that expand to
+    # full URLs via a template, instead of writing full links each time.
+    "sphinx.ext.extlinks",
+    # Provides UI components (cards, grids, badges, dropdowns, tabs, etc.)
+    # for richer page layouts.
     "sphinx_design",
+    # Adds `.. tab::` directives for inline tabbed content blocks.
     "sphinx_inline_tabs",
+    # Executes embedded Matplotlib plotting code and inserts the resulting
+    # figures as images in the docs.
     "matplotlib.sphinxext.plot_directive",
 ]
 

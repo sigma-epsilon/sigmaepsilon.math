@@ -29,6 +29,10 @@ class OptimizerState(BaseModel):
         Whether or not the optimizer exited successfully.
     message : str
         A message describing the cause of the termination.
+    diversity : float
+        A measure of the diversity of the population at the latest iteration, if
+        applicable (e.g. for population-based optimizers like genetic algorithms).
+        A value close to zero indicates a converged, homogeneous population.
     """
 
     x: list[float] | NoneType = Field(
@@ -61,6 +65,9 @@ class OptimizerState(BaseModel):
             "Its value depends on the underlying solver. "
             "Refer to the solver being used for more details."
         ),
+    )
+    diversity: float = Field(
+        default=0.0, description="Diversity of the population at the latest iteration."
     )
 
     def to_scipy(self) -> OptimizeResult:

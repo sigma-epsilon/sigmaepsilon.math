@@ -22,5 +22,5 @@ please refer to the :doc:`api`.
     user_guide/function
     user_guide/approximation
     user_guide/optimization
+    user_guide/custom_ga
     user_guide/graph
-    

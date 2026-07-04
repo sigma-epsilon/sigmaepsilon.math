@@ -11,7 +11,7 @@
   * Classes to define and solve linear and nonlinear optimization problems.
     
     * A :class:`~sigmaepsilon.math.optimize.LinearProgrammingProblem` class to define and solve continuous, integer or mixed-integer linear optimization problems.
-    * A :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` class to tackle more complicated optimization problems.
+    * A :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`, an :class:`~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm` and a :class:`~sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm` class to tackle more complicated optimization problems, with pluggable selection strategies and reproducible, seedable randomness.
 
 * :ref:`Appriximation <user_guide_approximation>`
 
