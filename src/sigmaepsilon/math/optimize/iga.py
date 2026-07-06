@@ -58,7 +58,7 @@ class IntegerGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
         to the next generation. If less than or equal to 1, it specifies a fraction of the population.
         If greater than 1, it indicates the exact number of individuals to be selected as elite.
         The default value of 1 assures that the reigning champion is always preserved. To turn this off,
-        det the value to None. Default is 1.
+        set the value to None. Default is 1.
     maxage: int, Optional
         The age is the maximum number of generations a candidate spends at the top
         (being the best candidate) before termination. Default is 5.
