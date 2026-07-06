@@ -52,7 +52,7 @@ class IntegerGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
     maxiter: int, Optional
         The maximum number of iterations. Default is 200.
     miniter: int, Optional
-        The minimum number of iterations. Default is 100.
+        The minimum number of iterations. Default is 0.
     elitism: float or int, Optional
         Determines the portion of the population designated as elite, which automatically survives
         to the next generation. If less than or equal to 1, it specifies a fraction of the population.
