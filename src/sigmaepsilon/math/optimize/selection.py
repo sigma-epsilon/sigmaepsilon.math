@@ -66,9 +66,9 @@ class TournamentSelection(SelectionStrategy):
         k = min(self.k, len(others))
         while len(winners) < int(ga.nPop / 2):
             candidates = ga.rng.choice(others, k, replace=False)
-            argsort = np.argsort([fitness[ID] for ID in candidates])
-            winner = argsort[0] if ga._minimize else argsort[-1]
-            winners.append(candidates[winner])
+            candidate_fitness = fitness[candidates]
+            best = np.argmin(candidate_fitness) if ga._minimize else np.argmax(candidate_fitness)
+            winners.append(candidates[best])
         return np.array(winners, dtype=int)
 
 
