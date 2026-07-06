@@ -109,13 +109,22 @@ class RankSelection(SelectionStrategy):
 
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
         fitness = np.asarray(fitness, dtype=float)
-        goodness = -fitness if ga._minimize else fitness
+        elit, others = ga.divide(fitness)
+        winners = list(elit)
+
+        n_target = max(int(ga.nPop / 2), 1)
+        if len(winners) >= n_target or len(others) == 0:
+            return np.array(winners, dtype=int)
+
+        pool_fitness = fitness[others]
+        goodness = -pool_fitness if ga._minimize else pool_fitness
         order = np.argsort(goodness)
-        n = len(fitness)
+        n = len(pool_fitness)
         ranks = np.empty(n, dtype=float)
         ranks[order] = np.arange(1, n + 1)
         probabilities = ranks / ranks.sum()
-        n_winners = max(int(ga.nPop / 2), 1)
-        return ga.rng.choice(
-            len(fitness), size=n_winners, replace=True, p=probabilities
-        )
+
+        n_remaining = n_target - len(winners)
+        picked = ga.rng.choice(others, size=n_remaining, replace=True, p=probabilities)
+        winners.extend(picked.tolist())
+        return np.array(winners, dtype=int)
