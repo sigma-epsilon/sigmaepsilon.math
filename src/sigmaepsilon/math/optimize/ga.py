@@ -685,11 +685,9 @@ class GeneticAlgorithm:
         n = len(genotypes)
         assert n % 2 == 0, "'n' must be a multiple of 2"
         pool = np.full(n, True)
-        nPool = n
-        while nPool >= 2:
+        while True:
             where = np.argwhere(pool == True).flatten()
-            nPool = len(where)
-            if nPool < 2:
+            if len(where) < 2:
                 break
             pair = self.rng.choice(where, 2, replace=False)
             parent1 = genotypes[pair[0]]
