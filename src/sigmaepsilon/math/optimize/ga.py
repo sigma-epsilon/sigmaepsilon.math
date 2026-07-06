@@ -769,6 +769,7 @@ class GeneticAlgorithm:
                 "not implemented. This branch is reached when at least one of these "
                 "arguments is given to 'select', but only the default case (both None) "
                 "is currently supported."
+            )
         fitness = self.fitness
         genotypes = self.genotypes
         winner_indices = self.selection_strategy.select(self, fitness)
