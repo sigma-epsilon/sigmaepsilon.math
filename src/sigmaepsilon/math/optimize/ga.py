@@ -230,6 +230,7 @@ class GeneticAlgorithm:
         miniter: int = 0,
         elitism: int | float | NoneType = 1,
         maxage: int = 5,
+        minimize: bool = False,
         seed: int | np.random.SeedSequence | RNG | NoneType = None,
         selection_strategy: SelectionStrategy | NoneType = None,
         vectorized: bool = False,
@@ -685,9 +686,11 @@ class GeneticAlgorithm:
         assert n % 2 == 0, "'n' must be a multiple of 2"
         pool = np.full(n, True)
         nPool = n
-        while nPool > 2:
+        while nPool >= 2:
             where = np.argwhere(pool == True).flatten()
             nPool = len(where)
+            if nPool < 2:
+                break
             pair = self.rng.choice(where, 2, replace=False)
             parent1 = genotypes[pair[0]]
             parent2 = genotypes[pair[1]]

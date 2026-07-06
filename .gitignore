@@ -167,3 +167,4 @@ cython_debug/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+*.aux
