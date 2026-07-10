@@ -44,8 +44,7 @@ class Genom(BaseModel):
 
     def __hash__(self):
         """Return a hash of self based on the genotype."""
-        arr_string = "".join(str(i) for i in self.genotype)
-        return hash(arr_string)
+        return hash(tuple(float(x) for x in self.genotype))
 
     def __gt__(self, other):
         """Return whether self's fitness is greater than other's fitness."""
