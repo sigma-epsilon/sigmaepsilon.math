@@ -250,7 +250,9 @@ class GeneticAlgorithm:
         self.length = length
         self._rng = seed if isinstance(seed, RNG) else np.random.default_rng(seed)
         self.selection_strategy = (
-            TournamentSelection() if selection_strategy is None else selection_strategy
+            selection_strategy
+            if selection_strategy is not None
+            else TournamentSelection()
         )
         self.vectorized = vectorized
         self.n_jobs = n_jobs
