@@ -17,3 +17,4 @@ This section is intended for developers who want to contribute to the project.
     developer_guide/installation
     developer_guide/testing
     developer_guide/documenting
+    developer_guide/docstrings
