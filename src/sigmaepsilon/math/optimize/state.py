@@ -76,6 +76,7 @@ class OptimizerState(BaseModel):
         return OptimizeResult(
             x=np.array(self.x) if self.x is not None else None,
             fun=self.fun,
+            diversity=self.diversity,
             status=self.stage,
             nfev=self.n_fev,
             njev=self.n_jev,
