@@ -1,3 +1,5 @@
+"""Assembly of the moment matrices used by moving least squares approximation."""
+
 from typing import Callable, Tuple
 
 import numpy as np

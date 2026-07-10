@@ -1,3 +1,5 @@
+"""High performance, object oriented moving least squares approximation."""
+
 from numbers import Number
 
 from numpy import ndarray
@@ -33,9 +35,9 @@ def _approximate_nd(
 
 
 class MLSApproximator:
-    """
-    Object oriented, high performance implementation of a specific version of the
-    moving least squares method. This implementation is less flexible than the others,
+    """Object oriented, high performance implementation of moving least squares.
+
+    This implementation is less flexible than the others,
     but performes well for extremely large datasets too. If you want to experiment
     with the hyperparameters of the MLS as a method, it is suggested to use the other
     solutions offered by the library.
@@ -130,32 +132,28 @@ class MLSApproximator:
 
     @property
     def neighbours(self) -> ndarray | None:
-        """
-        Returns the neighbours of the target points. If the neighbours are not
-        calculated yet, it returns None.
+        """Return the neighbours of the target points.
+
+        If the neighbours are not calculated yet, it returns None.
         """
         return self._neighbours
 
     @neighbours.setter
     def neighbours(self, val: ndarray) -> None:
-        """
-        Sets the neighbours of the target points.
-        """
+        """Set the neighbours of the target points."""
         self._neighbours = val
 
     @property
     def factors(self) -> ndarray | None:
-        """
-        Returns the factors of the target points. If the factors are not
-        calculated yet, it returns None.
+        """Return the factors of the target points.
+
+        If the factors are not calculated yet, it returns None.
         """
         return self._factors
 
     @factors.setter
     def factors(self, val: ndarray) -> None:
-        """
-        Sets the factors of the target points.
-        """
+        """Set the factors of the target points."""
         self._factors = val
 
     def _calc_factors_and_neighbours(self, X_S: ndarray, X_T: ndarray) -> None:

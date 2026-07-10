@@ -1,3 +1,5 @@
+"""Real-valued (continuous) Genetic Algorithm implementation."""
+
 import numpy as np
 from numpy import ndarray
 
@@ -8,7 +10,9 @@ __all__ = ["RealValuedGeneticAlgorithm"]
 
 class RealValuedGeneticAlgorithm(GeneticAlgorithm):
     """
-    A real-valued (continuous) Genetic Algorithm (GA) for finding minimums or maximums
+    A real-valued (continuous) Genetic Algorithm (GA).
+
+    It finds minimums or maximums
     of unconstrained problems over box-ranges of continuous variables, without
     binary encoding.
 
@@ -96,9 +100,7 @@ class RealValuedGeneticAlgorithm(GeneticAlgorithm):
         super().__init__(*args, **kwargs)
 
     def populate(self, genotypes: ndarray | None = None) -> ndarray:
-        """
-        Populates the model and returns the array of genotypes.
-        """
+        """Populate the model and return the array of genotypes."""
         nPop = self.nPop
 
         if genotypes is None:
@@ -122,9 +124,9 @@ class RealValuedGeneticAlgorithm(GeneticAlgorithm):
         return genotypes
 
     def crossover(self, parent1: ndarray, parent2: ndarray) -> tuple[ndarray, ndarray]:
-        """
-        Performs arithmetic (blend) crossover on the parents `parent1` and `parent2`
-        and returns two children.
+        """Perform arithmetic (blend) crossover on the parents.
+
+        Crosses `parent1` and `parent2` and returns two children.
         """
         if self.rng.random() > self.p_c:  # pragma: no cover
             return parent1, parent2
@@ -136,9 +138,7 @@ class RealValuedGeneticAlgorithm(GeneticAlgorithm):
         return self.mutate(child1), self.mutate(child2)
 
     def mutate(self, child: ndarray) -> ndarray:
-        """
-        Returns a mutated genotype. Children come in, mutants go out.
-        """
+        """Return a mutated genotype. Children come in, mutants go out."""
         mask = self.rng.random(self.dim) < self.p_m
         if not np.any(mask):
             return child

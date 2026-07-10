@@ -1,3 +1,5 @@
+"""Numerical integration rules (Gauss-Legendre quadrature)."""
+
 import numpy as np
 from collections import namedtuple
 
@@ -15,9 +17,9 @@ Quadrature = namedtuple("QuadratureRule", ["inds", "pos", "weight"])
 
 
 def gauss_points(*args):
-    """
-    Returns data for numerical integration on an N-dimensional unit square using
-    the Gauss-Legendre rule for 1d, 2d and 3d scenarios. The implementation using
+    """Return data for numerical integration on an N-dimensional unit square.
+
+    Uses the Gauss-Legendre rule for 1d, 2d and 3d scenarios. The implementation uses
     `numpy.polynomial.legendre.leggauss` repeatedly for higher dimensions.
 
     Parameters
@@ -80,6 +82,7 @@ def gauss_points(*args):
 
 
 def gauss_points_1d(NumPoints):
+    """Return Gauss-Legendre quadrature locations and weights in 1d."""
     x, w = np.polynomial.legendre.leggauss(NumPoints)
     v = np.zeros([2, NumPoints])
     v[0, :] = x
@@ -88,6 +91,7 @@ def gauss_points_1d(NumPoints):
 
 
 def gauss_points_2d(NumPoints):
+    """Return Gauss-Legendre quadrature locations and weights in 2d."""
     nGaus = NumPoints[0] * NumPoints[1]
     QuadraturePos = np.zeros((nGaus, 2))
     QuadratureWeight = np.zeros((nGaus))
@@ -103,6 +107,7 @@ def gauss_points_2d(NumPoints):
 
 
 def gauss_points_3d(NumPoints):
+    """Return Gauss-Legendre quadrature locations and weights in 3d."""
     nGaus = NumPoints[0] * NumPoints[1] * NumPoints[2]
     QuadraturePos = np.zeros((nGaus, 3))
     QuadratureWeight = np.zeros((nGaus))

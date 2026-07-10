@@ -1,3 +1,5 @@
+"""Numba-jitted kernels for moving least squares approximation and its derivatives."""
+
 from typing import Tuple
 
 from numpy import ndarray

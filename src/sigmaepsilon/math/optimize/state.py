@@ -1,3 +1,5 @@
+"""Shared optimizer state/result object threaded through optimization iterations."""
+
 from types import NoneType
 from pydantic import BaseModel, Field
 import numpy as np
@@ -8,8 +10,7 @@ __all__ = ["OptimizerState"]
 
 
 class OptimizerState(BaseModel):
-    """
-    Model representing the state of an optimizer.
+    """Model representing the state of an optimizer.
 
     Attributes
     ----------
@@ -71,7 +72,7 @@ class OptimizerState(BaseModel):
     )
 
     def to_scipy(self) -> OptimizeResult:
-        """Returns the state as a SciPy OptimizeResult object."""
+        """Return the state as a SciPy OptimizeResult object."""
         return OptimizeResult(
             x=np.array(self.x) if self.x is not None else None,
             fun=self.fun,

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Optimization algorithms: linear programming and genetic algorithms."""
 from .bga import BinaryGeneticAlgorithm
 from .iga import IntegerGeneticAlgorithm
 from .rga import RealValuedGeneticAlgorithm

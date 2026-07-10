@@ -1,3 +1,5 @@
+"""The `Graph` class, a `networkx.Graph` subclass with extra capabilities."""
+
 from ..linalg.sparse import csr_matrix
 from .utils import rooted_level_structure, pseudo_peripheral_nodes
 
@@ -13,8 +15,8 @@ try:
         adjacency_matrix = ntx.adjacency_matrix
 
     class Graph(ntx.Graph):
-        """
-        A subclass of `networkx.Graph`, extending its capabilities.
+        """A subclass of `networkx.Graph`, extending its capabilities.
+
         See the documentation of `networkx` for the details on how to
         define graphs.
 
@@ -36,8 +38,7 @@ try:
         """
 
         def adjacency_matrix(self, *args, to_csr: bool = False, **kwargs) -> csr_matrix:
-            """
-            Returns the adjacency matrix of the graph.
+            """Return the adjacency matrix of the graph.
 
             Parameters
             ----------
@@ -67,8 +68,7 @@ try:
             return csr_matrix(adj) if to_csr else adj
 
         def rooted_level_structure(self, root: int = 0) -> dict[int, np.ndarray]:
-            """
-            Returns the rooted level structure (RLS) of the graph.
+            """Return the rooted level structure (RLS) of the graph.
 
             The call is forwarded to `rooted_level_structure`, go there
             to read about the possible arguments.
@@ -80,10 +80,7 @@ try:
             return rooted_level_structure(csr_matrix(adjacency_matrix(self)), root)
 
         def pseudo_peripheral_nodes(self) -> np.ndarray:
-            """
-            Returns the indices of nodes that are possible candidates
-            for being peripheral nodes of a graph.
-            """
+            """Return the indices of nodes that are possible candidates for being peripheral nodes of a graph."""
             return pseudo_peripheral_nodes(csr_matrix(adjacency_matrix(self)))
 
 except ImportError:  # pragma: no cover

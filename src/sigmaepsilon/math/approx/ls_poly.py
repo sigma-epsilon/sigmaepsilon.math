@@ -1,3 +1,5 @@
+"""Polynomial basis functions and their derivatives for least squares approximation."""
+
 import numpy as np
 
 

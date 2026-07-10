@@ -1,3 +1,5 @@
+"""K-nearest neighbour search utilities."""
+
 import numpy as np
 from numpy import ndarray
 import scipy as sp
@@ -32,11 +34,11 @@ def k_nearest_neighbours(
     return_distance: bool = False,
     max_distance: float | None = None,
 ):
-    """
-    Returns the k nearest neighbours (KNN) of a KDTree for a pointcloud using `scipy`
-    or `sklearn`. The function acts as a uniform interface for similar functionality
-    of `scipy` and `sklearn`. The most important parameters are highlighted, for the
-    complete list of arguments, see the corresponding docs:
+    """Return the k nearest neighbours (KNN) of a KDTree for a pointcloud.
+
+    Uses `scipy` or `sklearn`. The function acts as a uniform interface for similar
+    functionality of `scipy` and `sklearn`. The most important parameters are
+    highlighted, for the complete list of arguments, see the corresponding docs:
 
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html#scipy.spatial.KDTree
 

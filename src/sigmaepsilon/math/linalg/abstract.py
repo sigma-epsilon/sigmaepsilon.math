@@ -1,3 +1,5 @@
+"""Abstract base classes for tensor-like objects."""
+
 import numbers
 from copy import deepcopy
 import numpy as np
@@ -20,10 +22,7 @@ HANDLED_UNIVERSAL_FUNCTIONS = {}
 
 
 def implements(numpy_function, ufunc: bool = False):
-    """
-    Register an __array_function__ implementation for TensorLike
-    objects.
-    """
+    """Register an __array_function__ implementation for TensorLike objects."""
 
     def decorator(func):
         if ufunc:
@@ -36,27 +35,34 @@ def implements(numpy_function, ufunc: bool = False):
 
 
 class AbstractTensor(TensorLike):
+    """Base class implementing arithmetic and NumPy protocol support for tensors."""
+
     _HANDLED_TYPES_ = (numbers.Number,)
 
     def __imul__(self, other) -> TensorLike:
+        """Multiply the tensor in place by a scalar."""
         if not isinstance(other, numbers.Number):
             raise TypeError("The multiplier must be a scalar.")
         self.array *= other
         return self
 
     def __mul__(self, other) -> TensorLike:
+        """Return a new tensor multiplied by a scalar."""
         if not isinstance(other, numbers.Number):
             raise TypeError("The multiplier must be a scalar.")
         arr = self.array * other
         return self.__class__(arr, frame=self.frame)
 
     def __imatmul__(self, other) -> TensorLike:
+        """Raise, since matrix multiplication is not supported for tensors."""
         raise LinalgInvalidTensorOperationError("Use a dot product.")
 
     def __matmul__(self, other) -> TensorLike:
+        """Raise, since matrix multiplication is not supported for tensors."""
         raise LinalgInvalidTensorOperationError("Use a dot product.")
 
     def __iadd__(self, other) -> TensorLike:
+        """Add a scalar or another tensor to this tensor in place."""
         if isinstance(other, numbers.Number):
             self.array += other
         elif isinstance(other, TensorLike):
@@ -66,6 +72,7 @@ class AbstractTensor(TensorLike):
         return self
 
     def __add__(self, other) -> TensorLike:
+        """Return the sum of this tensor and another tensor of the same class."""
         if other.__class__ == self.__class__:
             if not self.array.shape == other.array.shape:
                 raise TensorShapeMismatchError
@@ -83,6 +90,7 @@ class AbstractTensor(TensorLike):
             )
 
     def __sub__(self, other) -> TensorLike:
+        """Return the difference of this tensor and another tensor of the same class."""
         if other.__class__ == self.__class__:
             if not self.array.shape == other.array.shape:
                 raise TensorShapeMismatchError
@@ -100,6 +108,7 @@ class AbstractTensor(TensorLike):
             )
 
     def __isub__(self, other) -> TensorLike:
+        """Subtract a scalar or another tensor from this tensor in place."""
         if isinstance(other, numbers.Number):
             self.array += other
         elif isinstance(other, TensorLike):
@@ -109,24 +118,29 @@ class AbstractTensor(TensorLike):
         return self
 
     def __itruediv__(self, other) -> TensorLike:
+        """Divide the tensor in place by a scalar."""
         if not isinstance(other, numbers.Number):
             raise TypeError("The divider must be a scalar.")
         self.array /= other
         return self
 
     def __truediv__(self, other) -> TensorLike:
+        """Return a new tensor divided by a scalar."""
         if not isinstance(other, numbers.Number):
             raise TypeError("The multiplier must be a scalar.")
         arr = self.array / other
         return self.__class__(arr, frame=self.frame)
 
     def __ipow__(self, other) -> TensorLike:
+        """Raise, since in-place exponentiation is not implemented for tensors."""
         raise NotImplementedError("This operation is not implemented yet.")
 
     def __pow__(self, other) -> TensorLike:
+        """Raise, since exponentiation is not implemented for tensors."""
         raise NotImplementedError("This operation is not implemented yet.")
 
     def __array_function__(self, func, types, args, kwargs):
+        """Dispatch a NumPy function call to the registered implementation."""
         handled_types = self._HANDLED_TYPES_ + (TensorLike,)
         if not all(isinstance(x, handled_types) for x in args):
             raise TypeError("All inputs must be tensors!")
@@ -136,6 +150,7 @@ class AbstractTensor(TensorLike):
             return HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """Dispatch a NumPy universal function call to the registered implementation."""
         if ufunc in HANDLED_UNIVERSAL_FUNCTIONS:
             return HANDLED_UNIVERSAL_FUNCTIONS[ufunc](method, *inputs, **kwargs)
         msg = """

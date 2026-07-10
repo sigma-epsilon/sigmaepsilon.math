@@ -1,3 +1,5 @@
+"""Genetic algorithm base classes and population data structures."""
+
 from typing import Iterable, Callable, Tuple, Generator
 from types import NoneType
 from numbers import Number
@@ -26,9 +28,7 @@ def odd(n: Number) -> bool:
 
 
 class Genom(BaseModel):
-    """
-    A data class for members of a population.
-    """
+    """A data class for members of a population."""
 
     phenotype: list[float] = Field(default_factory=list)
     genotype: list[float] = Field(default_factory=list)
@@ -37,15 +37,18 @@ class Genom(BaseModel):
     index: int = Field(default=-1)
 
     def __eq__(self, other) -> bool:
+        """Return whether self and other have the same genotype."""
         if not isinstance(other, Genom):
             return False
         return np.all(self.genotype == other.genotype)
 
     def __hash__(self):
+        """Return a hash of self based on the genotype."""
         arr_string = "".join(str(i) for i in self.genotype)
         return hash(arr_string)
 
     def __gt__(self, other):
+        """Return whether self's fitness is greater than other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -53,6 +56,7 @@ class Genom(BaseModel):
         return np.all(self.fitness > other.fitness)
 
     def __lt__(self, other):
+        """Return whether self's fitness is less than other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -60,6 +64,7 @@ class Genom(BaseModel):
         return np.all(self.fitness < other.fitness)
 
     def __ge__(self, other):
+        """Return whether self's fitness is greater than or equal to other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -67,6 +72,7 @@ class Genom(BaseModel):
         return np.all(self.fitness >= other.fitness)
 
     def __le__(self, other):
+        """Return whether self's fitness is less than or equal to other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -75,6 +81,7 @@ class Genom(BaseModel):
 
     @property
     def fittness(self) -> float:  # pragma: no cover
+        """Return the fitness value (deprecated alias for :attr:`fitness`)."""
         import warnings
 
         warnings.warn(
@@ -87,8 +94,9 @@ class Genom(BaseModel):
 
 class GeneticAlgorithm:
     """
-    Base class for Genetic Algorithms (GA). Use this as a base
-    class to your custom implementation of a GA.
+    Base class for Genetic Algorithms (GA).
+
+    Use this as a base class to your custom implementation of a GA.
 
     The class has 3 representation-specific extension points that a subclass must
     implement to yield a working genetic algorithm: :func:`populate`, :func:`crossover`
@@ -173,7 +181,7 @@ class GeneticAlgorithm:
     number of problems or if the long running time is not an issue. If you want to customize the way the
     objective is evaluated, override the :func:`evaluate` method.
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
     :class:`~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm`
@@ -280,15 +288,15 @@ class GeneticAlgorithm:
 
     @property
     def state(self) -> OptimizerState:
-        """
-        Returns the state of the optimizer.
-        """
+        """Return the state of the optimizer."""
         return self._state
 
     @property
     def rng(self) -> RNG:
         """
-        Returns the random number generator of the instance. All stochastic operations
+        Return the random number generator of the instance.
+
+        All stochastic operations
         (population initialization, crossover, mutation, selection) must draw from this
         generator rather than the global :mod:`numpy.random` state, so that runs are
         reproducible (via the `seed` constructor argument) and independent instances
@@ -299,8 +307,9 @@ class GeneticAlgorithm:
     @property
     def diversity(self) -> float:
         """
-        Returns a simple measure of the phenotypic diversity of the current population,
-        computed as the mean, over all dimensions, of the per-dimension standard
+        Return a simple measure of the phenotypic diversity of the current population.
+
+        Computed as the mean, over all dimensions, of the per-dimension standard
         deviation of the phenotypes. A value close to zero indicates a converged,
         homogeneous population; this can be used, in addition to champion age, as a
         signal for premature convergence.
@@ -317,32 +326,24 @@ class GeneticAlgorithm:
 
     @property
     def champion(self) -> Genom:
-        """
-        Returnes the genotypes of the population.
-        """
+        """Return the genotypes of the population."""
         return self._champion
 
     @property
     def genotypes(self) -> Iterable:
-        """
-        Returnes the genotypes of the population.
-        """
+        """Return the genotypes of the population."""
         return self._genotypes
 
     @genotypes.setter
     def genotypes(self, value: Iterable) -> None:
-        """
-        Sets the genotypes of the population.
-        """
+        """Set the genotypes of the population."""
         self._genotypes = value
         self._phenotypes = None
         self._fitness = None
 
     @property
     def phenotypes(self) -> Iterable:
-        """
-        Returnes the phenotypes of the population.
-        """
+        """Return the phenotypes of the population."""
         if self._phenotypes is None:
             genotypes = self.genotypes
             if genotypes is not None:
@@ -352,8 +353,9 @@ class GeneticAlgorithm:
     @property
     def fitness(self) -> ndarray:
         """
-        Returns the actual fitness values of the population, or the fitness
-        of the population described by the argument `phenotypes`.
+        Return the actual fitness values of the population.
+
+        Or the fitness of the population described by the argument `phenotypes`.
         """
         if self._fitness is not None:
             return self._fitness
@@ -363,6 +365,7 @@ class GeneticAlgorithm:
 
     @property
     def fittness(self) -> ndarray:  # pragma: no cover
+        """Return the fitness values (deprecated alias for :attr:`fitness`)."""
         import warnings
 
         warnings.warn(
@@ -374,9 +377,10 @@ class GeneticAlgorithm:
 
     def reset(self) -> "GeneticAlgorithm":
         """
-        Resets the solver and returns the object. Only use it if you want to have
-        a completely clean sheet. Also, the function is called for every object at
-        instantiation.
+        Reset the solver and return the object.
+
+        Only use it if you want to have a completely clean sheet. Also, the function
+        is called for every object at instantiation.
 
         Note
         ----
@@ -393,7 +397,7 @@ class GeneticAlgorithm:
 
     def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
         """
-        Sets the hyperparameters of the algorithm.
+        Set the hyperparameters of the algorithm.
 
         Parameters
         ----------
@@ -450,9 +454,7 @@ class GeneticAlgorithm:
         return self
 
     def evolver(self) -> Iterable:
-        """
-        Returns a generator that can be used to manually control evolutions.
-        """
+        """Return a generator that can be used to manually control evolutions."""
         self.genotypes = self.populate()
         _ = yield
         yield self.genotypes
@@ -462,10 +464,7 @@ class GeneticAlgorithm:
             yield self.genotypes
 
     def evolve(self, cycles: int = 1) -> Iterable:
-        """
-        Performs a certain number of cycles of evolution and returns the
-        genotypes.
-        """
+        """Perform a certain number of cycles of evolution and return the genotypes."""
         for _ in range(cycles):
             next(self._evolver)
             candidate: Genom = self.best_candidate()
@@ -533,7 +532,7 @@ class GeneticAlgorithm:
 
     def evaluate(self, phenotypes: Iterable | None = None) -> ndarray:
         """
-        Evaluates the objective for a list of phenotypes.
+        Evaluate the objective for a list of phenotypes.
 
         If the phenotypes are not explicitly specified, the population at hand
         is evaluated.
@@ -577,7 +576,7 @@ class GeneticAlgorithm:
 
     def best_phenotype(self) -> ndarray:
         """
-        Returns the best phenotype from the active population.
+        Return the best phenotype from the active population.
 
         .. note::
            The value returned by this method is the phenotype of the best candidate
@@ -588,8 +587,7 @@ class GeneticAlgorithm:
         return self.best_candidate().phenotype
 
     def best_candidate(self) -> Genom:
-        """
-        Returns the Genom of the best candidate in the active population.
+        """Return the Genom of the best candidate in the active population.
 
         .. note::
            The value returned by this method is the Genom of the best candidate
@@ -609,9 +607,10 @@ class GeneticAlgorithm:
         )
 
     def _celebrate(self, genom: Genom) -> None:
-        """
-        Celebration of the winner. Curretly this means that the beast candidate is added
-        to a history to keep track of the improvements across evolutions.
+        """Celebrate the winner.
+
+        Curretly this means that the beast candidate is added to a history
+        to keep track of the improvements across evolutions.
         """
         if self.champion is None:
             self._champion = genom
@@ -626,9 +625,9 @@ class GeneticAlgorithm:
         self._champion.age += 1
 
     def divide(self, fitness: ndarray | None = None) -> tuple[ndarray, ndarray]:
-        """
-        Divides population to elit and others, and returns the corresponding
-        index arrays.
+        """Divide population to elit and others.
+
+        Returns the corresponding index arrays.
 
         Parameters
         ----------
@@ -664,8 +663,7 @@ class GeneticAlgorithm:
         return elit, others
 
     def random_parents_generator(self, genotypes: ndarray) -> Generator:
-        """
-        Yields random pairs from a list of genotypes.
+        """Yield random pairs from a list of genotypes.
 
         The implemantation assumes that the length of the input array
         is a multiple of 2.
@@ -696,10 +694,10 @@ class GeneticAlgorithm:
             yield parent1, parent2
 
     def stopping_criteria(self) -> bool:
-        """
-        Implements a simple stopping criteria that evaluates to `True` if the
-        current chanpion is thought ti bee the best solution and no further progress
-        can be made, or at lest with a bad rate.
+        """Implement a simple stopping criteria.
+
+        Evaluates to `True` if the current chanpion is thought ti bee the best
+        solution and no further progress can be made, or at lest with a bad rate.
 
         The default implementation considers a champion as the winner, if it is the champion
         for for at least 5 times in a row. This can be dontrolled with the `maxage` parameter
@@ -708,55 +706,60 @@ class GeneticAlgorithm:
         return self.champion.age > self.maxage
 
     def encode(self, phenotypes: ndarray | None = None) -> ndarray:
-        """
-        Turns phenotypes into genotypes. The default implementation is the identity
-        mapping (genotype == phenotype), suitable for representations that don't need
-        a separate encoding, e.g. real-valued genotypes. Override for representations
+        """Turn phenotypes into genotypes.
+
+        The default implementation is the identity mapping (genotype ==
+        phenotype), suitable for representations that don't need a separate
+        encoding, e.g. real-valued genotypes. Override for representations
         that do, e.g. binary encoding.
         """
         return phenotypes
 
     def decode(self, genotypes: ndarray) -> ndarray:
-        """
-        Turns genotypes into phenotypes. The default implementation is the identity
-        mapping (phenotype == genotype), suitable for representations that don't need
-        a separate decoding, e.g. real-valued genotypes. Override for representations
+        """Turn genotypes into phenotypes.
+
+        The default implementation is the identity mapping (phenotype ==
+        genotype), suitable for representations that don't need a separate
+        decoding, e.g. real-valued genotypes. Override for representations
         that do, e.g. binary encoding.
         """
         return genotypes
 
     def populate(self, genotypes: ndarray | None = None) -> ndarray:
-        """
-        Ought to produce a pool of genotypes. This is a representation-specific
-        extension point with no meaningful generic default; override it in a subclass.
+        """Produce a pool of genotypes.
+
+        This is a representation-specific extension point with no
+        meaningful generic default; override it in a subclass.
         """
         raise NotImplementedError(
             f"{type(self).__name__} does not implement 'populate'."
         )
 
     def crossover(self, parent1: ndarray, parent2: ndarray) -> Tuple[ndarray]:
-        """
-        Takes in two parents, returns two offspring. You'd probably want to use it inside
-        the populator. This is a representation-specific extension point with no
-        meaningful generic default; override it in a subclass.
+        """Take in two parents, return two offspring.
+
+        You'd probably want to use it inside the populator. This is a
+        representation-specific extension point with no meaningful generic
+        default; override it in a subclass.
         """
         raise NotImplementedError(
             f"{type(self).__name__} does not implement 'crossover'."
         )
 
     def mutate(self, child: ndarray) -> ndarray:
-        """
-        Takes a child in, returns a mutant. This is a representation-specific extension
-        point with no meaningful generic default; override it in a subclass.
+        """Take a child in, return a mutant.
+
+        This is a representation-specific extension point with no
+        meaningful generic default; override it in a subclass.
         """
         raise NotImplementedError(f"{type(self).__name__} does not implement 'mutate'.")
 
     def select(
         self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
     ) -> ndarray:
-        """
-        Runs :attr:`selection_strategy` over the current population's fitness values and
-        returns the genotypes of the winners.
+        """Run :attr:`selection_strategy` over the current population's fitness values.
+
+        Returns the genotypes of the winners.
 
         .. note::
            Providing either ``genotypes`` or ``phenotypes`` (or both) explicitly is not

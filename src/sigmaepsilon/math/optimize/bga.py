@@ -1,13 +1,12 @@
+"""Binary-encoded genetic algorithm for unconstrained real-valued optimization."""
+
 from .bitchromosome import BitChromosomeGeneticAlgorithm
 
 __all__ = ["BinaryGeneticAlgorithm"]
 
 
 class BinaryGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
-    """
-    An implementation of a Binary Genetic Algorithm (BGA) for finding
-    minimums of real valued unconstrained problems of continuous variables
-    in n-dimensional vector spaces.
+    r"""An implementation of a Binary Genetic Algorithm (BGA) for finding minimums of real valued unconstrained problems of continuous variables in n-dimensional vector spaces.
 
     The class is able to solve unconstrained optimization problems of the form:
 

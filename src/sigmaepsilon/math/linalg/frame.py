@@ -1,3 +1,5 @@
+"""Reference frame classes for tensorial quantities."""
+
 from typing import Iterable, Callable, Any
 from copy import deepcopy as dcopy
 
@@ -29,11 +31,12 @@ __all__ = ["ReferenceFrame", "RectangularFrame", "CartesianFrame"]
 def inplace_binary(
     obj: FrameLike, other: Any, bop: Callable, rtype: FrameLike | None = None
 ) -> FrameLike:
-    """
-    Performs a binary operation inplace. Components of registered tensorial entities
-    are transformed accordingly and registered to the output frame. This is important because
-    the operation takes effect inplace, the resulting instance can be new in the case of
-    having to change the type of the object (eg. from CartesianFrame to RectangularFrame).
+    """Perform a binary operation inplace.
+
+    Components of registered tensorial entities are transformed accordingly and
+    registered to the output frame. This is important because the operation takes
+    effect inplace, the resulting instance can be new in the case of having to
+    change the type of the object (eg. from CartesianFrame to RectangularFrame).
     """
     axes = np.copy(obj.show())
     new_axes = np.zeros_like(axes)
@@ -53,11 +56,12 @@ def inplace_binary(
 def out_of_place_binary(
     obj: FrameLike, other: Any, bop: Callable, rtype: FrameLike | None = None
 ) -> FrameLike:
-    """
-    Performs a binary operation inplace. Components of registered tensorial entities
-    are transformed accordingly and registered to the output frame. This is important because
-    the operation takes effect inplace, the resulting instance can be new in the case of
-    having to change the type of the object (eg. from CartesianFrame to RectangularFrame).
+    """Perform a binary operation inplace.
+
+    Components of registered tensorial entities are transformed accordingly and
+    registered to the output frame. This is important because the operation takes
+    effect inplace, the resulting instance can be new in the case of having to
+    change the type of the object (eg. from CartesianFrame to RectangularFrame).
     """
     axes = np.copy(obj.show())
     bop(axes, other, out=(axes,))
@@ -67,9 +71,9 @@ def out_of_place_binary(
 
 
 class ReferenceFrame(FrameLike):
-    """
-    A class for arbitrary reference frames, that facilitates transformation of tensor-like
-    quantities. Instances of this class support NumPy's functions, universal
+    """A class for arbitrary reference frames, that facilitates transformation of tensor-like quantities.
+
+    Instances of this class support NumPy's functions, universal
     functions and other standard features of NumPy (see the notes below).
 
     An important feature of the class is that it maintains the property of objectivity
@@ -198,30 +202,22 @@ class ReferenceFrame(FrameLike):
 
     @property
     def is_rectangular(self) -> bool:
-        """
-        Returns True if the frame is a rectangular one.
-        """
+        """Return True if the frame is a rectangular one."""
         return bool(is_rectangular_frame(self.axes))
 
     @property
     def is_cartesian(self) -> bool:
-        """
-        Returns True if the frame is a cartesian (orthonormal) one.
-        """
+        """Return True if the frame is a cartesian (orthonormal) one."""
         return bool(is_orthonormal_frame(self.axes))
 
     @property
     def is_independent(self) -> bool:
-        """
-        Returns True if the base vectors that make up the frame are linearly
-        independent.
-        """
+        """Return True if the base vectors that make up the frame are linearly independent."""
         return np.linalg.det(self.Gram()) > 0
 
     @classmethod
     def eye(cls, *args, dim=3, **kwargs) -> "ReferenceFrame":
-        """
-        Returns a standard orthonormal frame.
+        """Return a standard orthonormal frame.
 
         Returns
         -------
@@ -232,44 +228,34 @@ class ReferenceFrame(FrameLike):
         return cls(np.eye(dim), *args, **kwargs)
 
     def Gram(self) -> ndarray:
-        """
-        Returns the Gram-matrix of the frame.
-        """
+        """Return the Gram-matrix of the frame."""
         return Gram(self.show())
 
     def metric_tensor(self) -> TensorLike:
-        """
-        Returns the metric tensor of the frame.
-        """
+        """Return the metric tensor of the frame."""
         from .tensor import Tensor
 
         return Tensor(self.Gram(), frame=self)
 
     def volume(self) -> float:
-        """
-        Returns the signed volume of the general parallelepiped described by the
-        base vectors that make up the frame.
+        """Return the signed volume of the general parallelepiped.
+
+        The parallelepiped is described by the base vectors that make up the frame.
         """
         return np.sqrt(np.linalg.det(self.Gram()))
 
     def dual(self) -> "ReferenceFrame":
-        """
-        Returns the dual (or reciprocal) frame.
-        """
+        """Return the dual (or reciprocal) frame."""
         return self.__class__(dual_frame(self.show()))
 
     @property
     def name(self) -> str:
-        """
-        Returns the name of the frame.
-        """
+        """Return the name of the frame."""
         return self._name
 
     @name.setter
     def name(self, value: str):
-        """
-        Returns the name of the frame.
-        """
+        """Set the name of the frame."""
         if isinstance(value, str):
             self._name = value
         else:
@@ -277,9 +263,10 @@ class ReferenceFrame(FrameLike):
 
     @property
     def axes(self) -> ndarray:
-        """
-        Returns a matrix, where each row (or column) is the component array
-        of a basis vector with respect to the ambient frame.
+        """Return a matrix representing the frame's base vectors.
+
+        Each row (or column) is the component array of a basis vector with
+        respect to the ambient frame.
 
         Returns
         -------
@@ -289,9 +276,7 @@ class ReferenceFrame(FrameLike):
 
     @axes.setter
     def axes(self, value: Iterable):
-        """
-        Sets the array of the frame.
-        """
+        """Set the array of the frame."""
         if isinstance(value, np.ndarray):
             buf = value
         else:
@@ -311,8 +296,8 @@ class ReferenceFrame(FrameLike):
             raise ValueError("Mismatch in data dimensinons!")
 
     def show(self, target: "ReferenceFrame" = None) -> ndarray:
-        """
-        Returns the components of the current frame in a target frame.
+        """Return the components of the current frame in a target frame.
+
         If the target is None, the componants are returned in the ambient frame.
 
         Returns
@@ -324,10 +309,11 @@ class ReferenceFrame(FrameLike):
     def dcm(
         self, *, target: "ReferenceFrame" = None, source: "ReferenceFrame" = None
     ) -> ndarray:
-        """
-        Returns the direction cosine matrix (DCM) of a transformation
-        from a source (S) to a target (T) frame. The current frame can be
-        the source or the target, depending on the arguments.
+        """Return the direction cosine matrix (DCM) of a transformation.
+
+        The transformation goes from a source (S) to a target (T) frame.
+        The current frame can be the source or the target, depending on
+        the arguments.
 
         If called without arguments, it returns the DCM matrix from the
         ambient frame to the current frame (S=None, T=self).
@@ -379,9 +365,7 @@ class ReferenceFrame(FrameLike):
         return self.axes
 
     def transpose(self, inplace: bool = False) -> "ReferenceFrame":
-        """
-        Either transposes the array of the frame, or returns a copy
-        of it with the components transposed.
+        """Transpose the array of the frame, either in place or in a copy.
 
         Parameters
         ----------
@@ -401,9 +385,10 @@ class ReferenceFrame(FrameLike):
             return self.__class__(transpose_axes(self.axes))
 
     def orient(self, *args, **kwargs) -> "ReferenceFrame":
-        """
-        Orients the current frame inplace. All arguments are forwarded
-        to :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, see there for the
+        """Orient the current frame inplace.
+
+        All arguments are forwarded to
+        :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, see there for the
         details.
 
         Returns
@@ -433,8 +418,8 @@ class ReferenceFrame(FrameLike):
         return self
 
     def orient_new(self, *args, name="", **kwargs) -> "ReferenceFrame":
-        """
-        Returns a new frame, oriented relative to the called object.
+        """Return a new frame, oriented relative to the called object.
+
         All extra positional and keyword arguments are forwarded to
         :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, see there for the
         details.
@@ -528,30 +513,37 @@ class ReferenceFrame(FrameLike):
         return self.orient_new(*args, **kwargs)
 
     def __imul__(self, other) -> "ReferenceFrame":
+        """Multiply the frame by `other` in place."""
         return inplace_binary(self, other, np.multiply)
 
     def __imatmul__(self, other) -> "ReferenceFrame":
+        """Matrix-multiply the frame by `other` in place."""
         return inplace_binary(self, other, np.matmul)
 
     def __iadd__(self, other) -> "ReferenceFrame":
+        """Add `other` to the frame in place."""
         return inplace_binary(self, other, np.add)
 
     def __isub__(self, other) -> "ReferenceFrame":
+        """Subtract `other` from the frame in place."""
         return inplace_binary(self, other, np.subtract)
 
     def __itruediv__(self, other) -> "ReferenceFrame":
+        """Divide the frame by `other` in place."""
         return inplace_binary(self, other, np.divide)
 
     def __ipow__(self, other) -> "ReferenceFrame":
+        """Raise the frame to the power of `other` in place."""
         return inplace_binary(self, other, np.power)
 
     def __array_function__(self, func, types, args, kwargs):
+        """Dispatch a NumPy function call, unwrapping any frame arguments."""
         arrs = [arg._array if isinstance(arg, ArrayWrapper) else arg for arg in args]
         return func(*arrs, **kwargs)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """
-        Reimplemented to ensure that the result is always a general reference frame.
+        """Reimplemented to ensure that the result is always a general reference frame.
+
         This is necessary, because it cannot be guaranteed, that the resulting
         object will admit any regularities after manipulation.
         """
@@ -607,9 +599,10 @@ class ReferenceFrame(FrameLike):
             return ReferenceFrame(result)
 
     def copy(self, deep: bool = False, name: str = None) -> "ReferenceFrame":
-        """
-        Returns a shallow or deep copy of this object, depending of the
-        argument `deepcopy` (default is False).
+        """Return a shallow or deep copy of this object.
+
+        Whether the copy is deep depends of the argument `deepcopy`
+        (default is False).
         """
         if deep:
             return self.__class__(dcopy(self.axes), name=name)
@@ -617,15 +610,14 @@ class ReferenceFrame(FrameLike):
             return self.__class__(self.axes, name=name)
 
     def deepcopy(self, name: str = None) -> "ReferenceFrame":
-        """
-        Returns a deep copy of the frame.
-        """
+        """Return a deep copy of the frame."""
         return self.copy(deep=True, name=name)
 
 
 class RectangularFrame(ReferenceFrame):
-    """
-    A class for rectangular reference frames. The behaviour of a RectanguarFrame
+    """A class for rectangular reference frames.
+
+    The behaviour of a RectanguarFrame
     instance is similar to that of a ReferenceFrame, with minor differences. One is
     that the rectangular property is utilized wherever possible, resulting in slightly
     better performance for some operations. The downside is that operations causing
@@ -657,7 +649,7 @@ class RectangularFrame(ReferenceFrame):
     >>> type(A)
     <class 'sigmaepsilon.math.linalg.frame.ReferenceFrame'>
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.ReferenceFrame`
     :class:`~sigmaepsilon.math.linalg.CartesianFrame`
@@ -672,51 +664,55 @@ class RectangularFrame(ReferenceFrame):
 
     @property
     def is_rectangular(self) -> bool:
-        """
-        Returns True if the frame is a rectangular one.
-        """
+        """Return True if the frame is a rectangular one."""
         return True
 
     @property
     def is_independent(self) -> bool:
-        """
-        Returns True if the base vectors that make up the frame are linearly
-        independent.
-        """
+        """Return True if the base vectors that make up the frame are linearly independent."""
         return True
 
     def __mul__(self, other) -> ReferenceFrame:
+        """Multiply the frame by `other`, returning a new frame."""
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return out_of_place_binary(self, other, np.multiply, rtype)
 
     def __imul__(self, other) -> ReferenceFrame:
+        """Multiply the frame by `other` in place."""
         rtype = None if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.multiply, rtype)
 
     def __truediv__(self, other) -> ReferenceFrame:
+        """Divide the frame by `other`, returning a new frame."""
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return out_of_place_binary(self, other, np.divide, rtype)
 
     def __itruediv__(self, other) -> ReferenceFrame:
+        """Divide the frame by `other` in place."""
         rtype = None if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.divide, rtype)
 
     def __imatmul__(self, other) -> ReferenceFrame:
+        """Matrix-multiply the frame by `other` in place."""
         return inplace_binary(self, other, np.matmul, ReferenceFrame)
 
     def __iadd__(self, other) -> ReferenceFrame:
+        """Add `other` to the frame in place."""
         return inplace_binary(self, other, np.add, ReferenceFrame)
 
     def __isub__(self, other) -> ReferenceFrame:
+        """Subtract `other` from the frame in place."""
         return inplace_binary(self, other, np.subtract, ReferenceFrame)
 
     def __ipow__(self, other) -> ReferenceFrame:
+        """Raise the frame to the power of `other` in place."""
         return inplace_binary(self, other, np.power, ReferenceFrame)
 
 
 class CartesianFrame(RectangularFrame):
-    """
-    A class for cartesian (orthonormal) reference frames. Just like the RectangularFrame
+    """A class for cartesian (orthonormal) reference frames.
+
+    Just like the RectangularFrame
     class, this is similar to the more general ReferenceFrame, but with increased
     performance and even more limitations.
 
@@ -748,7 +744,7 @@ class CartesianFrame(RectangularFrame):
     >>> type(A)
     <class 'sigmaepsilon.math.linalg.frame.CartesianFrame'>
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.ReferenceFrame`
     :class:`~sigmaepsilon.math.linalg.RectangularFrame`
@@ -768,53 +764,51 @@ class CartesianFrame(RectangularFrame):
 
     @property
     def is_rectangular(self) -> bool:
-        """
-        Returns True if the frame is a rectangular one.
-        """
+        """Return True if the frame is a rectangular one."""
         return True
 
     @property
     def is_cartesian(self) -> bool:
-        """
-        Returns True if the frame is a cartesian (orthonormal) one.
-        """
+        """Return True if the frame is a cartesian (orthonormal) one."""
         return True
 
     def Gram(self) -> ndarray:
-        """
-        Returns the Gram-matrix of the frame.
-        """
+        """Return the Gram-matrix of the frame."""
         return np.eye(self.axes.shape[0])
 
     def volume(self) -> float:
-        """
-        Returns the signed volume of the general parallelepiped described by the
-        base vectors that make up the frame.
+        """Return the signed volume of the general parallelepiped.
+
+        The parallelepiped is described by the base vectors that make up the frame.
         """
         return 1.0
 
     def dual(self) -> ReferenceFrame:
-        """
-        Returns the dual (or reciprocal) frame.
-        """
+        """Return the dual (or reciprocal) frame."""
         return self
 
     def __imul__(self, other) -> ReferenceFrame | RectangularFrame:
+        """Multiply the frame by `other` in place."""
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.multiply, rtype)
 
     def __itruediv__(self, other) -> ReferenceFrame | RectangularFrame:
+        """Divide the frame by `other` in place."""
         rtype = RectangularFrame if isinstance(other, (float, int)) else ReferenceFrame
         return inplace_binary(self, other, np.divide, rtype)
 
     def __imatmul__(self, other) -> ReferenceFrame:
+        """Matrix-multiply the frame by `other` in place."""
         return inplace_binary(self, other, np.matmul, ReferenceFrame)
 
     def __iadd__(self, other) -> ReferenceFrame:
+        """Add `other` to the frame in place."""
         return inplace_binary(self, other, np.add, ReferenceFrame)
 
     def __isub__(self, other) -> ReferenceFrame:
+        """Subtract `other` from the frame in place."""
         return inplace_binary(self, other, np.subtract, ReferenceFrame)
 
     def __ipow__(self, other) -> ReferenceFrame:
+        """Raise the frame to the power of `other` in place."""
         return inplace_binary(self, other, np.power, ReferenceFrame)

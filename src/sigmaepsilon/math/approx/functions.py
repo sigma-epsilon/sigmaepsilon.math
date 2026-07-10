@@ -1,3 +1,5 @@
+"""Weight functions used by the moving least squares approximator."""
+
 from typing import Tuple, Any, Iterable
 from numbers import Number
 
@@ -9,9 +11,7 @@ from ..function import Function
 
 
 class MLSWeightFunction(Function):
-    """
-    Base class for weight functions for the moving least squares method.
-    """
+    """Base class for weight functions for the moving least squares method."""
 
     def __init__(
         self,
@@ -48,6 +48,7 @@ class MLSWeightFunction(Function):
 
     @property
     def core(self) -> ndarray | Iterable[Number] | None:
+        """Return the core (center) of the weight function."""
         return self._core
 
     @core.setter
@@ -66,6 +67,7 @@ class MLSWeightFunction(Function):
 
     @property
     def supportdomain(self) -> ndarray | Iterable[Number] | None:
+        """Return the support domain of the weight function."""
         return self._supportdomain
 
     @supportdomain.setter
@@ -81,6 +83,7 @@ class MLSWeightFunction(Function):
         return
 
     def preproc_evaluation(self, x: Iterable[Number]):
+        """Validate and coerce the evaluation point `x` into a NumPy array."""
         if not isinstance(x, (ndarray, float)):
             if isinstance(x, Iterable):
                 x = np.array(x)
@@ -90,16 +93,17 @@ class MLSWeightFunction(Function):
                 )
 
     def value(self, x: Iterable[Number]) -> float:
-        """
-        Evaluates the function.
-        """
+        """Evaluate the function."""
         raise NotImplementedError
 
 
 def isMLSWeightFunction(f: Any) -> bool:
-    """
-    Returns `True` if the argument is a valid weight function for the
-    moving least squares method.
+    """Return `True` if the argument is a valid weight function for the moving least squares method.
+
+    Parameters
+    ----------
+    f : Any
+        The object to check.
     """
     c1 = isinstance(f, MLSWeightFunction)
     c2 = MLSWeightFunction in list(type(f).__bases__)
@@ -107,9 +111,7 @@ def isMLSWeightFunction(f: Any) -> bool:
 
 
 class ConstantWeightFunction(MLSWeightFunction):
-    """
-    A constant weight function for the moving least squares method.
-    """
+    """A constant weight function for the moving least squares method."""
 
     def __init__(self, *, value: Number = 1.0, **kwargs):
         super().__init__(**kwargs)
@@ -117,6 +119,7 @@ class ConstantWeightFunction(MLSWeightFunction):
         return
 
     def value(self, x: Iterable[Number]) -> float:
+        """Return the value of the weight function at `x`."""
         if self.supportdomain is None:
             return self._value
 
@@ -129,16 +132,16 @@ class ConstantWeightFunction(MLSWeightFunction):
         return self._value
 
     def gradient(self, x: Iterable[Number]) -> ndarray:
+        """Return the gradient of the weight function at `x`."""
         return np.zeros(self.dimension, dtype=float)
 
     def Hessian(self, x: Iterable[Number]) -> ndarray:
+        """Return the Hessian of the weight function at `x`."""
         return np.zeros((self.dimension, self.dimension), dtype=float)
 
 
 class SingularWeightFunction(MLSWeightFunction):
-    """
-    A singular weight function for the moving least squares method.
-    """
+    """A singular weight function for the moving least squares method."""
 
     def __init__(self, *, eps: Number = 1e-5, **kwargs):
         super().__init__(**kwargs)
@@ -146,13 +149,16 @@ class SingularWeightFunction(MLSWeightFunction):
         return
 
     def value(self, x: Iterable[Number]):
+        """Return the value of the weight function at `x`."""
         self.preproc_evaluation(x)
         return 1 / (norm(np.subtract(self.core, x)) ** 2 + self.eps**2)
 
     def gradient(self, x: Iterable[Number]) -> ndarray:
+        """Return the gradient of the weight function at `x`."""
         return np.zeros(self.dimension, dtype=float)
 
     def Hessian(self, x: Iterable[Number]) -> ndarray:
+        """Return the Hessian of the weight function at `x`."""
         return np.zeros((self.dimension, self.dimension), dtype=float)
 
 
@@ -170,6 +176,7 @@ class CubicWeightFunction(MLSWeightFunction):
     """
 
     def evaluate(self, x: Iterable[Number]) -> Tuple[float, ndarray, ndarray]:
+        """Return the value, gradient and Hessian of the weight function at `x`."""
         if self.dimension == 1:
             return self._evaluate_1d(x)
         elif self.dimension == 2:
@@ -259,16 +266,19 @@ class CubicWeightFunction(MLSWeightFunction):
         return val, grad, Hessian
 
     def value(self, x: Iterable[Number]) -> float:
+        """Return the value of the weight function at `x`."""
         self.preproc_evaluation(x)
         res, _, _ = self.evaluate(x)
         return res
 
     def gradient(self, x: Iterable[Number]) -> ndarray:
+        """Return the gradient of the weight function at `x`."""
         self.preproc_evaluation(x)
         _, res, _ = self.evaluate(x)
         return res
 
     def Hessian(self, x: Iterable[Number]) -> ndarray:
+        """Return the Hessian of the weight function at `x`."""
         self.preproc_evaluation(x)
         _, _, res = self.evaluate(x)
         return res

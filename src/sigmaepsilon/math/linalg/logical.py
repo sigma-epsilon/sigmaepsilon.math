@@ -1,3 +1,5 @@
+"""Logical predicates for arrays, matrices and reference frames."""
+
 import numpy as np
 from numpy import ndarray
 import sympy as sy
@@ -19,22 +21,17 @@ __all__ = [
 
 
 def is_pos_def(arr) -> bool:
-    """
-    Returns True if the input is positive definite.
-    """
+    """Return True if the input is positive definite."""
     return np.all(np.linalg.eigvals(arr) > 0)
 
 
 def is_pos_semidef(arr) -> bool:
-    """
-    Returns True if the input is positive semi definite.
-    """
+    """Return True if the input is positive semi definite."""
     return np.all(np.linalg.eigvals(arr) >= 0)
 
 
 def is_rectangular_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is Cartesian.
+    """Return True if a frame is Cartesian.
 
     Parameters
     ----------
@@ -48,9 +45,9 @@ def is_rectangular_frame(axes: ndarray) -> bool:
 
 
 def is_normal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is normal, meaning, that it's base vectors
-    are all of unit length.
+    """Return True if a frame is normal.
+
+    This means that its base vectors are all of unit length.
 
     Parameters
     ----------
@@ -61,8 +58,7 @@ def is_normal_frame(axes: ndarray) -> bool:
 
 
 def is_orthonormal_frame(axes: ndarray) -> bool:
-    """
-    Returns True if a frame is orthonormal.
+    """Return True if a frame is orthonormal.
 
     Parameters
     ----------
@@ -73,8 +69,7 @@ def is_orthonormal_frame(axes: ndarray) -> bool:
 
 
 def is_independent_frame(axes: ndarray, tol: float = 0) -> bool:
-    """
-    Returns True if a the base vectors of a frame are linearly independent.
+    """Return True if the base vectors of a frame are linearly independent.
 
     Parameters
     ----------
@@ -85,20 +80,18 @@ def is_independent_frame(axes: ndarray, tol: float = 0) -> bool:
 
 
 def is_hermitian(arr: ndarray) -> bool:
-    """
-    Returns True if the input is a hermitian array.
-    """
+    """Return True if the input is a hermitian array."""
     shp = arr.shape
     s0 = shp[0]
     return all([s == s0 for s in shp[1:]])
 
 
 def has_full_row_rank(matrix: ndarray) -> bool:
-    """
-    Returns `True` if the input matrix has full row rank, ie
-    if all its rows are linearly independent.
+    """Return `True` if the input matrix has full row rank.
 
-    See also
+    This means that all its rows are linearly independent.
+
+    See Also
     --------
     :func:`numpy.linalg.matrix_rank`
     """
@@ -110,11 +103,11 @@ def has_full_row_rank(matrix: ndarray) -> bool:
 
 
 def has_full_column_rank(matrix: ndarray) -> bool:
-    """
-    Returns `True` if the input matrix has full column rank, ie
-    if all its columns are linearly independent.
+    """Return `True` if the input matrix has full column rank.
 
-    See also
+    This means that all its columns are linearly independent.
+
+    See Also
     --------
     :func:`numpy.linalg.matrix_rank`
     """
@@ -126,8 +119,7 @@ def has_full_column_rank(matrix: ndarray) -> bool:
 
 
 def has_full_rank(matrix: ndarray | sy.Matrix) -> bool:
-    """
-    Returns `True` if the input matrix has full rank, `False` otherwise.
+    """Return `True` if the input matrix has full rank, `False` otherwise.
 
     Parameters
     ----------

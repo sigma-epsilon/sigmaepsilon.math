@@ -1,3 +1,5 @@
+"""Index maps between tensor component indices and flattened representations."""
+
 index_map_Voigt = {0: (0, 0), 1: (1, 1), 2: (2, 2), 3: (1, 2), 4: (0, 2), 5: (0, 1)}
 index_map_2x3 = {
     0: (0, 0),

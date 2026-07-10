@@ -1,3 +1,5 @@
+"""Pluggable parent-selection strategies for genetic algorithms."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -18,16 +20,13 @@ __all__ = [
 
 
 class SelectionStrategy(ABC):
-    """
-    Base class for pluggable selection strategies used by the default
-    :func:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.select` implementation.
-    """
+    """Base class for pluggable selection strategies used by the default :func:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.select` implementation."""
 
     @abstractmethod
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
-        """
-        Returns an array of indices into `fitness` (repetition allowed) identifying the
-        winners of the selection process. The number of returned indices must be at
+        """Return an array of indices into `fitness` (repetition allowed) identifying the winners of the selection process.
+
+        The number of returned indices must be at
         least ``ga.nPop // 2``, since the caller pairs them up to breed the rest of the
         next generation.
 
@@ -43,10 +42,7 @@ class SelectionStrategy(ABC):
 
 
 class TournamentSelection(SelectionStrategy):
-    """
-    Classic k-way tournament selection: the elite (per ``ga.elitism``) automatically
-    survives, and the rest of the winners are picked by repeatedly drawing `k` random
-    candidates from the non-elite pool and keeping the fittest of them.
+    """Classic k-way tournament selection: the elite (per ``ga.elitism``) automatically survives, and the rest of the winners are picked by repeatedly drawing `k` random candidates from the non-elite pool and keeping the fittest of them.
 
     Parameters
     ----------
@@ -60,6 +56,7 @@ class TournamentSelection(SelectionStrategy):
         self.k = k
 
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
+        """Select winners using k-way tournaments among the non-elite population."""
         winners, others = ga.divide(fitness)
         winners = list(winners)
         others = np.asarray(others)
@@ -67,18 +64,20 @@ class TournamentSelection(SelectionStrategy):
         while len(winners) < int(ga.nPop / 2):
             candidates = ga.rng.choice(others, k, replace=False)
             candidate_fitness = fitness[candidates]
-            best = np.argmin(candidate_fitness) if ga._minimize else np.argmax(candidate_fitness)
+            best = (
+                np.argmin(candidate_fitness)
+                if ga._minimize
+                else np.argmax(candidate_fitness)
+            )
             winners.append(candidates[best])
         return np.array(winners, dtype=int)
 
 
 class RouletteSelection(SelectionStrategy):
-    """
-    Fitness-proportionate ("roulette wheel") selection: the probability of an individual
-    being picked is proportional to its (shifted, non-negative) fitness.
-    """
+    """Fitness-proportionate ("roulette wheel") selection: the probability of an individual being picked is proportional to its (shifted, non-negative) fitness."""
 
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
+        """Select winners with probability proportional to their shifted fitness."""
         fitness = np.asarray(fitness, dtype=float)
         elit, others = ga.divide(fitness)
         winners = list(elit)
@@ -101,13 +100,10 @@ class RouletteSelection(SelectionStrategy):
 
 
 class RankSelection(SelectionStrategy):
-    """
-    Rank-based selection: the probability of an individual being picked depends on its
-    rank within the population rather than the raw fitness value, which reduces the
-    influence of outlier fitness values compared to :class:`RouletteSelection`.
-    """
+    """Rank-based selection: the probability of an individual being picked depends on its rank within the population rather than the raw fitness value, which reduces the influence of outlier fitness values compared to :class:`RouletteSelection`."""
 
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
+        """Select winners with probability proportional to their fitness rank."""
         fitness = np.asarray(fitness, dtype=float)
         elit, others = ga.divide(fitness)
         winners = list(elit)

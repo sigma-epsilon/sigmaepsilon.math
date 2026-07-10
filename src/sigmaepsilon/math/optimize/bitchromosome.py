@@ -1,3 +1,5 @@
+"""Shared base class for bit-chromosome-encoded genetic algorithms."""
+
 import numpy as np
 from numpy import ndarray
 
@@ -7,10 +9,11 @@ __all__ = ["BitChromosomeGeneticAlgorithm"]
 
 
 class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
-    """
-    Shared base for genetic algorithms whose genotype is a flat 0/1 bit chromosome of
-    length ``dim * length``, decoded into ``dim`` scalar phenotypes by linearly scaling
-    each variable's ``length``-bit segment into its ``ranges[d]`` bounds.
+    """Shared base for genetic algorithms whose genotype is a flat 0/1 bit chromosome.
+
+    The chromosome has length ``dim * length``, decoded into ``dim`` scalar phenotypes
+    by linearly scaling each variable's ``length``-bit segment into its ``ranges[d]``
+    bounds.
 
     This class provides the representation-specific machinery (:func:`populate`,
     :func:`crossover`, :func:`mutate`, :func:`decode`) for any bit-chromosome GA. What
@@ -31,9 +34,7 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
     __slots__ = ()
 
     def populate(self, genotypes: ndarray | None = None) -> ndarray:
-        """
-        Populates the model and returns the array of genotypes.
-        """
+        """Populate the model and return the array of genotypes."""
         nPop = self.nPop
 
         if genotypes is None:
@@ -58,9 +59,7 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
         return genotypes
 
     def decode(self, genotypes: ndarray) -> ndarray:
-        """
-        Decodes the genotypes to phenotypes and returns them as an array.
-        """
+        """Decode the genotypes to phenotypes and return them as an array."""
         span = 2**self.length - 2**0
         genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
         precisions = [
@@ -75,9 +74,10 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
         return self._postprocess_phenotypes(phenotypes)
 
     def _postprocess_phenotypes(self, phenotypes: ndarray) -> ndarray:
-        """
-        Hook for subclasses to transform the linearly-decoded, continuous phenotypes
-        into the representation they actually want to expose (e.g. rounded to the
+        """Transform the linearly-decoded phenotypes for subclasses.
+
+        This is a hook that transforms the continuous phenotypes into the
+        representation subclasses actually want to expose (e.g. rounded to the
         nearest integer). The default implementation is the identity (continuous).
         """
         return phenotypes
@@ -85,9 +85,10 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
     def crossover(
         self, parent1: ndarray, parent2: ndarray, nCut: int | None = None
     ) -> tuple[ndarray, ndarray]:
-        """
-        Performs crossover on the parents `parent1` and `parent2`,
-        using an `nCut` number of cuts and returns two childs.
+        """Perform crossover on the parents.
+
+        Crosses `parent1` and `parent2` using an `nCut` number of cuts and returns
+        two childs.
         """
         if self.rng.random() > self.p_c:  # pragma: no cover
             return parent1, parent2
@@ -117,8 +118,6 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
         return self.mutate(child1), self.mutate(child2)
 
     def mutate(self, child: ndarray) -> ndarray:
-        """
-        Returns a mutated genotype. Children come in, mutants go out.
-        """
+        """Return a mutated genotype. Children come in, mutants go out."""
         p = self.rng.random(self.dim * self.length)
         return np.where(p > self.p_m, child, 1 - child)

@@ -1,3 +1,5 @@
+"""Integer-encoded genetic algorithm for bounded discrete optimization problems."""
+
 import numpy as np
 from numpy import ndarray
 
@@ -7,10 +9,7 @@ __all__ = ["IntegerGeneticAlgorithm"]
 
 
 class IntegerGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
-    """
-    An implementation of a Genetic Algorithm (GA) for problems whose decision variables
-    are natively boolean or small bounded integers, e.g. a 0/1 knapsack indicator vector,
-    or a handful of discrete levels per variable.
+    """An implementation of a Genetic Algorithm (GA) for problems whose decision variables are natively boolean or small bounded integers, e.g. a 0/1 knapsack indicator vector, or a handful of discrete levels per variable.
 
     Like :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`, individuals are
     represented as flat 0/1 bit chromosomes and decoded with the same linear scaling into
@@ -108,7 +107,5 @@ class IntegerGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
     __slots__ = ()
 
     def _postprocess_phenotypes(self, phenotypes: ndarray) -> ndarray:
-        """
-        Rounds the linearly-decoded phenotypes to the nearest integer.
-        """
+        """Round the linearly-decoded phenotypes to the nearest integer."""
         return np.round(phenotypes).astype(int)

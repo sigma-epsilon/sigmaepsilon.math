@@ -1,3 +1,5 @@
+"""Numba-jitted helper kernels for sparse array operations."""
+
 import numpy as np
 from numpy import ndarray
 from numba import njit, prange
@@ -6,17 +8,20 @@ __cache = True
 
 
 def lower_spdata(data: ndarray, rows: ndarray, cols: ndarray):
+    """Return the lower-triangular part (including the diagonal) of sparse data."""
     inds = np.where(rows >= cols)[0]
     return data[inds], rows[inds], cols[inds]
 
 
 def upper_spdata(data: ndarray, rows: ndarray, cols: ndarray):
+    """Return the upper-triangular part (including the diagonal) of sparse data."""
     inds = np.where(cols >= rows)[0]
     return data[inds], rows[inds], cols[inds]
 
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def get_shape_sp(indptr: np.ndarray):
+    """Return the number of rows and the maximum row width from a CSR `indptr` array."""
     nE = len(indptr) - 1
     widths = np.zeros(nE, dtype=indptr.dtype)
     for iE in prange(nE):
@@ -26,6 +31,7 @@ def get_shape_sp(indptr: np.ndarray):
 
 @njit(nogil=True, parallel=True, fastmath=True, cache=__cache)
 def count_cols(arr: np.ndarray):
+    """Return the number of columns (row lengths) of a jagged array."""
     n = len(arr)
     res = np.zeros(n, dtype=np.int64)
     for i in prange(n):

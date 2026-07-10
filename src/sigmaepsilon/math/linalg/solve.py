@@ -1,3 +1,5 @@
+"""Linear solve routines with support for prescribed values."""
+
 from typing import Union, Tuple
 
 import numpy as np
@@ -142,6 +144,7 @@ def reduce(
     method="Gauss-Jordan",
     inplace=False,
 ):
+    """Reduce a linear system of equations, with support for prescribed values."""
     fnc = None
     if method == "Gauss-Jordan":
         fnc = _GaussJordan
@@ -165,6 +168,7 @@ def reduce(
 
 @njit(nogil=True, cache=__cache)
 def npsolve(A, b):
+    """Solve a linear system of equations using `numpy.linalg.solve`."""
     return np.linalg.solve(A, b)
 
 
@@ -221,6 +225,7 @@ def _GaussJordan(
 def backsub(
     A: np.ndarray, B: np.ndarray, presc_bool: np.ndarray, presc_val: np.ndarray
 ):
+    """Perform back-substitution to solve a reduced linear system of equations."""
     nEQ, nRHS = B.shape
     X = np.zeros((nEQ, nRHS), dtype=np.float64)
     R = np.zeros((nEQ, nRHS), dtype=np.float64)
