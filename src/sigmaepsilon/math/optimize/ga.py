@@ -31,7 +31,7 @@ class Genom(BaseModel):
     """A data class for members of a population."""
 
     phenotype: list[float] = Field(default_factory=list)
-    genotype: list[float] = Field(default_factory=list)
+    genotype: list[int | float] = Field(default_factory=list)
     fitness: float
     age: int = Field(default=0)
     index: int = Field(default=-1)
