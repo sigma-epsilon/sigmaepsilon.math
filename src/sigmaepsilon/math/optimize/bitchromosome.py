@@ -88,7 +88,7 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
         """Perform crossover on the parents.
 
         Crosses `parent1` and `parent2` using an `nCut` number of cuts and returns
-        two childs.
+        two children.
         """
         if self.rng.random() > self.p_c:  # pragma: no cover
             return parent1, parent2
