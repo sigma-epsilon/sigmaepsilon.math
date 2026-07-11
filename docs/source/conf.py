@@ -48,7 +48,7 @@ release = "v" + library.__version__
 extensions = [
     # Parses Markdown (.md) files as Sphinx documents, alongside reStructuredText.
     # pip install myst-parser for this.
-    "myst_parser",
+    "myst_nb",
     # Measures and reports how long each document took to build; prints a
     # "slowest documents" summary at the end of the build.
     "sphinx.ext.duration",
@@ -68,7 +68,6 @@ extensions = [
     #'sphinx_gallery.load_style',  # load CSS for gallery (needs SG >= 0.6)
     # Renders Jupyter notebooks (.ipynb) as documentation pages, executing
     # them (or using saved outputs) and embedding the resulting cells/plots.
-    "nbsphinx",
     # "nbsphinx_link",  # for including notebook files from outside the sphinx source root
     # Adds a "copy to clipboard" button to code blocks; configured below to
     # strip prompts (>>>, $, In [1]:, ...) when copying.
@@ -221,39 +220,17 @@ html_css_files = ["custom.css"]
 html_context = {"default_mode": "light"}
 html_static_path = ["_static"]
 
-# -- nbsphinx configuration -------------------------------------------------
+# -- Options for MyST parser -------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/syntax/optional.html
 
-# This is processed by Jinja2 and inserted before each notebook
-nbsphinx_prolog = r"""
-{% set docname = 'docs/source/' + env.doc2path(env.docname, base=None) %}
+myst_enable_extensions = [
+    "dollarmath",   # $...$ and $$...$$ math
+    "amsmath",      # LaTeX amsmath environments (align, etc.)
+    "colon_fence",  # ::: fences for directives (used by sphinx_design)
+]
 
-.. raw:: html
+# -- Options for myst_nb -------------------------------------------------
+# https://myst-nb.readthedocs.io/en/latest/
 
-    <style>
-        .nbinput .prompt,
-        .nboutput .prompt {
-            display: none;
-        }
-    </style>
-
-    <div class="admonition note">
-      This page was generated from
-      <a class="reference external" href="https://github.com/sigma-epsilon/{{ env.config.project_name }}/blob/{{ env.config.release|e }}/{{ docname|e }}">{{ docname|e }}</a>.
-    </div>
-
-.. raw:: latex
-
-    \nbsphinxstartnotebook{\scriptsize\noindent\strut
-    \textcolor{gray}{The following section was generated from
-    \sphinxcode{\sphinxupquote{\strut {{ docname | escape_latex }}}} \dotfill}}
-"""
-
-# This is processed by Jinja2 and inserted after each notebook
-nbsphinx_epilog = r"""
-{% set docname = 'docs/source/' + env.doc2path(env.docname, base=None) %}
-.. raw:: latex
-
-    \nbsphinxstopnotebook{\scriptsize\noindent\strut
-    \textcolor{gray}{\dotfill\ \sphinxcode{\sphinxupquote{\strut
-    {{ docname | escape_latex }}}} ends here.}}
-"""
+nb_execution_allow_errors = True
+nb_execution_mode = "off"
