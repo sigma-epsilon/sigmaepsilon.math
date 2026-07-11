@@ -34,6 +34,19 @@ Nonlinear programming deals with problems where the objective function, the cons
 * :doc:`ga_performance` -- vectorized and parallel objective evaluation, choosing a representation, and posing objectives symbolically.
 * :doc:`custom_ga` -- a full, worked example of subclassing the framework for a custom representation.
 
+Ant Colony Optimization (ACO)
+===============================
+
+📖 :ref:`Ant Colony Optimization API Reference <api_optimization_ACO>`
+
+**Ant Colony Optimization (ACO)** is another nature-inspired metaheuristic, this time based
+on the pheromone-trail-following behavior of foraging ants. Unlike the GA family, which
+evolves a population of candidate solutions directly, ACO builds solutions incrementally
+(step by step) and steers the construction process with a shared memory (the "pheromones")
+that gets reinforced along good solutions and decays over time. See :doc:`aco` for how the
+continuous (ACOR) and combinatorial (Ant System / TSP) variants work, when to reach for them
+instead of a GA or `linprog`, and worked examples of both.
+
 .. toctree::
     :maxdepth: 1
     :hidden:
@@ -44,3 +57,4 @@ Nonlinear programming deals with problems where the objective function, the cons
     ga_tuning
     ga_performance
     custom_ga
+    aco

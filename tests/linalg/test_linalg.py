@@ -780,7 +780,7 @@ class TestSparse(LinalgTestCase):
         def csr_data(csr: csr_matrix):
             return csr.data
 
-        np.random.seed = 0
+        np.random.seed(0)
         mat = csr_scipy(np.random.rand(10, 12) > 0.8, dtype=int)
         csr = csr_matrix(mat)
         csr_row(csr, 0)

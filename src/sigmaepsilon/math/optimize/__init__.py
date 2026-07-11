@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Optimization algorithms: linear programming and genetic algorithms."""
+"""Optimization algorithms: linear programming, genetic algorithms, and ant colony optimization."""
+
 from .bga import BinaryGeneticAlgorithm
 from .iga import IntegerGeneticAlgorithm
 from .rga import RealValuedGeneticAlgorithm
@@ -10,6 +11,12 @@ from .selection import (
     TournamentSelection,
     RouletteSelection,
     RankSelection,
+)
+from .aco import (
+    AntSolution,
+    AntColonyOptimization,
+    ContinuousAntColonyOptimization,
+    CombinatorialAntColonyOptimization,
 )
 
 __all__ = [
@@ -22,4 +29,8 @@ __all__ = [
     "TournamentSelection",
     "RouletteSelection",
     "RankSelection",
+    "AntSolution",
+    "AntColonyOptimization",
+    "ContinuousAntColonyOptimization",
+    "CombinatorialAntColonyOptimization",
 ]
