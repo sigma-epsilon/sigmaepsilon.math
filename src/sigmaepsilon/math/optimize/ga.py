@@ -329,7 +329,7 @@ class GeneticAlgorithm:
 
     @property
     def champion(self) -> Genom:
-        """Return the genotypes of the population."""
+        """Return the genom of the champion."""
         return self._champion
 
     @property
@@ -612,7 +612,7 @@ class GeneticAlgorithm:
     def _celebrate(self, genom: Genom) -> None:
         """Celebrate the winner.
 
-        Curretly this means that the beast candidate is added to a history
+        Currently, this means that the best candidate is added to a history
         to keep track of the improvements across evolutions.
         """
         if self.champion is None:
@@ -674,7 +674,7 @@ class GeneticAlgorithm:
         Parameters
         ----------
         genotypes: numpy.ndarray
-            Genotypes of the parents as a 2d integer array.
+            Genotypes of the parents as a 2d array.
 
         Yields
         ------
