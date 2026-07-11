@@ -422,9 +422,9 @@ class ContinuousAntColonyOptimization(AntColonyOptimization):
         solutions = np.zeros((self.nAnts, self.dim))
 
         weights = np.zeros(k)
-        for l in range(k):
-            weights[l] = (1.0 / (self.q * k * np.sqrt(2 * np.pi))) * np.exp(
-                -((l) ** 2) / (2 * (self.q * k) ** 2)
+        for rank in range(k):
+            weights[rank] = (1.0 / (self.q * k * np.sqrt(2 * np.pi))) * np.exp(
+                -((rank) ** 2) / (2 * (self.q * k) ** 2)
             )
         weights /= weights.sum()
 
