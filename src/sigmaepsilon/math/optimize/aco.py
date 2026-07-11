@@ -53,8 +53,7 @@ class AntSolution(BaseModel):
 
 
 class AntColonyOptimization:
-    """
-    Base class for Ant Colony Optimization (ACO) algorithms.
+    """Base class for Ant Colony Optimization (ACO) algorithms.
 
     This class provides the common framework for ACO algorithms, with two extension
     points that subclasses must implement: :func:`construct_solutions` and
@@ -91,6 +90,7 @@ class AntColonyOptimization:
     This is an abstract base class. Use :class:`ContinuousAntColonyOptimization` for
     real-valued optimization or :class:`CombinatorialAntColonyOptimization` for
     discrete/graph-based problems.
+    
     """
 
     @unique
