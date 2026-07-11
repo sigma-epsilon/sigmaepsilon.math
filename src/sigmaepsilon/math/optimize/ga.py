@@ -697,10 +697,10 @@ class GeneticAlgorithm:
             yield parent1, parent2
 
     def stopping_criteria(self) -> bool:
-        """Implement a simple stopping criteria.
+        """Implement a simple stopping criterion.
 
-        Evaluates to `True` if the current chanpion is thought ti bee the best
-        solution and no further progress can be made, or at lest with a bad rate.
+        Return True if the current champion is thought to be the best solution
+        and no further progress can be made, or only at a slow rate.
 
         The default implementation considers a champion as the winner, if it is the champion
         for for at least 5 times in a row. This can be dontrolled with the `maxage` parameter
