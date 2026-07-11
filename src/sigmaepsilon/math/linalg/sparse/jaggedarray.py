@@ -1,3 +1,5 @@
+"""Jagged (ragged) 2d array support, backed by Awkward Array."""
+
 from typing import Iterable, Union
 import numpy as np
 from numpy import concatenate as join, ndarray, array_repr
@@ -79,9 +81,7 @@ HANDLED_FUNCTIONS = {}
 
 
 class JaggedArray(NDArrayOperatorsMixin, Wrapper):
-    """
-    A NumPy-compliant class that handles 2d matrices with a variable
-    number of columns per row.
+    """A NumPy-compliant class that handles 2d matrices with a variable number of columns per row.
 
     The class is actually an interface to `awkward.Array`,
     with some additional features, specific to 2d jagged arrays.
@@ -134,7 +134,7 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
     >>> JaggedArray([np.eye(2), np.eye(3)])
     JaggedArray([[[1, 0], [0, 1]], [[1, 0, 0], [0, 1, 0], [0, 0, 1]]])
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.sparse.csr.csr_matrix`
     :class:`awkward.Array`
@@ -159,48 +159,50 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
         super(JaggedArray, self).__init__(wrap=wrap)
 
     def __repr__(self):
+        """Return the string representation of the array."""
         if isinstance(self._wrapped, ndarray):
             return array_repr(self._wrapped)
         else:
             return f"{self.__class__.__name__}({self._wrapped})"
 
     def __array__(self):
+        """Return the wrapped data as an array."""
         return self._wrapped
 
     def __getitem__(self, key):
+        """Return the item(s) at `key` from the wrapped data."""
         return self._wrapped.__getitem__(key)
 
     def __setitem__(self, key, value):
+        """Set the item(s) at `key` of the wrapped data to `value`."""
         return self._wrapped.__setitem__(key, value)
 
     def __len__(self):
+        """Return the number of rows of the array."""
         return len(self._wrapped)
 
     def to_csr(self) -> csr_matrix:
-        """
-        Returns the topology as a csr_matrix.
+        """Return the topology as a csr_matrix.
 
-        See also
+        See Also
         --------
         :class:`~sigmaepsilon.math.linalg.sparse.csr.csr_matrix`
         """
         return csr_matrix(self._wrapped)
 
     def to_scipy(self) -> csr_scipy:
-        """
-        Returns the array as a sparse SciPy CSR matrix.
+        """Return the array as a sparse SciPy CSR matrix.
 
-        See also
+        See Also
         --------
         :class:`scipy.sparse.csr_matrix`
         """
         return self.to_csr().to_scipy()
 
     def to_ak(self) -> akarray:
-        """
-        Returns underlying data as an Awkward array.
+        """Return underlying data as an Awkward array.
 
-        See also
+        See Also
         --------
         :class:`awkward.Array`
         """
@@ -210,9 +212,9 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
             return akarray(self._wrapped)
 
     def to_numpy(self) -> ndarray:
-        """
-        Returns underlying data as a NumPy array. This is only possible
-        for regular topologies.
+        """Return underlying data as a NumPy array.
+
+        This is only possible for regular topologies.
         """
         if isinstance(self._wrapped, ndarray):
             return self.__array__()
@@ -220,14 +222,11 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
             return self.to_csr().to_numpy()
 
     def to_array(self) -> Union[akarray, ndarray]:
-        """
-        Returns the underlying data, which either an Awkward or a NumPy array.
-        """
+        """Return the underlying data, which is either an Awkward or a NumPy array."""
         return self.__array__()
 
     def to_list(self):
-        """
-        Returns underlying data as lists.
+        """Return underlying data as lists.
 
         .. versionadded:: 0.0.8
         """
@@ -237,36 +236,28 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
             return self.__array__().to_list()
 
     def unique(self, *args, **kwargs):
-        """
-        Returns unique elements, by generalizing the functionality provided
-        by :func:`numpy.unique`, see its documentation for the details.
+        """Return unique elements, generalizing the functionality provided by :func:`numpy.unique`.
+
+        See its documentation for the details.
         """
         return np.unique(self, *args, **kwargs)
 
     def is_jagged(self) -> bool:
-        """
-        Returns True if the topology is jagged, False otherwise.
-        """
+        """Return True if the topology is jagged, False otherwise."""
         widths = self.widths()
         return not np.all(widths == widths[0])
 
     def widths(self) -> ndarray:
-        """
-        Returns the number of columns for each row.
-        """
+        """Return the number of columns for each row."""
         return count_cols(self._wrapped)
 
     @property
     def size(self) -> int:
-        """
-        Number of elements in the array.
-        """
+        """Return the number of elements in the array."""
         return np.sum(self.widths())
 
     def flatten(self, return_cuts: bool = False):
-        """
-        Returns the flattened equivalent of the array.
-        """
+        """Return the flattened equivalent of the array."""
         if isinstance(self._wrapped, akarray):
             if return_cuts:
                 topo = ak.flatten(self._wrapped).to_numpy()
@@ -282,9 +273,9 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
 
     @property
     def shape(self):
-        """
-        Returns the shape of the data as a tuple. If the topology is
-        jagged, the second item is an iterable.
+        """Return the shape of the data as a tuple.
+
+        If the topology is jagged, the second item is an iterable.
 
         .. versionadded:: 0.0.8
         """
@@ -294,6 +285,7 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
             return len(self), self.widths()
 
     def __array_function__(self, func, types, args, kwargs):
+        """Implement the `__array_function__` protocol for NumPy dispatch."""
         if func not in HANDLED_FUNCTIONS:
             arrs = [arg.to_ak() for arg in args]
             return func(*arrs, **kwargs)
@@ -307,10 +299,7 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
 
 
 def implements(numpy_function):
-    """
-    Register an __array_function__ implementation for JaggedArray
-    objects.
-    """
+    """Register an __array_function__ implementation for JaggedArray objects."""
 
     def decorator(func):
         HANDLED_FUNCTIONS[numpy_function] = func

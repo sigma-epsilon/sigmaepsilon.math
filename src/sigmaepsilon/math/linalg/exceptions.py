@@ -1,3 +1,5 @@
+"""Exception types for the linear algebra subpackage."""
+
 from sigmaepsilon.core.exceptions import SigmaEpsilonException
 
 
@@ -14,11 +16,11 @@ class LinalgMissingInputError(SigmaEpsilonException):
 
 
 class LinalgInvalidTensorOperationError(SigmaEpsilonException):
-    """
-    Tensors don't support this operation. Try to call this using
-    the arrays of the tensorial inputs.
+    """Tensors don't support this operation.
+
+    Try to call this using the arrays of the tensorial inputs.
     """
 
 
 class LinalgError(SigmaEpsilonException):
-    """General linear algebra error"""
+    """General linear algebra error."""

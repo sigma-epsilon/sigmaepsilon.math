@@ -1,3 +1,5 @@
+"""Graph algorithm helpers (rooted level structures, peripheral nodes)."""
+
 import numpy as np
 from numba import jit
 from numba.types import int64, Array
@@ -12,8 +14,7 @@ int64A = Array(int64, 1, "C")
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)
 def rooted_level_structure(adj: csr_matrix, root: int = 0) -> Dict:
-    """
-    Turns a sparse adjacency matrix into a rooted level structure.
+    """Turn a sparse adjacency matrix into a rooted level structure.
 
     Parameters
     ----------
@@ -59,9 +60,7 @@ def rooted_level_structure(adj: csr_matrix, root: int = 0) -> Dict:
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)
 def pseudo_peripheral_nodes(adj: csr_matrix) -> np.ndarray:
-    """
-    Returns the indices of nodes that are possible candidates
-    for being peripheral nodes of a graph.
+    """Return the indices of nodes that are possible candidates for being peripheral nodes of a graph.
 
     Parameters
     ----------

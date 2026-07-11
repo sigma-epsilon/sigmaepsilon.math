@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Histogram utilities built on top of NumPy."""
 from numba import njit, prange
 import numpy as np
 
@@ -7,6 +8,7 @@ __all__ = ["histogram"]
 
 
 def histogram(data, bins, *args, return_edges=False, **kwargs):
+    """Compute a histogram and either its bin edges or bin centers."""
     hist, bin_edges = np.histogram(data, bins, *args, **kwargs)
     if return_edges:
         return hist, bin_edges

@@ -1,3 +1,5 @@
+"""Linear programming problem solving built on `scipy.optimize.linprog`."""
+
 from typing import Iterable, Sequence
 
 import numpy as np
@@ -14,10 +16,12 @@ __all__ = ["LinearProgrammingProblem"]
 
 
 class LinearProgrammingProblem:
-    """
-    A class to solve linear programming problems [1]_. It uses the :func:`scipy.optimize.linprog`
+    r"""
+    A class to solve linear programming problems [1]_.
+
+    It uses the :func:`scipy.optimize.linprog`
     function as a solver [2]_, which eventually calls into the HIGHS solver [3]_.
-    
+
     To define the objective and the constraints,
     you can use the `Function`, `Relation`, `Equality` and `InEquality` 
     classes. These are able to understand SymPy expressions and strings, giving you
@@ -180,15 +184,14 @@ class LinearProgrammingProblem:
 
     @property
     def variables(self) -> Iterable[Symbol]:
-        """
-        Returns the variables of the problem.
-        """
+        """Return the variables of the problem."""
         return self._variables
 
     def _to_scipy(self, *, maximize: bool = False) -> tuple[ndarray, dict]:
         """
-        Returns values for the parameters `A_ub`, `b_ub`, `A_eq`, `b_eq`, `bounds` and `integrality`
-        for the `scipy.optimize.linprog` function.
+        Return values for the parameters `A_ub`, `b_ub`, `A_eq`, `b_eq`, `bounds` and `integrality`.
+
+        These are the parameters expected by the `scipy.optimize.linprog` function.
         """
         n_eq = len(list(filter(lambda c: isinstance(c, Equality), self.constraints)))
         n_ieq = len(list(filter(lambda c: isinstance(c, InEquality), self.constraints)))
@@ -303,8 +306,9 @@ class LinearProgrammingProblem:
         self, *, maximize: bool = False, method: str = "highs", **kwargs
     ) -> OptimizeResult:
         """
-        Solves the linear programming problem using `scipy.optimize.linprog`
-        and returns an instance of `scipy.optimize.OptimizeResult`.
+        Solve the linear programming problem using `scipy.optimize.linprog`.
+
+        Returns an instance of `scipy.optimize.OptimizeResult`.
 
         Parameters
         ----------

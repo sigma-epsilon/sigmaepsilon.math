@@ -1,3 +1,5 @@
+"""Relations (equalities and inequalities) expressed in terms of Function objects."""
+
 from enum import Enum
 import operator as op
 from typing import Callable
@@ -19,9 +21,7 @@ class Relations(Enum):
     le = "<="
 
     def to_opfunc(self) -> Callable:
-        """
-        Returns the operator associated with the relation.
-        """
+        """Return the operator associated with the relation."""
         if self == Relations.eq:
             return op.eq
         elif self == Relations.gt:
@@ -36,9 +36,7 @@ class Relations(Enum):
             raise ValueError(f"Unsupported relation: {self}")
 
     def to_latex(self) -> str:
-        """
-        Returns the LaTeX representation of the relation.
-        """
+        """Return the LaTeX representation of the relation."""
         if self == Relations.eq:
             return "="
         elif self == Relations.gt:
@@ -54,8 +52,9 @@ class Relations(Enum):
 
 
 class Relation(Function):
-    """
-    Class to express relations. You can use this class to express equalities
+    """Class to express relations.
+
+    You can use this class to express equalities
     and inequalities. The class is a subclass of :class:`~sigmaepsilon.math.function.function.Function`
     and can be instantiated similatly, with an additional parameter `op` to specify the operator.
 
@@ -80,6 +79,7 @@ class Relation(Function):
     __slots__ = ["op", "opfunc", "slack", "op_str"]
 
     def __new__(cls, *args, op_str: str | None = None, **kwargs):
+        """Dispatch to `Equality` or `InEquality` based on the resolved operator."""
         # Determine the operator from the arguments
         op = getasany(["op", "operator"], None, **kwargs)
 
@@ -166,14 +166,12 @@ class Relation(Function):
 
     @property
     def operator(self) -> Callable:
-        """
-        Returns the associated operator.
-        """
+        """Return the associated operator."""
         return self.op
 
     def to_latex(self) -> str:
-        """
-        Returns the LaTeX code of the symbolic expression of the instance.
+        """Return the LaTeX code of the symbolic expression of the instance.
+
         Only for symbolic relations.
         """
         expr_str = super().to_latex()
@@ -188,16 +186,14 @@ class Relation(Function):
             )
 
     def relate(self, *args, **kwargs):
-        """
-        Relates an input and returns True if it is feasible.
-        """
+        """Relate an input and return True if it is feasible."""
         return self.opfunc(self.f0(*args, **kwargs), 0)
 
 
 class Equality(Relation):
-    """
-    Class for equalities, mostly used for expressing
-    constraints in optimization problems.
+    """Class for equalities.
+
+    Mostly used for expressing constraints in optimization problems.
 
     Examples
     --------
@@ -218,9 +214,9 @@ class Equality(Relation):
 
 
 class InEquality(Relation):
-    """
-    Class for inequalities, mostly used for expressing
-    constraints in optimization problems.
+    """Class for inequalities.
+
+    Mostly used for expressing constraints in optimization problems.
 
     Examples
     --------

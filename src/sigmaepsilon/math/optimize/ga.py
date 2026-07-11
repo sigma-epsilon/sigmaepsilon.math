@@ -1,16 +1,20 @@
-from abc import abstractmethod
+"""Genetic algorithm base classes and population data structures."""
+
 from typing import Iterable, Callable, Tuple, Generator
 from types import NoneType
 from numbers import Number
 import operator
 from enum import Enum, unique
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 from numpy import ndarray
+from numpy.random import Generator as RNG
 from pydantic import BaseModel, Field
 
 from ..function import Function
 from .state import OptimizerState
+from .selection import SelectionStrategy, TournamentSelection
 
 __all__ = ["GeneticAlgorithm", "Genom"]
 
@@ -24,26 +28,26 @@ def odd(n: Number) -> bool:
 
 
 class Genom(BaseModel):
-    """
-    A data class for members of a population.
-    """
+    """A data class for members of a population."""
 
     phenotype: list[float] = Field(default_factory=list)
-    genotype: list[int] = Field(default_factory=list)
+    genotype: list[int | float] = Field(default_factory=list)
     fitness: float
     age: int = Field(default=0)
     index: int = Field(default=-1)
 
     def __eq__(self, other) -> bool:
+        """Return whether self and other have the same genotype."""
         if not isinstance(other, Genom):
             return False
         return np.all(self.genotype == other.genotype)
 
     def __hash__(self):
-        arr_string = "".join(str(i) for i in self.genotype)
-        return hash(arr_string)
+        """Return a hash of self based on the genotype."""
+        return hash(tuple(float(x) for x in self.genotype))
 
     def __gt__(self, other):
+        """Return whether self's fitness is greater than other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -51,6 +55,7 @@ class Genom(BaseModel):
         return np.all(self.fitness > other.fitness)
 
     def __lt__(self, other):
+        """Return whether self's fitness is less than other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -58,6 +63,7 @@ class Genom(BaseModel):
         return np.all(self.fitness < other.fitness)
 
     def __ge__(self, other):
+        """Return whether self's fitness is greater than or equal to other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -65,6 +71,7 @@ class Genom(BaseModel):
         return np.all(self.fitness >= other.fitness)
 
     def __le__(self, other):
+        """Return whether self's fitness is less than or equal to other's fitness."""
         if not isinstance(other, Genom):
             raise TypeError(
                 f"This operation is not supported between instances of {type(other)} and {type(self)}."
@@ -73,6 +80,7 @@ class Genom(BaseModel):
 
     @property
     def fittness(self) -> float:  # pragma: no cover
+        """Return the fitness value (deprecated alias for :attr:`fitness`)."""
         import warnings
 
         warnings.warn(
@@ -85,14 +93,27 @@ class Genom(BaseModel):
 
 class GeneticAlgorithm:
     """
-    Base class for Genetic Algorithms (GA). Use this as a base
-    class to your custom implementation of a GA.
+    Base class for Genetic Algorithms (GA).
 
-    The class has 4 abstract methods wich upon being implemented, yield
-    a working genetic algorithm. These are :func:`populate`, :func:`decode`,
-    :func:`crossover`, :func:`mutate` and :func:`select`. It is also possible to
-    use a custom stopping criteria by implementing :func:`stopping_criteria`.
-    See the :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` class for an example.
+    Use this as a base class to your custom implementation of a GA.
+
+    The class has 3 representation-specific extension points that a subclass must
+    implement to yield a working genetic algorithm: :func:`populate`, :func:`crossover`
+    and :func:`mutate` (their base implementations raise ``NotImplementedError``).
+    :func:`encode`/:func:`decode` default to the identity mapping (suitable for
+    representations where genotype and phenotype coincide, e.g. real-valued encodings)
+    and :func:`select` already comes with a working, pluggable default (see
+    :attr:`selection_strategy` /
+    :class:`~sigmaepsilon.math.optimize.selection.SelectionStrategy`); override them only
+    if you need representation-specific behavior. It is also possible to use a custom
+    stopping criteria by overriding :func:`stopping_criteria`. See the
+    :class:`~sigmaepsilon.math.optimize.bitchromosome.BitChromosomeGeneticAlgorithm`
+    (shared bit-chromosome machinery, with
+    :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` and
+    :class:`~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm` as its concrete,
+    continuous/integer subclasses) and
+    :class:`~sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm` classes for
+    examples.
 
     .. note::
        This class is designed for maximizing the objective function. To minimize it, either negate
@@ -130,6 +151,25 @@ class GeneticAlgorithm:
         (being the best candidate). Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
+    seed: int | numpy.random.SeedSequence | numpy.random.Generator | None, Optional
+        A seed for a per-instance :func:`numpy.random.default_rng`, used for every
+        stochastic operation instead of the global :mod:`numpy.random` state. Passing the
+        same seed makes runs reproducible, and lets multiple instances draw independent
+        random streams in the same process. Default is None (nondeterministic).
+    selection_strategy: :class:`~sigmaepsilon.math.optimize.selection.SelectionStrategy`, Optional
+        The strategy used by the default :func:`select` implementation to pick the
+        survivors of a generation. Default is
+        :class:`~sigmaepsilon.math.optimize.selection.TournamentSelection`.
+    vectorized: bool, Optional
+        If True, :func:`evaluate` calls the objective function once with the whole
+        ``(nPop, dim)`` array of phenotypes and expects it to return one fitness value
+        per row, instead of calling it once per individual. Default is False.
+    n_jobs: int, Optional
+        If different from 1 and ``vectorized`` is False, :func:`evaluate` calls the
+        objective function once per individual in parallel worker processes (using
+        :class:`concurrent.futures.ProcessPoolExecutor`); -1 means "use all available
+        CPUs". The objective function must be picklable (e.g. a module-level function,
+        not a lambda or a closure). Default is 1 (sequential evaluation).
 
     Note
     ----
@@ -140,9 +180,11 @@ class GeneticAlgorithm:
     number of problems or if the long running time is not an issue. If you want to customize the way the
     objective is evaluated, override the :func:`evaluate` method.
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm`
     """
 
     @unique
@@ -176,6 +218,10 @@ class GeneticAlgorithm:
         "_minimize",
         "_state",
         "_status",
+        "_rng",
+        "selection_strategy",
+        "vectorized",
+        "n_jobs",
     ]
 
     def __init__(
@@ -192,12 +238,24 @@ class GeneticAlgorithm:
         elitism: int | float | NoneType = 1,
         maxage: int = 5,
         minimize: bool = False,
+        seed: int | np.random.SeedSequence | RNG | NoneType = None,
+        selection_strategy: SelectionStrategy | NoneType = None,
+        vectorized: bool = False,
+        n_jobs: int = 1,
     ):
         super().__init__()
         self.fnc = fnc
         self.ranges = np.array(ranges)
         self.dim = getattr(fnc, "dimension", self.ranges.shape[0])
         self.length = length
+        self._rng = seed if isinstance(seed, RNG) else np.random.default_rng(seed)
+        self.selection_strategy = (
+            selection_strategy
+            if selection_strategy is not None
+            else TournamentSelection()
+        )
+        self.vectorized = vectorized
+        self.n_jobs = n_jobs
 
         if odd(nPop):
             nPop += 1
@@ -212,7 +270,7 @@ class GeneticAlgorithm:
         self.p_c = None
         self.p_m = None
         self._genotypes = None
-        self._pnenotypes = None
+        self._phenotypes = None
         self._fitness = None
         self._champion: Genom | NoneType = None
         self._celebrate_op = None
@@ -233,10 +291,36 @@ class GeneticAlgorithm:
 
     @property
     def state(self) -> OptimizerState:
-        """
-        Returns the state of the optimizer.
-        """
+        """Return the state of the optimizer."""
         return self._state
+
+    @property
+    def rng(self) -> RNG:
+        """
+        Return the random number generator of the instance.
+
+        All stochastic operations
+        (population initialization, crossover, mutation, selection) must draw from this
+        generator rather than the global :mod:`numpy.random` state, so that runs are
+        reproducible (via the `seed` constructor argument) and independent instances
+        don't interfere with each other's randomness.
+        """
+        return self._rng
+
+    @property
+    def diversity(self) -> float:
+        """
+        Return a simple measure of the phenotypic diversity of the current population.
+
+        Computed as the mean, over all dimensions, of the per-dimension standard
+        deviation of the phenotypes. A value close to zero indicates a converged,
+        homogeneous population; this can be used, in addition to champion age, as a
+        signal for premature convergence.
+        """
+        phenotypes = np.asarray(self.phenotypes, dtype=float)
+        if phenotypes.size == 0:
+            return 0.0
+        return float(np.mean(np.std(phenotypes, axis=0)))
 
     @property
     def nIter(self) -> int:  # pragma: no cover
@@ -245,32 +329,24 @@ class GeneticAlgorithm:
 
     @property
     def champion(self) -> Genom:
-        """
-        Returnes the genotypes of the population.
-        """
+        """Return the genom of the champion."""
         return self._champion
 
     @property
     def genotypes(self) -> Iterable:
-        """
-        Returnes the genotypes of the population.
-        """
+        """Return the genotypes of the population."""
         return self._genotypes
 
     @genotypes.setter
     def genotypes(self, value: Iterable) -> None:
-        """
-        Sets the genotypes of the population.
-        """
+        """Set the genotypes of the population."""
         self._genotypes = value
         self._phenotypes = None
         self._fitness = None
 
     @property
     def phenotypes(self) -> Iterable:
-        """
-        Returnes the phenotypes of the population.
-        """
+        """Return the phenotypes of the population."""
         if self._phenotypes is None:
             genotypes = self.genotypes
             if genotypes is not None:
@@ -280,8 +356,9 @@ class GeneticAlgorithm:
     @property
     def fitness(self) -> ndarray:
         """
-        Returns the actual fitness values of the population, or the fitness
-        of the population described by the argument `phenotypes`.
+        Return the actual fitness values of the population.
+
+        Or the fitness of the population described by the argument `phenotypes`.
         """
         if self._fitness is not None:
             return self._fitness
@@ -291,6 +368,7 @@ class GeneticAlgorithm:
 
     @property
     def fittness(self) -> ndarray:  # pragma: no cover
+        """Return the fitness values (deprecated alias for :attr:`fitness`)."""
         import warnings
 
         warnings.warn(
@@ -302,9 +380,10 @@ class GeneticAlgorithm:
 
     def reset(self) -> "GeneticAlgorithm":
         """
-        Resets the solver and returns the object. Only use it if you want to have
-        a completely clean sheet. Also, the function is called for every object at
-        instantiation.
+        Reset the solver and return the object.
+
+        Only use it if you want to have a completely clean sheet. Also, the function
+        is called for every object at instantiation.
 
         Note
         ----
@@ -321,7 +400,7 @@ class GeneticAlgorithm:
 
     def set_solution_params(self, **kwargs) -> "GeneticAlgorithm":
         """
-        Sets the hyperparameters of the algorithm.
+        Set the hyperparameters of the algorithm.
 
         Parameters
         ----------
@@ -378,9 +457,7 @@ class GeneticAlgorithm:
         return self
 
     def evolver(self) -> Iterable:
-        """
-        Returns a generator that can be used to manually control evolutions.
-        """
+        """Return a generator that can be used to manually control evolutions."""
         self.genotypes = self.populate()
         _ = yield
         yield self.genotypes
@@ -390,14 +467,12 @@ class GeneticAlgorithm:
             yield self.genotypes
 
     def evolve(self, cycles: int = 1) -> Iterable:
-        """
-        Performs a certain number of cycles of evolution and returns the
-        genotypes.
-        """
+        """Perform a certain number of cycles of evolution and return the genotypes."""
         for _ in range(cycles):
             next(self._evolver)
             candidate: Genom = self.best_candidate()
             self._celebrate(candidate)
+            self._state.diversity = self.diversity
         return self.genotypes
 
     def solve(self, recycle: bool = False, **kwargs) -> Genom:
@@ -460,7 +535,7 @@ class GeneticAlgorithm:
 
     def evaluate(self, phenotypes: Iterable | None = None) -> ndarray:
         """
-        Evaluates the objective for a list of phenotypes.
+        Evaluate the objective for a list of phenotypes.
 
         If the phenotypes are not explicitly specified, the population at hand
         is evaluated.
@@ -470,11 +545,28 @@ class GeneticAlgorithm:
         phenotypes: Iterable, Optional
             The phenotypes the objective function is to be evaluated for.
             Default is None.
+
+        Note
+        ----
+        By default, the objective function is called once per individual in a plain
+        Python loop. Set ``vectorized=True`` at construction if the objective function
+        can consume the whole ``(nPop, dim)`` array of phenotypes at once and return one
+        fitness value per row. Alternatively, set ``n_jobs`` to a value other than 1 to
+        evaluate individuals in parallel worker processes (requires a picklable
+        objective function).
         """
         try:
             phenotypes = self.phenotypes if phenotypes is None else phenotypes
             if self._is_symbolic_Function:
                 result = self.fnc(phenotypes.T)
+            elif self.vectorized:
+                result = np.asarray(self.fnc(phenotypes), dtype=float)
+            elif self.n_jobs != 1:
+                max_workers = None if self.n_jobs < 0 else self.n_jobs
+                with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                    result = np.array(
+                        list(executor.map(self.fnc, phenotypes)), dtype=float
+                    )
             else:
                 result = np.array([self.fnc(x) for x in phenotypes], dtype=float)
             self.state.n_fev += len(phenotypes)
@@ -487,7 +579,7 @@ class GeneticAlgorithm:
 
     def best_phenotype(self) -> ndarray:
         """
-        Returns the best phenotype from the active population.
+        Return the best phenotype from the active population.
 
         .. note::
            The value returned by this method is the phenotype of the best candidate
@@ -498,8 +590,7 @@ class GeneticAlgorithm:
         return self.best_candidate().phenotype
 
     def best_candidate(self) -> Genom:
-        """
-        Returns the Genom of the best candidate in the active population.
+        """Return the Genom of the best candidate in the active population.
 
         .. note::
            The value returned by this method is the Genom of the best candidate
@@ -519,9 +610,10 @@ class GeneticAlgorithm:
         )
 
     def _celebrate(self, genom: Genom) -> None:
-        """
-        Celebration of the winner. Curretly this means that the beast candidate is added
-        to a history to keep track of the improvements across evolutions.
+        """Celebrate the winner.
+
+        Currently, this means that the best candidate is added to a history
+        to keep track of the improvements across evolutions.
         """
         if self.champion is None:
             self._champion = genom
@@ -536,9 +628,9 @@ class GeneticAlgorithm:
         self._champion.age += 1
 
     def divide(self, fitness: ndarray | None = None) -> tuple[ndarray, ndarray]:
-        """
-        Divides population to elit and others, and returns the corresponding
-        index arrays.
+        """Divide population to elit and others.
+
+        Returns the corresponding index arrays.
 
         Parameters
         ----------
@@ -557,7 +649,7 @@ class GeneticAlgorithm:
         assert fitness is not None, "No available fitness data detected."
 
         if self.elitism is None:
-            return [], list(range(self.nPop))
+            return np.array([], dtype=int), np.arange(self.nPop)
 
         if self.elitism is not None:
             argsort = np.argsort(fitness)
@@ -573,10 +665,8 @@ class GeneticAlgorithm:
 
         return elit, others
 
-    @classmethod
-    def random_parents_generator(cls, genotypes: ndarray) -> Generator:
-        """
-        Yields random pairs from a list of genotypes.
+    def random_parents_generator(self, genotypes: ndarray) -> Generator:
+        """Yield random pairs from a list of genotypes.
 
         The implemantation assumes that the length of the input array
         is a multiple of 2.
@@ -584,7 +674,7 @@ class GeneticAlgorithm:
         Parameters
         ----------
         genotypes: numpy.ndarray
-            Genotypes of the parents as a 2d integer array.
+            Genotypes of the parents as a 2d array.
 
         Yields
         ------
@@ -596,22 +686,21 @@ class GeneticAlgorithm:
         n = len(genotypes)
         assert n % 2 == 0, "'n' must be a multiple of 2"
         pool = np.full(n, True)
-        nPool = n
-        while nPool > 2:
+        while True:
             where = np.argwhere(pool == True).flatten()
-            nPool = len(where)
-            pair = np.random.choice(where, 2, replace=False)
+            if len(where) < 2:
+                break
+            pair = self.rng.choice(where, 2, replace=False)
             parent1 = genotypes[pair[0]]
             parent2 = genotypes[pair[1]]
             pool[pair] = False
             yield parent1, parent2
 
-    @abstractmethod
     def stopping_criteria(self) -> bool:
-        """
-        Implements a simple stopping criteria that evaluates to `True` if the
-        current chanpion is thought ti bee the best solution and no further progress
-        can be made, or at lest with a bad rate.
+        """Implement a simple stopping criterion.
+
+        Return True if the current champion is thought to be the best solution
+        and no further progress can be made, or only at a slow rate.
 
         The default implementation considers a champion as the winner, if it is the champion
         for for at least 5 times in a row. This can be dontrolled with the `maxage` parameter
@@ -619,46 +708,75 @@ class GeneticAlgorithm:
         """
         return self.champion.age > self.maxage
 
-    @abstractmethod
     def encode(self, phenotypes: ndarray | None = None) -> ndarray:
-        """
-        Turns phenotypes into genotypes.
+        """Turn phenotypes into genotypes.
+
+        The default implementation is the identity mapping (genotype ==
+        phenotype), suitable for representations that don't need a separate
+        encoding, e.g. real-valued genotypes. Override for representations
+        that do, e.g. binary encoding.
         """
         return phenotypes
 
-    @abstractmethod
     def decode(self, genotypes: ndarray) -> ndarray:
-        """
-        Turns genotypes into phenotypes.
+        """Turn genotypes into phenotypes.
+
+        The default implementation is the identity mapping (phenotype ==
+        genotype), suitable for representations that don't need a separate
+        decoding, e.g. real-valued genotypes. Override for representations
+        that do, e.g. binary encoding.
         """
         return genotypes
 
-    @abstractmethod
     def populate(self, genotypes: ndarray | None = None) -> ndarray:
-        """
-        Ought to produce a pool of phenotypes.
-        """
-        ...
+        """Produce a pool of genotypes.
 
-    @abstractmethod
+        This is a representation-specific extension point with no
+        meaningful generic default; override it in a subclass.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} does not implement 'populate'."
+        )
+
     def crossover(self, parent1: ndarray, parent2: ndarray) -> Tuple[ndarray]:
-        """
-        Takes in two parents, returns two offspring. You'd probably want to use it inside
-        the populator.
-        """
-        ...
+        """Take in two parents, return two offspring.
 
-    @abstractmethod
+        You'd probably want to use it inside the populator. This is a
+        representation-specific extension point with no meaningful generic
+        default; override it in a subclass.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} does not implement 'crossover'."
+        )
+
     def mutate(self, child: ndarray) -> ndarray:
-        """
-        Takes a child in, returns a mutant.
-        """
-        ...
+        """Take a child in, return a mutant.
 
-    @abstractmethod
-    def select(self, genotypes: ndarray, phenotypes: ndarray) -> ndarray:
+        This is a representation-specific extension point with no
+        meaningful generic default; override it in a subclass.
         """
-        Ought to implement some kind of selection mechanism, e.g., a roulette wheel,
-        tournament, or other. Both `genotypes` and `phenotypes` must be provided.
+        raise NotImplementedError(f"{type(self).__name__} does not implement 'mutate'.")
+
+    def select(
+        self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
+    ) -> ndarray:
+        """Run :attr:`selection_strategy` over the current population's fitness values.
+
+        Returns the genotypes of the winners.
+
+        .. note::
+           Providing either ``genotypes`` or ``phenotypes`` (or both) explicitly is not
+           currently supported and raises a ``NotImplementedError``; only the default
+           case (both None, operating on the current population) is implemented.
         """
-        ...
+        if (genotypes is not None) or (phenotypes is not None):
+            raise NotImplementedError(
+                "Selection with either 'genotypes' or 'phenotypes' (or both) provided is "
+                "not implemented. This branch is reached when at least one of these "
+                "arguments is given to 'select', but only the default case (both None) "
+                "is currently supported."
+            )
+        fitness = self.fitness
+        genotypes = self.genotypes
+        winner_indices = self.selection_strategy.select(self, fitness)
+        return np.asarray([genotypes[w] for w in winner_indices])

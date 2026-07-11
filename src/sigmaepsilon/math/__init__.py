@@ -1,3 +1,5 @@
+"""General-purpose applied-math tools for the SigmaEpsilon ecosystem."""
+
 from os.path import dirname, abspath
 from importlib.metadata import metadata
 

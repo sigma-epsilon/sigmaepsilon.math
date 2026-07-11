@@ -1,3 +1,5 @@
+"""Decorators shared across the package."""
+
 from typing import Callable, Any
 import numpy as np
 
@@ -10,8 +12,9 @@ def _squeeze_if_array(arr: Any) -> Any:
 
 
 def squeeze(default: bool = True) -> Callable:
-    """
-    A decorator that squeezes outputs of a function if
+    """Return a decorator that squeezes outputs of a function.
+
+    Applies when
     * the result is a NumPy array
     * the result is a tuple of NumPy arrays
     * the result is a dictionary of NumPy arrays as values

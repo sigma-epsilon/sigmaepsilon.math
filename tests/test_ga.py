@@ -185,6 +185,75 @@ class TestBGA(unittest.TestCase):
             best_phenotype = bga.best_phenotype()
             self.assertTrue(np.all(champion.phenotype == best_phenotype))
 
+    def test_BGA_elitism_eq_None_solve(self):
+        # Regression test: elitism=None used to crash solve() from the second
+        # generation onward (AttributeError: 'list' object has no attribute 'tolist').
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        BGA = BinaryGeneticAlgorithm(
+            f, ranges, length=6, nPop=8, elitism=None, maxiter=3
+        )
+        BGA.solve()
+
+    def test_base_class_instantiable(self):
+        # Regression test: a stray 'self._pnenotypes = None' (typo for '_phenotypes')
+        # used to crash GeneticAlgorithm.__init__ with an unrelated AttributeError.
+        # The base class still can't run end-to-end (populate/crossover/mutate have no
+        # generic default), but it must fail with NotImplementedError, not AttributeError.
+        from sigmaepsilon.math.optimize.ga import GeneticAlgorithm
+
+        with self.assertRaises(NotImplementedError):
+            GeneticAlgorithm(lambda x: x[0], [[-1, 1]], nPop=8)
+
+    def test_no_dict_on_subclass_instances(self):
+        # Regression test: BinaryGeneticAlgorithm didn't declare __slots__, so instances
+        # silently got a __dict__, defeating the memory optimization of the base class.
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        bga = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=8)
+        with self.assertRaises(AttributeError):
+            bga.__dict__
+
+    def test_reproducibility_with_seed(self):
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        bga1 = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=20, seed=0)
+        bga2 = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=20, seed=0)
+        result1 = bga1.solve()
+        result2 = bga2.solve()
+        self.assertEqual(result1.phenotype, result2.phenotype)
+
+    def test_diversity(self):
+        def f(x):
+            return Rosenbrock(1, 100, x[0], x[1])
+
+        f.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        bga = BinaryGeneticAlgorithm(f, ranges, length=6, nPop=20, seed=0)
+        self.assertIsInstance(bga.diversity, float)
+        bga.evolve(1)
+        self.assertIsInstance(bga.state.diversity, float)
+
+    def test_vectorized_evaluation(self):
+        def f_vectorized(x):
+            return Rosenbrock(1, 100, x[:, 0], x[:, 1])
+
+        f_vectorized.dimension = 2
+        ranges = [[-10, 10], [-10, 10]]
+        bga = BinaryGeneticAlgorithm(
+            f_vectorized, ranges, length=6, nPop=20, seed=0, vectorized=True
+        )
+        bga.evolve(2)
+
 
 if __name__ == "__main__":
     unittest.main()

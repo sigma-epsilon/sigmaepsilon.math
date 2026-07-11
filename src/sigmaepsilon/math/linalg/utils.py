@@ -1,3 +1,5 @@
+"""Utility functions for reference frames, vectors, and matrix algebra."""
+
 from typing import Union, Iterable
 import numbers
 import itertools
@@ -57,8 +59,9 @@ __all__ = [
 def rotation_matrix(
     rot_type: str, amounts: Iterable, rot_order: Union[str, int] = ""
 ) -> ndarray:
-    """
-    Returns a rotation matrix using the mechanism provided by
+    """Return a rotation matrix.
+
+    Uses the mechanism provided by
     `sympy.physics.vector.ReferenceFrame.orientnew`.
 
     Parameters
@@ -119,8 +122,7 @@ def rotation_matrix(
 
 
 def permutation_tensor(dim: int = 3) -> ndarray:
-    """
-    Returns the Levi-Civita pseudotensor for N dimensions as a NumPy array.
+    """Return the Levi-Civita pseudotensor for N dimensions as a NumPy array.
 
     Parameters
     ----------
@@ -144,9 +146,9 @@ def dot(
     frame: FrameLike = None,
     axes: Union[list, tuple] = None,
 ) -> Union[TensorLike, ndarray, numbers.Number]:
-    """
-    Returns the dot product (without complex conjugation) of two quantities. The behaviour
-    coincides with NumPy when all inputs are arrays and generalizes when they are not,
+    """Return the dot product (without complex conjugation) of two quantities.
+
+    The behaviour coincides with NumPy when all inputs are arrays and generalizes when they are not,
     but all inputs must be either all arrays or all tensors of some kind. The operation for
     tensors of order 1 and 2 have dedicated implementations, for higher order tensors
     it generalizes to tensor contraction along specified axes.
@@ -258,9 +260,9 @@ def cross(
     frame: FrameLike = None,
     **kwargs,
 ) -> Union[TensorLike, ndarray]:
-    """
-    Calculates the cross product of two vectors or one vector and a second order
-    tensor. The behaviour coincides with NumPy when all inputs are arrays and generalizes
+    """Calculate the cross product of two vectors or one vector and a second order tensor.
+
+    The behaviour coincides with NumPy when all inputs are arrays and generalizes
     when they are not, but all inputs must be either all arrays or all tensors of some kind.
 
     Parameters
@@ -345,9 +347,10 @@ def cross(
 
 
 def show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of a single or multiple vectors in a frame specified
-    by one or several DCM matrices. The function can handle the following scenarios:
+    """Return the coordinates of a single or multiple vectors in a frame.
+
+    The frame is specified by one or several DCM matrices. The function can
+    handle the following scenarios:
 
         - a single (1d) vector and a single (2d) dcm matrix (trivial case)
         - a stack of vectors (2d) and a single (2d) dcm matrix
@@ -385,6 +388,11 @@ def show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
 
 
 def show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
+    """Return the coordinates of a frame or stack of frames in a target frame.
+
+    The target frame is specified by one or several DCM matrices, dispatching
+    to the appropriate implementation based on the shapes of `dcm` and `arr`.
+    """
     if len(arr.shape) == 2 and len(dcm.shape) == 2:
         return _show_frame(dcm, arr)  # dcm @ arr
     elif len(arr.shape) == 3 and len(dcm.shape) == 2:
@@ -402,9 +410,9 @@ def show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def _show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of a single vector in a frame specified
-    by a DCM matrix.
+    """Return the coordinates of a single vector in a frame.
+
+    The frame is specified by a DCM matrix.
 
     Parameters
     ----------
@@ -423,9 +431,9 @@ def _show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def _show_vectors(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of multiple vectors in a frame specified
-    by a DCM matrix.
+    """Return the coordinates of multiple vectors in a frame.
+
+    The frame is specified by a DCM matrix.
 
     Parameters
     ----------
@@ -447,8 +455,7 @@ def _show_vectors(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def _show_vectors_multi(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of multiple vectors and multiple DCM matrices.
+    """Return the coordinates of multiple vectors and multiple DCM matrices.
 
     Parameters
     ----------
@@ -470,9 +477,9 @@ def _show_vectors_multi(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def _show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of a single frame in a target frame specified
-    by a DCM matrix.
+    """Return the coordinates of a single frame in a target frame.
+
+    The target frame is specified by a DCM matrix.
 
     Parameters
     ----------
@@ -494,9 +501,9 @@ def _show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def _show_frames(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of multiple frames in a target frame specified
-    by a DCM matrix.
+    """Return the coordinates of multiple frames in a target frame.
+
+    The target frame is specified by a DCM matrix.
 
     Parameters
     ----------
@@ -519,8 +526,7 @@ def _show_frames(dcm: ndarray, arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def _show_frames_multi(dcm: ndarray, arr: ndarray) -> ndarray:
-    """
-    Returns the coordinates of multiple frames and multiple DCM matrices.
+    """Return the coordinates of multiple frames and multiple DCM matrices.
 
     Parameters
     ----------
@@ -566,8 +572,7 @@ def transpose_axes(arr: ndarray) -> ndarray:
 
 
 def normalize_frame(axes: ndarray) -> ndarray:
-    """
-    Returns the frame with normalized base vectors.
+    """Return the frame with normalized base vectors.
 
     Parameters
     ----------
@@ -578,8 +583,7 @@ def normalize_frame(axes: ndarray) -> ndarray:
 
 
 def Gram(axes: ndarray) -> ndarray:
-    """
-    Returns the Gram matrix of a frame.
+    """Return the Gram matrix of a frame.
 
     Parameters
     ----------
@@ -590,8 +594,7 @@ def Gram(axes: ndarray) -> ndarray:
 
 
 def dual_frame(axes: ndarray) -> ndarray:
-    """
-    Returns the dual frame of the input.
+    """Return the dual frame of the input.
 
     Parameters
     ----------
@@ -602,8 +605,7 @@ def dual_frame(axes: ndarray) -> ndarray:
 
 
 def random_pos_semidef_matrix(N) -> ndarray:
-    """
-    Returns a random positive semidefinite matrix of shape (N, N).
+    """Return a random positive semidefinite matrix of shape (N, N).
 
     Example
     -------
@@ -618,8 +620,7 @@ def random_pos_semidef_matrix(N) -> ndarray:
 
 
 def random_posdef_matrix(N, alpha: float = 1e-12) -> ndarray:
-    """
-    Returns a random positive definite matrix of shape (N, N).
+    """Return a random positive definite matrix of shape (N, N).
 
     All eigenvalues of this matrix are >= alpha.
 
@@ -636,6 +637,22 @@ def random_posdef_matrix(N, alpha: float = 1e-12) -> ndarray:
 
 
 def inv_sym_3x3(m: Matrix, as_adj_det=False) -> Matrix:
+    """Return the symbolic inverse of a 3x3 symmetric matrix.
+
+    Parameters
+    ----------
+    m : sympy.Matrix
+        A 3x3 symmetric symbolic matrix.
+    as_adj_det : bool, Optional
+        If True, return the determinant and the adjugate of `m` separately,
+        instead of the inverse. Default is False.
+
+    Returns
+    -------
+    sympy.Matrix or tuple
+        The symbolic inverse of `m`, or a tuple of the determinant and the
+        adjugate of `m` if `as_adj_det` is True.
+    """
     P11, P12, P13, P21, P22, P23, P31, P32, P33 = symbols(
         "P_{11} P_{12} P_{13} P_{21} P_{22} P_{23} P_{31} \
                 P_{32} P_{33}",
@@ -655,6 +672,7 @@ def inv_sym_3x3(m: Matrix, as_adj_det=False) -> Matrix:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def vpath(p1: ndarray, p2: ndarray, n: int) -> ndarray:
+    """Return `n` points along the straight line connecting `p1` and `p2`."""
     nD = len(p1)
     dist = p2 - p1
     length = np.linalg.norm(dist)
@@ -673,6 +691,7 @@ def linsolve(A, b) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def inv(A: ndarray) -> ndarray:
+    """Return the inverse of a square matrix."""
     return np.linalg.inv(A)
 
 
@@ -703,6 +722,7 @@ def ATBAw(A: ndarray, B: ndarray, w: float = 1.0) -> ndarray:
 
 @guv(["(f8[:, :], f8)"], "(n, n) -> ()", nopython=True, cache=__cache)
 def det3x3(A, res):
+    """Compute the determinant of a 3x3 matrix, or a stack of such matrices."""
     res = (
         A[0, 0] * A[1, 1] * A[2, 2]
         - A[0, 0] * A[1, 2] * A[2, 1]
@@ -715,11 +735,13 @@ def det3x3(A, res):
 
 @guv(["(f8[:, :], f8)"], "(n, n) -> ()", nopython=True, cache=__cache)
 def det2x2(A, res):
+    """Compute the determinant of a 2x2 matrix, or a stack of such matrices."""
     res = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
 
 
 @njit(nogil=True, cache=__cache)
 def inv2x2(A) -> ndarray:
+    """Return the inverse of a 2x2 matrix."""
     res = np.zeros_like(A)
     d = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
     res[0, 0] = A[1, 1] / d
@@ -731,6 +753,7 @@ def inv2x2(A) -> ndarray:
 
 @guv(["(f8[:, :], f8[:, :])"], "(n, n) -> (n, n)", nopython=True, cache=__cache)
 def inv2x2u(A, res):
+    """Compute the inverse of a 2x2 matrix, or a stack of such matrices."""
     d = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
     res[0, 0] = A[1, 1] / d
     res[1, 1] = A[0, 0] / d
@@ -740,6 +763,7 @@ def inv2x2u(A, res):
 
 @guv(["(f8[:, :], f8[:, :])"], "(n, n) -> (n, n)", nopython=True, cache=__cache)
 def adj3x3(A, res):
+    """Compute the adjugate of a 3x3 matrix, or a stack of such matrices."""
     res[0, 0] = A[1, 1] * A[2, 2] - A[1, 2] * A[2, 1]
     res[0, 1] = -A[0, 1] * A[2, 2] + A[0, 2] * A[2, 1]
     res[0, 2] = A[0, 1] * A[1, 2] - A[0, 2] * A[1, 1]
@@ -753,6 +777,7 @@ def adj3x3(A, res):
 
 @guv(["(f8[:, :], f8[:, :])"], "(n, n) -> (n, n)", nopython=True, cache=__cache)
 def inv3x3u(A, res):
+    """Compute the inverse of a 3x3 matrix, or a stack of such matrices."""
     d = (
         A[0, 0] * A[1, 1] * A[2, 2]
         - A[0, 0] * A[1, 2] * A[2, 1]
@@ -774,6 +799,7 @@ def inv3x3u(A, res):
 
 @njit(nogil=True, cache=__cache)
 def inv3x3(A):
+    """Return the inverse of a 3x3 matrix."""
     res = np.zeros_like(A)
     det = (
         A[0, 0] * A[1, 1] * A[2, 2]
@@ -798,6 +824,7 @@ def inv3x3(A):
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def inv3x3_bulk(A) -> ndarray:
+    """Return the inverse of a stack of 3x3 matrices."""
     res = np.zeros_like(A)
     for i in prange(A.shape[0]):
         det = (
@@ -823,6 +850,7 @@ def inv3x3_bulk(A) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def inv3x3_bulk2(A) -> ndarray:
+    """Return the inverse of a stack of 3x3 matrices (alternative implementation)."""
     res = np.zeros_like(A)
     for i in prange(A.shape[0]):
         res[i] = inv3x3(A[i])
@@ -831,11 +859,13 @@ def inv3x3_bulk2(A) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def normalize(A) -> ndarray:
+    """Return `A` normalized by its Euclidean norm."""
     return A / np.linalg.norm(A)
 
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def normalize2d(A) -> ndarray:
+    """Return each row of `A` normalized by its Euclidean norm."""
     res = np.zeros_like(A)
     for i in prange(A.shape[0]):
         res[i] = normalize(A[i])
@@ -844,11 +874,13 @@ def normalize2d(A) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def norm(A) -> float:
+    """Return the Euclidean norm of `A`."""
     return np.linalg.norm(A)
 
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def norm2d(A) -> ndarray:
+    """Return the Euclidean norm of each row of `A`."""
     res = np.zeros(A.shape[0])
     for i in prange(A.shape[0]):
         res[i] = norm(A[i, :])
@@ -871,6 +903,7 @@ def _linspace(p0: ndarray, p1: ndarray, N):
 
 
 def linspace(start, stop, N) -> ndarray:
+    """Return `N` evenly spaced values (or points) between `start` and `stop`."""
     if isinstance(start, ndarray):
         return _linspace(start, stop, N)
     else:
@@ -879,6 +912,7 @@ def linspace(start, stop, N) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def linspace1d(start, stop, N) -> ndarray:
+    """Return `N` evenly spaced scalar values between `start` and `stop`."""
     res = np.zeros(N)
     di = (stop - start) / (N - 1)
     for i in prange(N):
@@ -887,37 +921,37 @@ def linspace1d(start, stop, N) -> ndarray:
 
 
 def generalized_left_inverse(matrix: ndarray) -> ndarray:
-    """Returns the generalized left inverse
+    r"""Return the generalized left inverse.
 
     .. math::
         :nowrap:
 
-        \\begin{equation}
-            \left( \mathbf{A}^{T} \mathbf{A} \\right)^{-1} \mathbf{A}^{T}
-        \\end{equation}
+        \begin{equation}
+            \left( \mathbf{A}^{T} \mathbf{A} \right)^{-1} \mathbf{A}^{T}
+        \end{equation}
 
     """
     return np.linalg.inv(matrix.T @ matrix) @ matrix.T
 
 
 def generalized_right_inverse(matrix: ndarray) -> ndarray:
-    """Returns the generalized right inverse
+    r"""Return the generalized right inverse.
 
     .. math::
         :nowrap:
 
-        \\begin{equation}
-            \mathbf{A}^{T} \left( \mathbf{A} \mathbf{A}^{T} \\right)^{-1}
-        \\end{equation}
+        \begin{equation}
+            \mathbf{A}^{T} \left( \mathbf{A} \mathbf{A}^{T} \right)^{-1}
+        \end{equation}
 
     """
     return matrix.T @ np.linalg.inv(matrix @ matrix.T)
 
 
 def generalized_inverse(matrix: ndarray) -> ndarray:
-    """
-    Returns the generalized inverse of the input matrix, in any of the following
-    cases:
+    """Return the generalized inverse of the input matrix.
+
+    This is applicable in any of the following cases:
 
     1. The matrix is square and has full rank. In this case the returned matrix
        is the usual inverse.
@@ -945,8 +979,8 @@ def generalized_inverse(matrix: ndarray) -> ndarray:
 
 
 def unit_basis_vector(length: int, index: int = 0, value: float = 1.0) -> ndarray:
-    """
-    Returns a unit basis vector of length `length` with a value of `value` at
-    the index `index`.
+    """Return a unit basis vector.
+
+    The vector has length `length` with a value of `value` at the index `index`.
     """
     return value * np.bincount([index], None, length)

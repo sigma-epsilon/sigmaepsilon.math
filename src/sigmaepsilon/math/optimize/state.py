@@ -1,3 +1,5 @@
+"""Shared optimizer state/result object threaded through optimization iterations."""
+
 from types import NoneType
 from pydantic import BaseModel, Field
 import numpy as np
@@ -8,8 +10,7 @@ __all__ = ["OptimizerState"]
 
 
 class OptimizerState(BaseModel):
-    """
-    Model representing the state of an optimizer.
+    """Model representing the state of an optimizer.
 
     Attributes
     ----------
@@ -29,6 +30,10 @@ class OptimizerState(BaseModel):
         Whether or not the optimizer exited successfully.
     message : str
         A message describing the cause of the termination.
+    diversity : float
+        A measure of the diversity of the population at the latest iteration, if
+        applicable (e.g. for population-based optimizers like genetic algorithms).
+        A value close to zero indicates a converged, homogeneous population.
     """
 
     x: list[float] | NoneType = Field(
@@ -62,12 +67,16 @@ class OptimizerState(BaseModel):
             "Refer to the solver being used for more details."
         ),
     )
+    diversity: float = Field(
+        default=0.0, description="Diversity of the population at the latest iteration."
+    )
 
     def to_scipy(self) -> OptimizeResult:
-        """Returns the state as a SciPy OptimizeResult object."""
+        """Return the state as a SciPy OptimizeResult object."""
         return OptimizeResult(
             x=np.array(self.x) if self.x is not None else None,
             fun=self.fun,
+            diversity=self.diversity,
             status=self.stage,
             nfev=self.n_fev,
             njev=self.n_jev,

@@ -1,3 +1,5 @@
+"""Base class for symbolic and numerical functions."""
+
 from typing import TypeVar, Callable, Iterable
 from collections import OrderedDict
 import warnings
@@ -19,8 +21,9 @@ FunctionLike = TypeVar("FunctionLike", str, Callable, Expr)
 
 
 class Function(MetaFunction):
-    """
-    Base class for all kinds of functions. It can be used to represent
+    """Base class for all kinds of functions.
+
+    It can be used to represent
     symbolic and numerical functions. The class is designed to be as
     flexible as possible, so it can be used in a wide range of applications.
 
@@ -182,6 +185,7 @@ class Function(MetaFunction):
         variables: Iterable | None = None,
         **kwargs
     ):
+        """Update the instance in place with new function definitions."""
         self.from_str = None
 
         if f0 is not None:
@@ -202,8 +206,8 @@ class Function(MetaFunction):
 
     @property
     def symbolic(self) -> bool:
-        """
-        Returns `True` if the function is a fit subject of symbolic manipulation.
+        """Return `True` if the function is a fit subject of symbolic manipulation.
+
         This is probably only true if the object was created from a string or
         `sympy` expression.
         """
@@ -217,9 +221,7 @@ class Function(MetaFunction):
 
     @property
     def linear(self) -> bool:
-        """
-        Returns True if the function is at most linear in all of its variables.
-        """
+        """Return True if the function is at most linear in all of its variables."""
         warnings.warn(
             "The property `linear` is deprecated and will be removed in a future version. "
             "Use `is_linear` instead.",
@@ -230,9 +232,7 @@ class Function(MetaFunction):
 
     @property
     def is_linear(self) -> bool:
-        """
-        Returns `True` if the function is at most linear in all of its variables.
-        """
+        """Return `True` if the function is at most linear in all of its variables."""
         if self.is_symbolic:
             return all(
                 np.array([degree(self.expr, v) for v in self.variables], dtype=int) <= 1
@@ -242,25 +242,22 @@ class Function(MetaFunction):
 
     @property
     def is_symbolic(self) -> bool:
-        """
-        Returns `True` if the function is a fit subject of symbolic manipulation.
+        """Return `True` if the function is a fit subject of symbolic manipulation.
+
         This is probably only true if the object was created from a string or
         `SymPy` expression.
         """
         return self.expr is not None
 
     def simplify(self) -> None:
-        """
-        Simplifies the symbolic expression of the instance.
-        """
+        """Simplify the symbolic expression of the instance."""
         if self.is_symbolic:
             self.expr = self.expr.simplify()
         else:
             raise TypeError("This is exclusive to symbolic functions.")
 
     def linear_coefficients(self, normalize: bool = False) -> dict | None:
-        """
-        Returns the linear coeffiecients, if the function is symbolic and linear.
+        """Return the linear coeffiecients, if the function is symbolic and linear.
 
         Parameters
         ----------
@@ -284,8 +281,7 @@ class Function(MetaFunction):
         return None
 
     def coefficients(self, normalize: bool = False) -> dict | None:
-        """
-        Returns the coefficients if the function is symbolic.
+        """Return the coefficients if the function is symbolic.
 
         Parameters
         ----------
@@ -322,8 +318,8 @@ class Function(MetaFunction):
             return None
 
     def to_latex(self) -> str:
-        """
-        Returns the LaTeX code of the symbolic expression of the instance.
+        """Return the LaTeX code of the symbolic expression of the instance.
+
         Only for symbolic functions.
 
         Examples

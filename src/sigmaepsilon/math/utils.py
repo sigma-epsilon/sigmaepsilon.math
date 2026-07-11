@@ -1,3 +1,5 @@
+"""Standalone helper utilities for array manipulation and numerical routines."""
+
 import numpy as np
 import numbers
 from numpy import ndarray
@@ -15,9 +17,7 @@ ArrayOrFloat = Union[float, ndarray, list]
 
 
 def itype_of_ftype(dtype):
-    """
-    Returns a matching NumPy integer type to a float type.
-    """
+    """Return a matching NumPy integer type to a float type."""
     name = np.dtype(dtype).name
     if "32" in name:
         return np.int32
@@ -29,15 +29,13 @@ def itype_of_ftype(dtype):
 
 @njit(nogil=True, cache=__cache)
 def minmax(a: ndarray) -> Tuple[float]:
-    """
-    Returns the minimum and maximum values of an array.
-    """
+    """Return the minimum and maximum values of an array."""
     return a.min(), a.max()
 
 
 def ascont(array: ndarray) -> ndarray:
-    """
-    Returns the input as contiguous array.
+    """Return the input as contiguous array.
+
     It is basically a shortcut to `numpy.ascontiguousarray`.
     """
     return np.ascontiguousarray(array)
@@ -45,9 +43,9 @@ def ascont(array: ndarray) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def clip1d(a: ndarray, a_min: float, a_max: float) -> ndarray:
-    """
-    Clips the values outside the interval [a_min, a_max] to
-    either a_min or a_max.
+    """Clip the values outside the interval [a_min, a_max].
+
+    Values are clipped to either a_min or a_max.
 
     Parameters
     ----------
@@ -78,8 +76,8 @@ def atleastnd(
     front: bool = True,
     back: bool = False,
 ) -> ndarray:
-    """
-    Returns an array that is at least 'n' dimensional.
+    """Return an array that is at least 'n' dimensional.
+
     The required shape is obtained by inserting new axes either
     before or after existing ones. This behaviour can be controlled
     using the parameters 'front' and 'back'. If front is True and back
@@ -118,7 +116,7 @@ def atleastnd(
 
 def atleast1d(a: Union[numbers.Number, Iterable]) -> ndarray:
     """
-    Returns an array that is at least 1 dimensional.
+    Return an array that is at least 1 dimensional.
 
     Examples
     --------
@@ -132,7 +130,7 @@ def atleast1d(a: Union[numbers.Number, Iterable]) -> ndarray:
 
 def atleast2d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
     """
-    Returns an array that is at least 2 dimensional.
+    Return an array that is at least 2 dimensional.
 
     Examples
     --------
@@ -146,7 +144,7 @@ def atleast2d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
 
 def matrixform(a: Union[numbers.Number, Iterable]) -> ndarray:
     """
-    Returns an array that is at least 2 dimensional.
+    Return an array that is at least 2 dimensional.
 
     Examples
     --------
@@ -171,7 +169,7 @@ def matrixform(a: Union[numbers.Number, Iterable]) -> ndarray:
 
 def atleast3d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
     """
-    Returns an array that is at least 3 dimensional.
+    Return an array that is at least 3 dimensional.
 
     Examples
     --------
@@ -185,7 +183,7 @@ def atleast3d(a: Union[numbers.Number, Iterable], **kwargs) -> ndarray:
 
 def atleast4d(a: ndarray, **kwargs) -> ndarray:
     """
-    Returns an array that is at least 4 dimensional.
+    Return an array that is at least 4 dimensional.
 
     Examples
     --------
@@ -199,6 +197,7 @@ def atleast4d(a: ndarray, **kwargs) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def flatten2dC(a: ndarray) -> ndarray:
+    """Return a flattened view of `a` in row-major (C) order."""
     I, J = a.shape
     res = np.zeros(I * J, dtype=a.dtype)
     ind = 0
@@ -211,6 +210,7 @@ def flatten2dC(a: ndarray) -> ndarray:
 
 @njit(nogil=True, cache=__cache)
 def flatten2dF(a: ndarray) -> ndarray:
+    """Return a flattened view of `a` in column-major (Fortran) order."""
     I, J = a.shape
     res = np.zeros(I * J, dtype=a.dtype)
     ind = 0
@@ -222,9 +222,7 @@ def flatten2dF(a: ndarray) -> ndarray:
 
 
 def flatten2d(a: ndarray, order: str = "C") -> ndarray:
-    """
-    Returns a flattened view of `a`.
-    """
+    """Return a flattened view of `a`."""
     if order == "C":
         return flatten2dC(a)
     elif order == "F":
@@ -232,9 +230,9 @@ def flatten2d(a: ndarray, order: str = "C") -> ndarray:
 
 
 def bool_to_float(a: Iterable, true: float = 1.0, false: float = 0.0) -> ndarray:
-    """
-    Transforms a boolean array to a float array using the specified
-    values for `True` and `False`.
+    """Transform a boolean array to a float array.
+
+    Uses the specified values for `True` and `False`.
 
     Example
     -------
@@ -251,9 +249,9 @@ def bool_to_float(a: Iterable, true: float = 1.0, false: float = 0.0) -> ndarray
 
 
 def choice(choices: Iterable, size: Tuple, probs: Iterable = None) -> ndarray:
-    """
-    Returns a NumPy array, whose elements are selected from
-    'choices' under probabilities provided with 'probs' (optionally).
+    """Return a NumPy array with elements selected from 'choices'.
+
+    Elements are selected under probabilities provided with 'probs' (optionally).
 
     Parameters
     ----------
@@ -374,6 +372,7 @@ def tile(a: ndarray, da: ndarray, N: int = 1) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def tile1d(a: ndarray, da: ndarray, N=1) -> ndarray:
+    """Tile a 1d array N times, incrementing by `da` at each step."""
     M = a.shape[0]
     res = np.zeros(N * M, dtype=a.dtype)
     for i in prange(N):
@@ -382,6 +381,7 @@ def tile1d(a: ndarray, da: ndarray, N=1) -> ndarray:
 
 
 def indices_of_equal_rows(x: ndarray, y: ndarray, tol=1e-12):
+    """Return the indices of rows in `x` and `y` that are equal within a tolerance."""
     from .logical import isintegerarray
 
     nX, dX = x.shape
@@ -404,6 +404,7 @@ def indices_of_equal_rows(x: ndarray, y: ndarray, tol=1e-12):
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def indices_of_equal_rows_njit(x: ndarray, y: ndarray, tol: float = 1e-12):
+    """Return the indices of rows in `x` and `y` that are equal within a tolerance."""
     R = np.zeros((x.shape[0], y.shape[0]), dtype=x.dtype)
     for i in prange(R.shape[0]):
         for j in prange(R.shape[1]):
@@ -413,6 +414,7 @@ def indices_of_equal_rows_njit(x: ndarray, y: ndarray, tol: float = 1e-12):
 
 @njit(nogil=True, parallel=True, cache=__cache)
 def indices_of_equal_rows_square_njit(x: ndarray, y: ndarray, tol=1e-12):
+    """Return the indices of rows in `x` and `y` that are equal within a tolerance, for square inputs."""
     nx, ny = x.shape[0], y.shape[0]
     if nx < ny:
         n = nx
@@ -427,10 +429,7 @@ def indices_of_equal_rows_square_njit(x: ndarray, y: ndarray, tol=1e-12):
 
 @njit(nogil=True, parallel=True, fastmath=True, cache=__cache)
 def count_cols(arr: ndarray) -> ndarray:
-    """
-    Count and return the number of columns for each row in
-    the input array.
-    """
+    """Count and return the number of columns for each row in the input array."""
     n = len(arr)
     res = np.zeros(n, dtype=np.int64)
     for i in prange(n):
@@ -440,9 +439,7 @@ def count_cols(arr: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, fastmath=True, cache=__cache)
 def count_cols_csr(indptr: ndarray, indices: ndarray) -> ndarray:
-    """
-    Count and return the number of columns for each row in
-    a CSR matrix.
+    """Count and return the number of columns for each row in a CSR matrix.
 
     Parameters
     ----------
@@ -513,6 +510,7 @@ def to_range_1d(
     source: ndarray,
     target: ndarray = None,
 ):
+    """Map values from a source range to a target range, linearly."""
     if not isinstance(vals, ndarray):
         vals = np.array(
             [
@@ -527,6 +525,7 @@ def to_range_1d(
 # !FIXME : assumes a unique input array
 @njit(nogil=True, parallel=True, fastmath=True, cache=__cache)
 def find1d(arr, space):
+    """Return the indices in `space` matching each unique value of `arr`."""
     res = np.zeros(arr.shape, dtype=np.uint64)
     for i in prange(arr.shape[0]):
         res[i] = np.where(arr[i] == space)[0][0]
@@ -537,6 +536,7 @@ def find1d(arr, space):
 # !FIXME : assumes a unique input array
 @njit(nogil=True, parallel=True, fastmath=True, cache=__cache)
 def find2d(arr, space):
+    """Return the indices in `space` matching each unique value of `arr`, row-wise."""
     res = np.zeros(arr.shape, dtype=np.uint64)
     for i in prange(arr.shape[0]):
         res[i] = find1d(arr[i], space)

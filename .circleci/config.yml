@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   python: circleci/python@3.0.0
-  codecov: codecov/codecov@5.0.3
+  codecov: codecov/codecov@6.0.0
 
 executors:
   my-executor:
@@ -26,7 +26,8 @@ jobs:
       - store_artifacts:
           name: Store coverage report as artifact
           path: coverage.xml
-      - codecov/upload
+      - codecov/upload:
+          token: CODECOV_TOKEN
       - store_test_results:
           name: Store test results
           path: test-results

@@ -1,3 +1,5 @@
+"""Numba-jittable sparse matrix class in CSR format."""
+
 from typing import Union
 import numpy as np
 import awkward as ak
@@ -25,8 +27,8 @@ SparseLike = Union[spmatrix, np.ndarray, ak.Array]
 
 
 class csr_matrix:
-    """
-    Numba-jittable Python class for a sparse matrices in CSR format.
+    """Numba-jittable Python class for a sparse matrices in CSR format.
+
     The meaning of the input variables is the same as in SciPy, and
     object creation follows the same pattern.
 
@@ -104,7 +106,7 @@ class csr_matrix:
     >>> numba_nopython(csr, 0)  # doctest: +SKIP
     (array([1., 2.]), array([0, 2]))
 
-    See also
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.sparse.jaggedarray.JaggedArray`
     :class:`scipy.sparse.csr_matrix`
@@ -153,31 +155,26 @@ class csr_matrix:
             self.shape = shape
 
     def to_numpy(self) -> np.ndarray:
-        """
-        Returns the matrix as a NumPy array.
+        """Return the matrix as a NumPy array.
+
         .. versionadded:: 0.0.8
         """
         return self.to_scipy().toarray()
 
     def to_scipy(self) -> csr_scipy:
-        """
-        Returns data as a `SciPy` object.
-        """
+        """Return data as a `SciPy` object."""
         return csr_scipy((self.data, self.indices, self.indptr), shape=self.shape)
 
     @staticmethod
     def eye(N: int) -> "csr_matrix":
-        """
-        Returns the NxN identity matrix as a CSR matrix.
-        """
+        """Return the NxN identity matrix as a CSR matrix."""
         indices = np.arange(N)
         indptr = np.arange(N + 1)
         data = np.ones(N, dtype=float)
         return csr_matrix(data=data, indices=indices, indptr=indptr, shape=(N, N))
 
     def row(self, i: int = 0) -> np.ndarray:
-        """
-        Returns the values of the i-th row.
+        """Return the values of the i-th row.
 
         .. versionmodified:: 0.0.8
 
@@ -192,8 +189,7 @@ class csr_matrix:
         return self.data[self.indptr[i] : self.indptr[i + 1]]
 
     def irow(self, i: int = 0) -> np.ndarray:
-        """
-        Returns the colum indices of the values of the i-th row.
+        """Return the colum indices of the values of the i-th row.
 
         .. versionadded:: 0.0.8
 
@@ -204,6 +200,7 @@ class csr_matrix:
         return self.indices[self.indptr[i] : self.indptr[i + 1]]
 
     def __repr__(self):
+        """Return a short string representation of the matrix."""
         N = len(self.data)
         n, m = self.shape
         return f"{n}x{m} CSR matrix of {N} values."

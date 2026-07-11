@@ -1,12 +1,12 @@
+"""Helpers for parsing string expressions of relations."""
+
 import re
 
 valid_operators = ["<=", ">=", "<", ">", "="]
 
 
 def parse_expression(expression: str) -> tuple[str, str, str]:
-    """
-    Takes an expression and returns a tuple with the left side, operator and right
-    side of the expression.
+    """Take an expression and return a tuple with the left side, operator and right side.
 
     Example
     -------
@@ -42,8 +42,7 @@ def parse_expression(expression: str) -> tuple[str, str, str]:
 
 
 def has_operator(expression: str) -> bool:
-    """
-    Returns True if the expression contains a valid operator.
+    """Return True if the expression contains a valid operator.
 
     Example
     -------

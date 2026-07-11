@@ -1,3 +1,5 @@
+"""Lagrange polynomial generation and 1d approximation utilities."""
+
 from typing import Iterable, Callable
 
 import sympy as sy
@@ -33,8 +35,9 @@ def gen_Lagrange_1d(
     lambdify: bool = False,
     out: dict | None = None
 ) -> dict:
-    """
-    Generates Lagrange polynomials and their derivatives up to 3rd, for approximation
+    """Generate Lagrange polynomials and their derivatives.
+
+    Generates polynomials and their derivatives up to 3rd order, for approximation
     in 1d space, based on N input pairs of position and value. Geometrical parameters
     can be numeric or symbolic.
 
@@ -165,8 +168,7 @@ def gen_Lagrange_1d(
 def approx_Lagrange_1d(
     points: Iterable, values: Iterable, lambdify: bool = False
 ) -> Callable:
-    """
-    Returns a callable that maps from 'source' to 'target' in 1d.
+    """Return a callable that maps from 'source' to 'target' in 1d.
 
     Parameters
     ----------

@@ -1,3 +1,5 @@
+"""Boolean predicates and comparison helpers for arrays and matrices."""
+
 from typing import Union
 import numpy as np
 from numpy import ndarray
@@ -5,6 +7,7 @@ from .utils import atleast1d
 
 
 def is_none_or_false(a):
+    """Return True if `a` is None, or `a` is a boolean equal to False."""
     if isinstance(a, bool):
         return not a
     elif a is None:
@@ -13,58 +16,45 @@ def is_none_or_false(a):
 
 
 def isfloatarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is a float array.
-    """
+    """Return `True` if `a` is a float array."""
     return np.issubdtype(a.dtype, float)
 
 
 def isintegerarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is an integer array.
-    """
+    """Return `True` if `a` is an integer array."""
     return np.issubdtype(a.dtype, int)
 
 
 def isintarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is a integer array.
-    """
+    """Return `True` if `a` is a integer array."""
     return isintegerarray(a)
 
 
 def isboolarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is a boolean array.
-    """
+    """Return `True` if `a` is a boolean array."""
     return np.issubdtype(a.dtype, bool)
 
 
 def is1dfloatarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is a 1d float array.
-    """
+    """Return `True` if `a` is a 1d float array."""
     return isfloatarray(a) and len(a.shape) == 1
 
 
 def is1dintarray(a: ndarray) -> bool:
-    """
-    Returns `True` if `a` is a 1d integer array.
-    """
+    """Return `True` if `a` is a 1d integer array."""
     return isintarray(a) and len(a.shape) == 1
 
 
 def issymmetric(a: ndarray, tol: float = 1e-8) -> bool:
-    """
-    Returns `True` if `a` is symmetric with a given tolerance
-    prescribed by `tol`.
+    """Return `True` if `a` is symmetric with a given tolerance.
+
+    Tolerance is prescribed by `tol`.
     """
     return np.linalg.norm(a - a.T) < tol
 
 
 def isposdef(A: ndarray, tol=0) -> bool:
-    """
-    Returns `True` if `A` is positive definite.
+    """Return `True` if `A` is positive definite.
 
     Examples
     --------
@@ -84,8 +74,7 @@ def isposdef(A: ndarray, tol=0) -> bool:
 
 
 def ispossemidef(A: ndarray) -> bool:
-    """
-    Returns `True` if `A` is positive semidefinite.
+    """Return `True` if `A` is positive semidefinite.
 
     Example
     -------
@@ -102,10 +91,10 @@ def ispossemidef(A: ndarray) -> bool:
 def isclose(
     x1: ndarray, x2: ndarray, *, atol: float = 1e-8, rtol: float = 1e-5
 ) -> Union[bool, ndarray]:
-    """
-    Returns a boolean array where two arrays are element-wise equal
-    in absolute and optionally in relative sense. In the latter case
-    the relative difference is measured agains `x2`.
+    """Return a boolean array where two arrays are element-wise equal.
+
+    The comparison is done in absolute and optionally in relative sense. In
+    the latter case the relative difference is measured agains `x2`.
 
     Absolute difference is measured as abs(`x1` - `x2`) <= `atol`, relative
     difference is measured as abs(`x1` - `x2`) <= abs(`rtol` * `x2`).
@@ -161,9 +150,10 @@ def isclose(
 
 
 def allclose(*args, **kwargs) -> bool:
-    """
-    Same as `isclose`, but it returns a single boolean that is `True` or `False`
-    if all the values returned by `isclose` are `True` or `False`.
+    """Behave like `isclose`, but return a single boolean.
+
+    The returned value is `True` or `False` depending on whether all the
+    values returned by `isclose` are `True` or `False`.
 
     See Also
     --------

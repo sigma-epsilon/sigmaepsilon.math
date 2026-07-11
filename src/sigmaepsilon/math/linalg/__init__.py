@@ -1,3 +1,5 @@
+"""Vector/tensor algebra and sparse array layer."""
+
 from .utils import *
 from .frame import *
 from .vector import *

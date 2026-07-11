@@ -1,3 +1,5 @@
+"""Shared type aliases used across the sigmaepsilon.math package."""
+
 from typing import TypeAlias, Sequence
 
 __all__ = ["Scalar", "BoundLike", "BoundsLike"]

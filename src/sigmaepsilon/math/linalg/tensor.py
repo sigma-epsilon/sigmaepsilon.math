@@ -1,3 +1,5 @@
+"""Tensor classes built on top of the linalg reference frame and abstract tensor layer."""
+
 from copy import deepcopy as dcopy
 
 import numpy as np
@@ -84,16 +86,12 @@ class Tensor(AbstractTensor):
                 return Tensor(*args, **kwargs)
 
     def dual(self) -> "Tensor2":
-        """
-        Returns the tensor described in the dual (or reciprocal) frame.
-        """
+        """Return the tensor described in the dual (or reciprocal) frame."""
         a = self.transform_components(self.frame.Gram())
         return self.__class__(a, frame=self.frame.dual())
 
     def transform_components(self, Q: ndarray) -> ndarray:
-        """
-        Returns the components of the tensor transformed by the matrix Q.
-        """
+        """Return the components of the tensor transformed by the matrix Q."""
         r = self.rank
         arr = self.array
         args = [Q for _ in range(r)]
@@ -109,10 +107,9 @@ class Tensor(AbstractTensor):
         return np.einsum(command, *args, arr, optimize=einsum_path)
 
     def show(self, target: Frame = None, *, dcm: ndarray = None) -> ndarray:
-        """
-        Returns the components in a target frame. If the target is
-        `None`, the components are returned in the ambient frame.
+        """Return the components in a target frame.
 
+        If the target is `None`, the components are returned in the ambient frame.
         The transformation can also be specified with a proper DCM matrix.
 
         Parameters
@@ -135,9 +132,9 @@ class Tensor(AbstractTensor):
         return self.transform_components(dcm)
 
     def orient(self, *args, **kwargs) -> "Tensor":
-        """
-        Orients the vector inplace. All arguments are forwarded to
-        `orient_new`.
+        """Orient the vector inplace.
+
+        All arguments are forwarded to `orient_new`.
 
         Returns
         -------
@@ -154,8 +151,7 @@ class Tensor(AbstractTensor):
         return self
 
     def orient_new(self, *args, **kwargs) -> "Tensor":
-        """
-        Returns a transformed version of the instance.
+        """Return a transformed version of the instance.
 
         Returns
         -------
@@ -172,9 +168,9 @@ class Tensor(AbstractTensor):
         return self.__class__(array, frame=self.frame)
 
     def copy(self, deep: bool = False, name: str = None) -> "Tensor":
-        """
-        Returns a shallow or deep copy of this object, depending of the
-        argument `deepcopy` (default is False).
+        """Return a shallow or deep copy of this object, depending of the argument `deepcopy`.
+
+        Default is False.
         """
         if deep:
             return self.__class__(dcopy(self.array), name=name)
@@ -182,20 +178,19 @@ class Tensor(AbstractTensor):
             return self.__class__(self.array, name=name)
 
     def deepcopy(self, name: str = None) -> "Tensor":
-        """
-        Returns a deep copy of the frame.
-        """
+        """Return a deep copy of the frame."""
         return self.copy(deep=True, name=name)
 
 
 class Tensor2(Tensor):
-    """
-    A class to handle second-order tensors. Some operations have dedicated implementations
-    that provide higher performence utilizing implicit parallelization. Examples
-    for tensors of this class include the metric tensor, or the stress and strain tensors
-    of elasticity.
+    """A class to handle second-order tensors.
 
-    See also
+    Some operations have dedicated implementations that provide higher
+    performence utilizing implicit parallelization. Examples for tensors
+    of this class include the metric tensor, or the stress and strain
+    tensors of elasticity.
+
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.tensor.Tensor2x3`
     """
@@ -210,14 +205,16 @@ class Tensor2(Tensor):
             return len(arr.shape) == 2 and arr.shape[-1] == arr.shape[-2]
 
     def transform_components(self, Q: ndarray) -> ndarray:
+        """Return the components of the tensor transformed by the matrix Q."""
         return _tr_tensors2(self.array, Q)
 
 
 class Tensor2x3(Tensor2):
-    """
-    Dedicated class for second-order tensors, with 3 indices per axis.
-    Since the shape of the tensor is known, instances are able to automatically detect
-    if the provided components resemble a single item or a collection.
+    """Dedicated class for second-order tensors, with 3 indices per axis.
+
+    Since the shape of the tensor is known, instances are able to
+    automatically detect if the provided components resemble a single
+    item or a collection.
     """
 
     def __init__(self, *args, **kwargs):
@@ -250,13 +247,14 @@ class Tensor2x3(Tensor2):
 
 
 class Tensor4(Tensor):
-    """
-    A class to handle fourth-order tensors. Some operations have dedicated implementations
-    that provide higher performence utilizing implicit parallelization. Examples of this class
-    include the piezo-optical tensor, the elasto-optical tensor, the flexoelectric tensor or the
-    elasticity tensor.
+    """A class to handle fourth-order tensors.
 
-    See also
+    Some operations have dedicated implementations that provide higher
+    performence utilizing implicit parallelization. Examples of this class
+    include the piezo-optical tensor, the elasto-optical tensor, the
+    flexoelectric tensor or the elasticity tensor.
+
+    See Also
     --------
     :class:`~sigmaepsilon.math.linalg.tensor.Tensor4x3`
     """
@@ -273,18 +271,19 @@ class Tensor4(Tensor):
             return len(shape) == 4 and is_hermitian
 
     def transform_components(self, dcm: ndarray) -> ndarray:
-        """
-        Returns the components of the transformed numerical tensor, based on
-        the provided direction cosine matrix.
+        """Return the components of the transformed numerical tensor.
+
+        The transformation is based on the provided direction cosine matrix.
         """
         return _tr_tensors4x3(self._array, dcm)
 
 
 class Tensor4x3(Tensor4):
-    """
-    Dedicated class for fourth order tensors, with 3 indices per axis.
-    Since the shape of the tensor is known, instances are able to automatically detect
-    if the provided components resemble a single item or a collection.
+    """Dedicated class for fourth order tensors, with 3 indices per axis.
+
+    Since the shape of the tensor is known, instances are able to
+    automatically detect if the provided components resemble a single
+    item or a collection.
     """
 
     def __init__(self, *args, **kwargs):

@@ -1,3 +1,5 @@
+"""Standard benchmark test functions for optimizers."""
+
 import sympy as sy
 
 from .testfunction import TestMinFunction2D
@@ -14,8 +16,7 @@ __all__ = [
 
 
 def Rosenbrock(a: float = 1, b: float = 100) -> TestMinFunction2D:
-    """
-    Implements the Rosenbrock function, aka. Banana function.
+    """Implement the Rosenbrock function, aka. Banana function.
 
     :math:`f(x, y) = (a - x)^2 + b (y - x^2)^2`
 
@@ -29,8 +30,7 @@ def Rosenbrock(a: float = 1, b: float = 100) -> TestMinFunction2D:
 
 
 def Himmelblau() -> TestMinFunction2D:
-    """
-    Creates the Himmelblau's function object.
+    """Create the Himmelblau's function object.
 
     :math:`f(x,y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2`
 
@@ -50,8 +50,7 @@ def Himmelblau() -> TestMinFunction2D:
 
 
 def GoldsteinPrice() -> TestMinFunction2D:
-    """
-    Creates the Goldstein-Price function object.
+    r"""Create the Goldstein-Price function object.
 
     .. math::
         :nowrap:
@@ -72,8 +71,7 @@ def GoldsteinPrice() -> TestMinFunction2D:
 
 
 def Beale() -> TestMinFunction2D:
-    """
-    Creates the Beale function object.
+    r"""Create the Beale function object.
 
     .. math::
         :nowrap:
@@ -93,8 +91,7 @@ def Beale() -> TestMinFunction2D:
 
 
 def Matyas() -> TestMinFunction2D:
-    """
-    Creates the Matyas function object.
+    """Create the Matyas function object.
 
     :math:`f(x, y) = 0.26 (x^2 + y^2) - 0.48 x y`
 

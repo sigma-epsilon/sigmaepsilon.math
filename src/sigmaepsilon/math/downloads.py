@@ -1,3 +1,5 @@
+"""Utilities for downloading test data used by the library."""
+
 import numpy as np
 
 from sigmaepsilon.core.downloads import download_file, delete_downloads
@@ -10,8 +12,7 @@ __all__ = [
 
 
 def download_mls_testdata() -> np.ndarray:
-    """
-    Downloads the data of a cloud of points.
+    """Download the data of a cloud of points.
 
     Returns
     -------

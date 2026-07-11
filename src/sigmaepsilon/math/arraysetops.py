@@ -1,3 +1,5 @@
+"""Set operations on arrays, including unique-element finding for 2d arrays."""
+
 import numpy as np
 from numpy import ndarray
 from awkward import Array as akarray

@@ -1,3 +1,5 @@
+"""Least squares and moving least squares approximation."""
+
 from typing import Callable, Iterable
 
 import numpy as np
@@ -18,8 +20,9 @@ def moving_least_squares(
     w: Callable | None = None,
     **kwargs,
 ) -> Callable:
-    """
-    Moving least squares approximation. The usage is the same as for the
+    """Perform moving least squares approximation.
+
+    The usage is the same as for the
     :func:`~sigmaepsilon.math.approx.ls.weighted_least_squares` function.
     """
     dim = 1 if len(points.shape) == 1 else points.shape[1]
@@ -50,7 +53,8 @@ def least_squares(
     deg: int = 1,
     order: int = 2,
 ) -> Callable:
-    """
+    r"""Fit a polynomial to the given points and values in the least-squares sense.
+
     Given :math:`N` points located at :math:`\mathbf{x}_i` in :math:`\mathbb{R}^d`
     where :math:`i \in [1 \dots N]`. The returned fit function approximates the given
     values :math:`f_i` at :math:`\mathbf{x}_i` in the least-squares sence with the
@@ -95,8 +99,7 @@ def weighted_least_squares(
     order: int = 2,
     w: Callable | None = None,
 ) -> Callable:
-    """
-    Returns a Callable that can be used to approximate over datasets.
+    """Return a Callable that can be used to approximate over datasets.
 
     Parameters
     ----------

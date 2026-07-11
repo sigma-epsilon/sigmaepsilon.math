@@ -21,6 +21,5 @@ please refer to the :doc:`api`.
     user_guide/linalg
     user_guide/function
     user_guide/approximation
-    user_guide/optimization
+    user_guide/optimization/index
     user_guide/graph
-    

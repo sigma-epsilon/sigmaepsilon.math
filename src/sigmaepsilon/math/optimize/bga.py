@@ -1,16 +1,12 @@
-import numpy as np
-from numpy import ndarray
+"""Binary-encoded genetic algorithm for unconstrained real-valued optimization."""
 
-from .ga import GeneticAlgorithm
+from .bitchromosome import BitChromosomeGeneticAlgorithm
 
 __all__ = ["BinaryGeneticAlgorithm"]
 
 
-class BinaryGeneticAlgorithm(GeneticAlgorithm):
-    """
-    An implementation of a Binary Genetic Algorithm (BGA) for finding
-    minimums of real valued unconstrained problems of continuous variables
-    in n-dimensional vector spaces.
+class BinaryGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
+    r"""An implementation of a Binary Genetic Algorithm (BGA) for finding minimums of real valued unconstrained problems of continuous variables in n-dimensional vector spaces.
 
     The class is able to solve unconstrained optimization problems of the form:
 
@@ -56,10 +52,22 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
         (being the best candidate) before termination. Default is 5.
     minimize: bool, Optional
         If True, the objective function is minimized. Default is False.
+    seed: int | numpy.random.SeedSequence | numpy.random.Generator | None, Optional
+        A seed for a per-instance random number generator. Default is None.
+    selection_strategy: :class:`~sigmaepsilon.math.optimize.selection.SelectionStrategy`, Optional
+        The selection strategy used by :func:`select`. Default is
+        :class:`~sigmaepsilon.math.optimize.selection.TournamentSelection`.
+    vectorized: bool, Optional
+        See :func:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.evaluate`. Default is False.
+    n_jobs: int, Optional
+        See :func:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.evaluate`. Default is 1.
 
     See Also
     --------
     :class:`~sigmaepsilon.math.optimize.ga.Genom`
+    :class:`~sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm`
+    :class:`~sigmaepsilon.math.optimize.bitchromosome.BitChromosomeGeneticAlgorithm`
 
     Examples
     --------
@@ -82,113 +90,4 @@ class BinaryGeneticAlgorithm(GeneticAlgorithm):
 
     """
 
-    def populate(self, genotypes: ndarray | None = None) -> ndarray:
-        """
-        Populates the model and returns the array of genotypes.
-        """
-        nPop = self.nPop
-
-        if genotypes is None:
-            poolshape = (int(nPop / 2), self.dim * self.length)
-            genotypes = np.random.randint(2, size=poolshape)
-        else:
-            poolshape = genotypes.shape
-
-        nParent = poolshape[0]
-
-        if nParent < nPop:
-            offspring = []
-            g = self.random_parents_generator(genotypes)
-            try:
-                while (len(offspring) + nParent) < nPop:
-                    parent1, parent2 = next(g)
-                    offspring.extend(self.crossover(parent1, parent2))
-                genotypes = np.vstack([genotypes, offspring])
-            except Exception:  # pragma: no cover
-                raise RuntimeError
-
-        return genotypes
-
-    def decode(self, genotypes: ndarray) -> ndarray:
-        """
-        Decodes the genotypes to phenotypes and returns them as an array.
-        """
-        span = 2**self.length - 2**0
-        genotypes = genotypes.reshape((self.nPop, self.dim, self.length))
-        precisions = [
-            (self.ranges[d, -1] - self.ranges[d, 0]) / span for d in range(self.dim)
-        ]
-        phenotypes = np.sum(
-            [genotypes[:, :, i] * 2**i for i in range(self.length)], axis=0
-        ).astype(float)
-        for d in range(self.dim):
-            phenotypes[:, d] *= precisions[d]
-            phenotypes[:, d] += self.ranges[d, 0]
-        return phenotypes
-
-    def crossover(
-        self, parent1: ndarray, parent2: ndarray, nCut: int | None = None
-    ) -> tuple[ndarray, ndarray]:
-        """
-        Performs crossover on the parents `parent1` and `parent2`,
-        using an `nCut` number of cuts and returns two childs.
-        """
-        if np.random.rand() > self.p_c:  # pragma: no cover
-            return parent1, parent2
-
-        if nCut is None:
-            nCut = np.random.randint(1, self.dim * self.length - 1)
-
-        cuts = [0, self.dim * self.length]
-        p = np.random.choice(range(1, self.length * self.dim - 1), nCut, replace=False)
-        cuts.extend(p)
-        cuts = np.sort(cuts)
-
-        child1 = np.zeros(self.dim * self.length, dtype=int)
-        child2 = np.zeros(self.dim * self.length, dtype=int)
-
-        randBool = np.random.rand() > 0.5
-        for i in range(nCut + 1):
-            if (i % 2 == 0) == randBool:
-                child1[cuts[i] : cuts[i + 1]] = parent1[cuts[i] : cuts[i + 1]]
-                child2[cuts[i] : cuts[i + 1]] = parent2[cuts[i] : cuts[i + 1]]
-            else:
-                child1[cuts[i] : cuts[i + 1]] = parent2[cuts[i] : cuts[i + 1]]
-                child2[cuts[i] : cuts[i + 1]] = parent1[cuts[i] : cuts[i + 1]]
-
-        return self.mutate(child1), self.mutate(child2)
-
-    def mutate(self, child: ndarray) -> ndarray:
-        """
-        Returns a mutated genotype. Children come in, mutants go out.
-        """
-        p = np.random.rand(self.dim * self.length)
-        return np.where(p > self.p_m, child, 1 - child)
-
-    def select(
-        self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
-    ) -> ndarray:
-        """
-        Organizes a tournament and returns the genotypes of the winners.
-
-        .. note::
-           Providing either ``genotypes`` or ``phenotypes`` (or both) is not currently supported
-           and will raise a NotImplementedError. Only the default case (both None) is implemented.
-        """
-        if (genotypes is None) and (phenotypes is None):
-            fitness = self.fitness
-            genotypes = self.genotypes
-        else:
-            raise NotImplementedError(
-                "Selection with either 'genotypes' or 'phenotypes' (or both) provided is not implemented. "
-                "This branch is reached when at least one of these arguments is given to 'select', "
-                "but only the default case (both None) is currently supported."
-            )
-        winners, others = self.divide(fitness)
-        winners = winners.tolist()
-        while len(winners) < int(self.nPop / 2):
-            candidates = np.random.choice(others, 3, replace=False)
-            argsort = np.argsort([fitness[ID] for ID in candidates])
-            winner = argsort[0] if self._minimize else argsort[-1]
-            winners.append(candidates[winner])
-        return np.array([genotypes[w] for w in winners], dtype=float)
+    __slots__ = ()

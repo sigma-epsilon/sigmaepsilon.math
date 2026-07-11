@@ -1,3 +1,5 @@
+"""SymPy-based helpers for parsing, substituting and differentiating expressions."""
+
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import lambdify, derive_by_array, symbols, Expr, Symbol
 from sympy.core.numbers import One
@@ -8,9 +10,7 @@ import sympy as sy
 def generate_symbols(
     template: str, indices: Iterable[int], **assumptions
 ) -> list[Symbol]:
-    """
-    Generates a list of symbols.
-    """
+    """Generate a list of symbols."""
     result = list(
         sy.symbols(" ".join([template.format(i) for i in indices]), **assumptions)
     )
@@ -24,9 +24,9 @@ def decode(
     variables: Iterable | None = None,
     **__,
 ) -> tuple[Expr, Iterable[Symbol]]:
-    """
-    Takes an expression as either a string or a `SymPy` expression and returns
-    the expression and the variables in the expression.
+    """Take an expression as either a string or a `SymPy` expression.
+
+    Returns the expression and the variables in the expression.
     """
     if str_expr is not None:
         expr = parse_expr(str_expr, evaluate=False)
@@ -44,6 +44,7 @@ def decode(
 
 
 def symbolize(*args, simplify: bool = True, **kwargs) -> dict:
+    """Build value, gradient and Hessian callables for a symbolic expression."""
     expr, variables = decode(*args, **kwargs)
     if simplify:
         expr = expr.simplify()
@@ -100,8 +101,7 @@ def substitute(
 def coefficients(
     expr: Expr, variables: Iterable | None = None, normalize: bool = False
 ) -> dict:
-    """
-    Returns the coefficients of the expression.
+    """Return the coefficients of the expression.
 
     Parameters
     ----------

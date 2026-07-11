@@ -1,3 +1,5 @@
+"""Vector class built on top of the linalg reference frame and abstract tensor layer."""
+
 from copy import deepcopy as dcopy
 
 from numpy import ndarray
@@ -13,11 +15,10 @@ __all__ = ["Vector"]
 
 
 class Vector(AbstractTensor):
-    """
-    Extends `NumPy`'s ``ndarray`` class to handle arrays with associated
-    reference frames. The class also provides a mechanism to transform
-    vectors between different frames. Use it like if it was a ``numpy.ndarray``
-    instance.
+    """Extend `NumPy`'s ``ndarray`` class to handle arrays with associated reference frames.
+
+    The class also provides a mechanism to transform vectors between
+    different frames. Use it like if it was a ``numpy.ndarray`` instance.
 
     All parameters are identical to those of ``numpy.ndarray``, except that
     this class allows to specify an embedding frame.
@@ -95,34 +96,29 @@ class Vector(AbstractTensor):
 
     @classmethod
     def _verify_input(cls, arr: ndarray, *_, **kwargs) -> bool:
-        """
-        Ought to verify if an array input is acceptable for the current class.
+        """Verify if an array input is acceptable for the current class.
+
         If not a general Tensor class is returned upon calling the creator.
         """
         return True
 
     @property
     def rank(self) -> int:
-        """
-        Returns the tensor rank (or order).
-        """
+        """Return the tensor rank (or order)."""
         return 1
 
     def dual(self) -> "Vector":
-        """
-        Returns the vector described in the dual (or reciprocal) frame.
-        """
+        """Return the vector described in the dual (or reciprocal) frame."""
         # NOTE Strictly this should be self.frame.Gram().T @ self.array,
         # but since the Gram matrix is symmetric, it's cheaper like this
         a = self.frame.Gram() @ self.array
         return self.__class__(a, frame=self.frame.dual())
 
     def show(self, target: Frame = None, *, dcm: ndarray = None) -> ndarray:
-        """
-        Returns the components in a target frame. If the target is
-        `None`, the components are returned in the ambient frame.
+        """Return the components in a target frame.
 
-        The transformation can also be specified with a proper DCM matrix.
+        If the target is `None`, the components are returned in the ambient
+        frame. The transformation can also be specified with a proper DCM matrix.
 
         Parameters
         ----------
@@ -144,9 +140,10 @@ class Vector(AbstractTensor):
         return show_vector(dcm, self.array)  # dcm @ arr
 
     def orient(self, *args, dcm: ndarray = None, **kwargs) -> "Vector":
-        """
-        Orients the vector inplace. If the transformation is not specified by 'dcm',
-        all arguments are forwarded to `orient_new`.
+        """Orient the vector inplace.
+
+        If the transformation is not specified by 'dcm', all arguments are
+        forwarded to `orient_new`.
 
         Parameters
         ----------
@@ -179,8 +176,7 @@ class Vector(AbstractTensor):
         return self
 
     def orient_new(self, *args, **kwargs) -> "Vector":
-        """
-        Returns a transformed version of the instance.
+        """Return a transformed version of the instance.
 
         Returns
         -------
@@ -199,9 +195,9 @@ class Vector(AbstractTensor):
         return Vector(array, frame=self.frame)
 
     def copy(self, deep: bool = False, name: str = None) -> "Vector":
-        """
-        Returns a shallow or deep copy of this object, depending of the
-        argument `deepcopy` (default is False).
+        """Return a shallow or deep copy of this object, depending of the argument `deepcopy`.
+
+        Default is False.
         """
         if deep:
             return self.__class__(dcopy(self.array), name=name)
@@ -209,7 +205,5 @@ class Vector(AbstractTensor):
             return self.__class__(self.array, name=name)
 
     def deepcopy(self, name: str = None) -> "Vector":
-        """
-        Returns a deep copy of the frame.
-        """
+        """Return a deep copy of the frame."""
         return self.copy(deep=True, name=name)

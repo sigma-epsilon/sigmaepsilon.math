@@ -1,3 +1,5 @@
+"""Least-squares style approximation tools (moving least squares, weight functions, Lagrange interpolation)."""
+
 from .ls import moving_least_squares, least_squares, weighted_least_squares
 from .functions import (
     CubicWeightFunction,

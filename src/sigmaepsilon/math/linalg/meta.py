@@ -1,3 +1,5 @@
+"""Abstract base classes and array/frame/tensor backends for the linalg layer."""
+
 from abc import abstractmethod
 import weakref
 from typing import Tuple, Union
@@ -21,10 +23,10 @@ __all__ = ["ArrayWrapper", "ArrayLike", "TensorLike", "FrameLike"]
 
 
 class Array(ABC_Safe, ndarray):
-    """
-    Base backend class for array-like classes. Although you don't really need
-    to directly create instances of this class, you can use it like if it was
-    a ``numpy.ndarray`` instance.
+    """Base backend class for array-like classes.
+
+    Although you don't really need to directly create instances of this class,
+    you can use it like if it was a ``numpy.ndarray`` instance.
 
     The class has a safe metaclass, which means that there is a safety mechanism
     that prevents you from unintentionally crashing the internal behaviour of the
@@ -33,7 +35,7 @@ class Array(ABC_Safe, ndarray):
     reason it is safer to subclass this class rather than to directly subclass
     NumPy's ndarray class.
 
-    See also
+    See Also
     --------
     :class:`~numpy.ndarray`
     :class:`~sigmaepsilon.core.abstract.ABC_Safe`
@@ -87,16 +89,12 @@ class Array(ABC_Safe, ndarray):
 
     @property
     def frame(self) -> "FrameLike":
-        """
-        Returns the frame of the vector.
-        """
+        """Return the frame of the vector."""
         return self._frame
 
     @frame.setter
     def frame(self, value: "FrameLike"):
-        """
-        Sets the frame.
-        """
+        """Set the frame."""
         if isinstance(value, FrameLike):
             self._frame = value
         else:
@@ -110,9 +108,9 @@ class Array(ABC_Safe, ndarray):
 
 
 class ArrayWrapper(NDArrayOperatorsMixin, Wrapper):
-    """
-    Base frontend class for array-like classes. Use it like if it
-    was a ``numpy.ndarray`` instance.
+    """Base frontend class for array-like classes.
+
+    Use it like if it was a ``numpy.ndarray`` instance.
     """
 
     _array_cls_ = Array
@@ -135,21 +133,16 @@ class ArrayWrapper(NDArrayOperatorsMixin, Wrapper):
 
     @property
     def dim(self) -> int:
-        """
-        Returns the dimension of the array.
-        """
+        """Return the dimension of the array."""
         return len(self._array.shape)
 
     @property
     def minmax(self) -> Tuple[float]:
-        """
-        Returns the minimum and maximum values of the array.
-        """
+        """Return the minimum and maximum values of the array."""
         return minmax(self._array)
 
     def chop(self, tol: float = 1e-12) -> "ArrayWrapper":
-        """
-        Sets very small values (in an absolute sense) to zero.
+        """Set very small values (in an absolute sense) to zero.
 
         .. versionadded:: 1.0.5
 
@@ -168,26 +161,29 @@ class ArrayWrapper(NDArrayOperatorsMixin, Wrapper):
         return self
 
     def __array__(self, dtype=None):
+        """Return the wrapped data as a NumPy array, optionally cast to `dtype`."""
         if dtype is not None:
             return self._array.astype(dtype)
         return self._array
 
     def __getitem__(self, key):
+        """Return the item(s) at `key` from the wrapped array."""
         return self._array.__getitem__(key)
 
     def __setitem__(self, key, value):
+        """Set the item(s) at `key` of the wrapped array to `value`."""
         return self._array.__setitem__(key, value)
 
     def __len__(self):
+        """Return the length of the first axis of the wrapped array."""
         return self._array.shape[0]
 
     def to_numpy(self) -> np.ndarray:
-        """
-        Returns the data as a pure NumPy array.
-        """
+        """Return the data as a pure NumPy array."""
         return self.__array__()
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """Implement NumPy ufunc dispatch for wrapped arrays."""
         out = kwargs.get("out", ())
         for x in inputs + out:
             # Only support operations with instances of _HANDLED_TYPES.
@@ -216,61 +212,73 @@ class ArrayWrapper(NDArrayOperatorsMixin, Wrapper):
             return type(self)(result)
 
     def __repr__(self):
+        """Return the NumPy-style repr of the wrapped array."""
         return array_repr(self)
 
     def __str__(self):
+        """Return the NumPy-style string representation of the wrapped array."""
         return array_str(self)
 
 
 class FrameLike(ArrayWrapper):
-    """
-    Base class for reference frames.
-    """
+    """Base class for reference frames."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._weakrefs = weakref.WeakValueDictionary()
 
     @abstractmethod
-    def dcm(self) -> ndarray: ...
+    def dcm(self) -> ndarray:
+        """Return the direction cosine matrix of the frame."""
+        ...
 
     @abstractmethod
-    def show(self) -> ndarray: ...
+    def show(self) -> ndarray:
+        """Return the components of the frame in another frame."""
+        ...
 
     @abstractmethod
-    def orient(self) -> "FrameLike": ...
+    def orient(self) -> "FrameLike":
+        """Orient the frame inplace."""
+        ...
 
     @abstractmethod
-    def orient_new(self) -> "FrameLike": ...
+    def orient_new(self) -> "FrameLike":
+        """Return a new, oriented frame."""
+        ...
 
     @abstractmethod
-    def Gram(self) -> ndarray: ...
+    def Gram(self) -> ndarray:
+        """Return the Gram matrix of the frame."""
+        ...
 
     @abstractmethod
-    def dual(self) -> "FrameLike": ...
+    def dual(self) -> "FrameLike":
+        """Return the dual frame."""
+        ...
 
     @abstractmethod
-    def transpose(self, inplace: bool = False) -> "FrameLike": ...
+    def transpose(self, inplace: bool = False) -> "FrameLike":
+        """Transpose the frame."""
+        ...
 
     @property
     def T(self) -> "FrameLike":
-        """
-        Returns the transpose.
-        """
+        """Return the transpose."""
         return self.transpose(inplace=False)
 
     def _register_tensorial_(self, v: "TensorLike"):
-        """
-        Registers tensorial objects by appending a weak reference to the set
-        of weak references. Registered objects change their components upon
-        changes of their supporting frame.
+        """Register tensorial objects by appending a weak reference to the set of weak references.
+
+        Registered objects change their components upon changes of their
+        supporting frame.
         """
         self._weakrefs[id(v)] = v
 
     def _unregister_tensorial_(self, v: "TensorLike") -> bool:
-        """
-        Unregisters previously registered tensorial objects. Returns True if the
-        object was found in the registry, False if it was not.
+        """Unregister previously registered tensorial objects.
+
+        Returns True if the object was found in the registry, False if it was not.
         """
         k = id(v)
         if k in self._weakrefs:
@@ -280,10 +288,7 @@ class FrameLike(ArrayWrapper):
 
 
 class TensorLike(ArrayWrapper):
-    """
-    Abstract base class for numerical data classes that walk and talk like
-    a tensor does.
-    """
+    """Abstract base class for numerical data classes that walk and talk like a tensor does."""
 
     _frame_cls_: FrameLike = None
     _rank_: int = None
@@ -339,9 +344,11 @@ class TensorLike(ArrayWrapper):
             self._rank = None
 
     def __deepcopy__(self, memo):
+        """Return a deep copy of the tensor."""
         return self.__copy__(memo)
 
     def __copy__(self, memo=None):
+        """Return a copy of the tensor, deep if `memo` is provided."""
         cls = type(self)
         copy_function = copy if (memo is None) else partial(deepcopy, memo=memo)
         is_deep = memo is not None
@@ -370,9 +377,7 @@ class TensorLike(ArrayWrapper):
 
     @property
     def rank(self) -> int:
-        """
-        Returns the tensor rank (or order).
-        """
+        """Return the tensor rank (or order)."""
         if self._rank:
             return self._rank
         else:
@@ -386,31 +391,24 @@ class TensorLike(ArrayWrapper):
 
     @property
     def array(self) -> Array:
-        """
-        Returns the coordinates of the vector.
-        """
+        """Return the coordinates of the vector."""
         return self._array
 
     @array.setter
     def array(self, value: np.ndarray):
-        """
-        Sets the coordinates of the vector.
-        """
+        """Set the coordinates of the vector."""
         array = np.array(value)
         assert array.shape == self._array.shape
         self._array[...] = array
 
     @property
     def frame(self) -> FrameLike:
-        """
-        Returns the frame of the vector.
-        """
+        """Return the frame of the vector."""
         return self.array.frame
 
     @frame.setter
     def frame(self, value: FrameLike | ndarray):
-        """
-        Sets the frame of the vector.
+        """Set the frame of the vector.
 
         Note
         ----
@@ -431,15 +429,11 @@ class TensorLike(ArrayWrapper):
 
     @property
     def T(self) -> "TensorLike":
-        """
-        Returns the transpose.
-        """
+        """Return the transpose."""
         return self.transpose(inplace=False)
 
     def transpose(self, inplace: bool = False) -> "TensorLike":
-        """
-        Either transposes the array of the tensor, or returns a copy
-        of it with the components transposed.
+        """Transpose the array of the tensor, either inplace or as a copy.
 
         Parameters
         ----------
@@ -467,19 +461,22 @@ class TensorLike(ArrayWrapper):
             return self.__class__(np.transpose(self.array, indices), frame=frame)
 
     @abstractmethod
-    def show(self) -> Array: ...
+    def show(self) -> Array:
+        """Return the components of the tensor in another frame."""
+        ...
 
     @abstractmethod
-    def orient(self) -> "TensorLike": ...
+    def orient(self) -> "TensorLike":
+        """Orient the tensor inplace."""
+        ...
 
     @abstractmethod
-    def orient_new(self) -> "TensorLike": ...
+    def orient_new(self) -> "TensorLike":
+        """Return a new, oriented tensor."""
+        ...
 
     def is_bulk(self):
-        """
-        Returns True if the object represents a collection of tensors, False
-        otherwise.
-        """
+        """Return True if the object represents a collection of tensors, False otherwise."""
         if self._bulk:
             return True
         else:
