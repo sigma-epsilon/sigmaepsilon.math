@@ -403,9 +403,9 @@ class TestCombinatorialAntColonyOptimization(unittest.TestCase):
         self.assertEqual(aco.tau_init, 0.5)
 
     def test_larger_tsp(self):
-        np.random.seed(42)
+        rng = np.random.default_rng(42)
         n = 10
-        coords = np.random.rand(n, 2) * 100
+        coords = rng.uniform(0, 100, size=(n, 2))
         distance_matrix = np.zeros((n, n))
         for i in range(n):
             for j in range(n):
