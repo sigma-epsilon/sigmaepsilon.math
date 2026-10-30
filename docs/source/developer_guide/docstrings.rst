@@ -78,7 +78,7 @@ Things to keep in mind while fixing docstrings
 
 .. code-block:: shell
 
-   poetry run black src/
+   uv run black src/
 
 .. note::
 

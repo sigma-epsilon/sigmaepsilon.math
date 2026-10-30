@@ -1,86 +1,87 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "sigmaepsilon.math"
 version = "2.5.0"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
-classifiers=[  # https://pypi.org/classifiers/
-        "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3 :: Only",
-        "Operating System :: OS Independent",
-]
 readme = "README.md"
-authors = ["Bence Balogh <bencebalogh@sigmaepsilon.com>"]
-maintainers = ["Bence Balogh <bencebalogh@sigmaepsilon.com>"]
+requires-python = ">=3.10,<4.0"
 license = "MIT"
+authors = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
+maintainers = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
+classifiers = [  # https://pypi.org/classifiers/
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+]
 keywords = [
     "engineering", "mathematics", "optimization", "vector", "tensor",
     "vector algebra", "tensor algebra", "symbolic mathematics",
     "nonlinear optimization"
 ]
-homepage = "https://github.com/sigma-epsilon/sigmaepsilon.math"
-repository = "https://github.com/sigma-epsilon/sigmaepsilon.math"
-documentation = "https://sigmaepsilonmath.readthedocs.io/en/latest/?badge=latest"
-packages = [{ include = "sigmaepsilon", from = "src" }]
+dependencies = [
+    "sigmaepsilon-core>=1.2.2,<2",
+    "sigmaepsilon-deepdict>=3.0.1,<4",
+    "numba>=0.56.4",
+    "numpy>=1.26.4,<2",
+    "scipy>=1.12.0,<2",
+    "awkward>2.0.8",
+    "sympy>=1.11.1",
+    "pydantic>=2.0.2",
+    # packages pinned for vulnerability reasons
+    "zipp>=3.19.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-sigmaepsilon-core = "^1.2.2"
-sigmaepsilon-deepdict = "^3.0.1"
-numba = ">=0.56.4"
-numpy = "^1.26.4"
-scipy = "^1.12.0"
-awkward = ">2.0.8"
-sympy = ">=1.11.1"
-pydantic = ">=2.0.2"
+[project.urls]
+Homepage = "https://github.com/sigma-epsilon/sigmaepsilon.math"
+Repository = "https://github.com/sigma-epsilon/sigmaepsilon.math"
+Documentation = "https://sigmaepsilonmath.readthedocs.io/en/latest/?badge=latest"
 
-# packages pinned for vulnerability reasons
-zipp = ">=3.19.1"
+[tool.hatch.build.targets.wheel]
+packages = ["src/sigmaepsilon"]
 
-[tool.poetry.group.dev]
-optional = true
+[tool.hatch.build.targets.sdist]
+include = ["src/sigmaepsilon", "README.md", "LICENSE"]
 
-[tool.poetry.group.test]
-optional = true
+[tool.uv]
+# Poetry groups were opt-in; keep it that way (`uv sync --group <name>`).
+default-groups = []
 
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.2"
-black = "^24.2.0"
-ipython = "^8.21.0"
-poetry-plugin-export = "^1.6.0"
-pre-commit = "^3.6.1"
-matplotlib = "^3.9.2"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.0.1"
-pytest-cov = "^4.1.0"
-networkx = "^3.2.1"
-flake8 = "^7.0.0"
-coverage = "^7.4.1"
-pandas = "^2.2.3"
-matplotlib = "^3.9.2"
-
-[tool.poetry.group.docs.dependencies]
-ipython = "^8.21.0"
-myst-parser = "^2.0.0"
-sphinx-gallery = "^0.15.0"
-sphinx-copybutton = "^0.5.2"
-sphinxcontrib-bibtex = "^2.6.2"
-nbsphinx-link = "^1.3.0"
-sphinxcontrib-svg2pdfconverter = "^1.2.2"
-sphinx-design = "^0.5.0"
-sphinx-inline-tabs = "^2023.4.21"
-pydata-sphinx-theme = "^0.15.2"
-networkx = "^3.2.1"
-plotly = "^5.19.0"
-matplotlib = "^3.9.2"
-myst-nb = "^1.4.0"
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.2,<7",
+    "black>=24.2.0,<25",
+    "ipython>=8.21.0,<9",
+    "pre-commit>=3.6.1,<4",
+    "matplotlib>=3.9.2,<4",
+]
+test = [
+    "pytest>=8.0.1,<9",
+    "pytest-cov>=4.1.0,<5",
+    "networkx>=3.2.1,<4",
+    "flake8>=7.0.0,<8",
+    "coverage>=7.4.1,<8",
+    "pandas>=2.2.3,<3",
+    "matplotlib>=3.9.2,<4",
+]
+docs = [
+    "ipython>=8.21.0,<9",
+    "myst-parser>=2.0.0,<3",
+    "sphinx-gallery>=0.15.0,<0.16",
+    "sphinx-copybutton>=0.5.2,<0.6",
+    "sphinxcontrib-bibtex>=2.6.2,<3",
+    "nbsphinx-link>=1.3.0,<2",
+    "sphinxcontrib-svg2pdfconverter>=1.2.2,<2",
+    "sphinx-design>=0.5.0,<0.6",
+    "sphinx-inline-tabs>=2023.4.21,<2024",
+    "pydata-sphinx-theme>=0.15.2,<0.16",
+    "networkx>=3.2.1,<4",
+    "plotly>=5.19.0,<6",
+    "matplotlib>=3.9.2,<4",
+    "myst-nb>=1.4.0,<2",
+]

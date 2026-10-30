@@ -5,7 +5,7 @@ Files reviewed:
 - `src/sigmaepsilon/math/optimize/bga.py` (`BinaryGeneticAlgorithm`)
 - `src/sigmaepsilon/math/optimize/state.py` (`OptimizerState`)
 
-Verified with `poetry run python` reproductions against the current working tree
+Verified with `uv run python` reproductions against the current working tree
 (branch `feature/101-create-bga-for-native-binary-optimization`), not just static reading.
 
 ## Summary
