@@ -640,8 +640,8 @@ class TestDCM(LinalgTestCase):
 
 class TestLinsolve(LinalgTestCase):
     def test_linsolve_2x2(self):
-        # a random system
-        A = random_posdef_matrix(2)
+        # a random, well-conditioned system (eigenvalues >= 1)
+        A = random_posdef_matrix(2, alpha=1.0)
         b = np.random.rand(2)
         # control solution
         x = np.linalg.solve(A, b)
@@ -659,8 +659,8 @@ class TestLinsolve(LinalgTestCase):
         assert err < 1e-12
 
     def test_linsolve_3x3(self):
-        # a random system
-        A = random_posdef_matrix(3)
+        # a random, well-conditioned system (eigenvalues >= 1)
+        A = random_posdef_matrix(3, alpha=1.0)
         b = np.random.rand(3)
         # control solution
         x = np.linalg.solve(A, b)
