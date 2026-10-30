@@ -22,12 +22,12 @@ __all__ = [
 
 def is_pos_def(arr) -> bool:
     """Return True if the input is positive definite."""
-    return np.all(np.linalg.eigvals(arr) > 0)
+    return bool(np.all(np.linalg.eigvals(arr) > 0))
 
 
 def is_pos_semidef(arr) -> bool:
     """Return True if the input is positive semi definite."""
-    return np.all(np.linalg.eigvals(arr) >= 0)
+    return bool(np.all(np.linalg.eigvals(arr) >= 0))
 
 
 def is_rectangular_frame(axes: ndarray) -> bool:

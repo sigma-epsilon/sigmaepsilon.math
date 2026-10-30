@@ -170,7 +170,7 @@ class CubicWeightFunction(MLSWeightFunction):
     -------
     >>> from sigmaepsilon.math.approx import CubicWeightFunction
     >>> w = CubicWeightFunction(core=[0.0, 0.0], sd=[0.5, 0.5])
-    >>> w([0.0, 0.0])
+    >>> float(w([0.0, 0.0]))
     0.4444444444444444
 
     """
