@@ -12,22 +12,46 @@ executors:
 jobs:
   run_tests:
     executor: my-executor
+    parameters:
+      python:
+        type: string
+      resolution:
+        description: uv resolution strategy; lowest-direct checks the minimum versions in pyproject.toml.
+        type: enum
+        enum: ["highest", "lowest-direct"]
+        default: "highest"
     steps:
       - checkout
       - run:
           name: Install uv
           command: pip install uv
-      - run:
-          name: Install project
-          command: |
-            uv sync --locked --group test
+      - when:
+          condition:
+            equal: ["highest", << parameters.resolution >>]
+          steps:
+            - run:
+                name: Install project
+                command: uv sync --locked --group test --python << parameters.python >>
+      - when:
+          condition:
+            equal: ["lowest-direct", << parameters.resolution >>]
+          steps:
+            - run:
+                name: Install project with the lowest direct dependencies
+                command: uv sync --resolution lowest-direct --group test --python << parameters.python >>
       - run:
           name: Run tests and generate coverage report
-          command: uv run pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.math
-      - store_artifacts:
-          name: Store coverage report as artifact
-          path: coverage.xml
-      - codecov/upload
+          command: uv run --no-sync pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.math
+      - when:
+          condition:
+            and:
+              - equal: ["3.12", << parameters.python >>]
+              - equal: ["highest", << parameters.resolution >>]
+          steps:
+            - store_artifacts:
+                name: Store coverage report as artifact
+                path: coverage.xml
+            - codecov/upload
       - store_test_results:
           name: Store test results
           path: test-results
@@ -67,13 +91,22 @@ jobs:
 workflows:
   test_and_deploy:
     jobs:
-      - run_tests
+      - run_tests:
+          matrix:
+            parameters:
+              python: ["3.10", "3.12", "3.13"]
+
+      - run_tests:
+          name: run_tests_lowest
+          python: "3.10"
+          resolution: "lowest-direct"
 
       - deploy_to_test_pypi:
           context:
             - TestPyPI deploy
           requires:
             - run_tests
+            - run_tests_lowest
           filters:
             branches:
               only:
@@ -84,6 +117,7 @@ workflows:
             - PyPI deploy
           requires:
             - run_tests
+            - run_tests_lowest
           filters:
             branches:
               only:
