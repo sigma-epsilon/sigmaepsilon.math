@@ -11,42 +11,45 @@ computational-solid-mechanics ecosystem. It is distributed as the namespace pack
 (source under `src/sigmaepsilon/math`), and depends on `sigmaepsilon-core` / `sigmaepsilon-deepdict` from
 the same ecosystem, plus NumPy, SciPy, Numba, Awkward and SymPy.
 
-Package/dependency management is Poetry. Packaging metadata, dependencies and tool config live in
-`pyproject.toml`.
+Package/dependency management is uv (hatchling build backend). Packaging metadata, dependencies and tool
+config live in `pyproject.toml`; the lock file is `uv.lock`.
 
 ## Common commands
 
-Install dependencies (uses `poetry.toml`, which configures an in-project virtualenv):
+Install dependencies into an in-project `.venv` (no dependency group is installed by default):
 
 ```
-poetry install --with dev,test,docs
+uv sync --group dev --group test --group docs
 ```
+
+To work against sibling `sigmaepsilon.*` checkouts in editable mode: `uv pip install -e ../sigmaepsilon.<pkg>`
+(undone by the next `uv sync`).
 
 Run the full test suite:
 
 ```
-poetry run pytest
+uv run pytest
 ```
 
 Run a single test file / test:
 
 ```
-poetry run pytest tests/test_lpp.py
-poetry run pytest tests/test_lpp.py::test_name -v
+uv run pytest tests/test_lpp.py
+uv run pytest tests/test_lpp.py::test_name -v
 ```
 
 Run with coverage (two configs exist — the default `.coveragerc` excludes numba-jitted code from
 coverage; `.coveragerc_nojit` does not):
 
 ```
-poetry run pytest --cov=sigmaepsilon --cov-config=.coveragerc
+uv run pytest --cov=sigmaepsilon --cov-config=.coveragerc
 ```
 
 Format code (pre-commit runs Black on `src/` only):
 
 ```
-poetry run black src/
-poetry run pre-commit run --all-files
+uv run black src/
+uv run pre-commit run --all-files
 ```
 
 Build docs (Sphinx, config under `docs/source`):

@@ -9,8 +9,8 @@ The following command runs all tests and creates a html report in a folder named
 
    python -m pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.math
 
-Alternatively, you can use Poetry to test the package:
+Alternatively, you can use `uv` to test the package (requires the `test` dependency group):
 
 .. code-block:: shell
 
-   poetry run pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.math
+   uv run pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.math
