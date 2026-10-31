@@ -70,7 +70,7 @@ def isposdef(A: ndarray, tol=0) -> bool:
     False
 
     """
-    return np.all(np.linalg.eigvals(A) > tol)
+    return bool(np.all(np.linalg.eigvals(A) > tol))
 
 
 def ispossemidef(A: ndarray) -> bool:
@@ -85,7 +85,7 @@ def ispossemidef(A: ndarray) -> bool:
     True
 
     """
-    return np.all(np.linalg.eigvals(A) >= 0)
+    return bool(np.all(np.linalg.eigvals(A) >= 0))
 
 
 def isclose(

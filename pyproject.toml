@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigmaepsilon.math"
-version = "2.5.0"
+version = "2.6.0"
 description = "A Python Library for Applied Mathematics in Physical Sciences."
 readme = "README.md"
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
 maintainers = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
@@ -16,6 +16,7 @@ classifiers = [  # https://pypi.org/classifiers/
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Operating System :: OS Independent",
 ]
@@ -25,14 +26,14 @@ keywords = [
     "nonlinear optimization"
 ]
 dependencies = [
-    "sigmaepsilon-core>=1.2.2,<2",
-    "sigmaepsilon-deepdict>=3.0.1,<4",
-    "numba>=0.56.4",
-    "numpy>=1.26.4,<2",
-    "scipy>=1.12.0,<2",
-    "awkward>2.0.8",
-    "sympy>=1.11.1",
-    "pydantic>=2.0.2",
+    "sigmaepsilon-core>=1.2.1",
+    "sigmaepsilon-deepdict>=3.0.0",
+    "numba>=0.56.2",
+    "numpy>=1.23",
+    "scipy>=1.9",
+    "awkward>=2.0.0",
+    "sympy>=1.9",
+    "pydantic>=2.0",
     # packages pinned for vulnerability reasons
     "zipp>=3.19.1",
 ]
