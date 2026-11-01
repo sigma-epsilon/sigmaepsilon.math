@@ -4105,16 +4105,16 @@ wheels = [
 
 [[package]]
 name = "sigmaepsilon-core"
-version = "1.2.2"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
     { name = "six" },
     { name = "toml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a1/d0/9ce8a1189b4024cf7a4e0dbe2e273fe7ec4c0c5d1f601c8be9de107d3189/sigmaepsilon_core-1.2.2.tar.gz", hash = "sha256:7ffd6ce4f9e3f10d9d456519fd65cdb8daf1957e3f20f45caf959e69e57981c8", size = 29566, upload-time = "2024-12-08T10:12:15.855Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/af/d00c9ee1c209836f68761d5f45b696d934cd87e1f1dcda77d8ba90624af9/sigmaepsilon_core-1.4.0.tar.gz", hash = "sha256:6781350bfea2e94f53515cda906c6c4b0dd2ef500e9777485dfcc7c26f96d41e", size = 29759, upload-time = "2026-11-01T17:11:56.392Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/eb/d84c8aca5e53b052228ae593d93db868bc12de59e6e0057367e04ef5139b/sigmaepsilon_core-1.2.2-py3-none-any.whl", hash = "sha256:03d78159945293886a63bac59faa19d3aee26fc4c7d97697c9bfbeaed89e1317", size = 34076, upload-time = "2024-12-08T10:12:14.92Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/bc/67ef7081f37950ed1e574e88a574a4fe3a19adbf26c4a7bb1f07a5e91ce9/sigmaepsilon_core-1.4.0-py3-none-any.whl", hash = "sha256:34c91313c2058ccdbab5c17cea665c439ba22294132a34e454d5995272978acc", size = 35259, upload-time = "2026-11-01T17:11:55.499Z" },
 ]
 
 [[package]]
@@ -4131,11 +4131,10 @@ wheels = [
 
 [[package]]
 name = "sigmaepsilon-math"
-version = "2.6.0"
+version = "2.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "awkward" },
-    { name = "numba" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
     { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
@@ -4147,6 +4146,11 @@ dependencies = [
     { name = "sigmaepsilon-deepdict" },
     { name = "sympy" },
     { name = "zipp" },
+]
+
+[package.optional-dependencies]
+numba = [
+    { name = "numba" },
 ]
 
 [package.dev-dependencies]
@@ -4195,15 +4199,16 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "awkward", specifier = ">=2.0.0" },
-    { name = "numba", specifier = ">=0.56.2" },
+    { name = "numba", marker = "extra == 'numba'", specifier = ">=0.56.2" },
     { name = "numpy", specifier = ">=1.23" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "scipy", specifier = ">=1.9" },
-    { name = "sigmaepsilon-core", specifier = ">=1.2.1" },
+    { name = "sigmaepsilon-core", specifier = ">=1.4.0" },
     { name = "sigmaepsilon-deepdict", specifier = ">=3.0.0" },
     { name = "sympy", specifier = ">=1.9" },
     { name = "zipp", specifier = ">=3.19.1" },
 ]
+provides-extras = ["numba"]
 
 [package.metadata.requires-dev]
 dev = [

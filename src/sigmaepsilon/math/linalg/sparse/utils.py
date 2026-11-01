@@ -2,7 +2,7 @@
 
 import numpy as np
 from numpy import ndarray
-from numba import njit, prange
+from sigmaepsilon.core.jit import njit, prange
 
 __cache = True
 

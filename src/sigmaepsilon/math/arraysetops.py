@@ -3,12 +3,11 @@
 import numpy as np
 from numpy import ndarray
 from awkward import Array as akarray
-from numba import njit
-from numba.core import types
-from numba.typed import Dict
+from sigmaepsilon.core.jit import njit
 from typing import Union, Any
 import awkward as ak
 
+from ._nbtypes import Dict, int64, int64_1d, int64_2d
 from .utils import flatten2dC
 from .utils import count_cols
 
@@ -19,9 +18,6 @@ __all__ = ["unique2d"]
 
 
 ArrayLike = Union[ndarray, akarray]
-i64 = types.int64
-i64A = types.int64[:]
-i64A2 = types.int64[:, :]
 
 
 def unique2d(
@@ -61,10 +57,13 @@ def unique2d(
     >>> unique2d(arr)
     array([1, 2, 3, 4])
 
-    >>> unique2d(arr, return_index=True)
-    [array([1, 2, 3, 4]), DictType[int64,array(int64, 2d, A)]<iv=None>({1: [[0 0]
-     [1 0]], 2: [[0 1]
-     [1 1]], 3: [[0 2]], 4: [[1 2]]})]
+    With `return_index=True`, a dictionary is returned as well, which maps
+    each unique item to the (row, column) indices of its occurrences:
+
+    >>> unique, indices = unique2d(arr, return_index=True)
+    >>> indices[1]
+    array([[0, 0],
+           [1, 0]])
 
     >>> unique2d(arr, return_inverse=True)  # doctest: +SKIP
     [array([1, 2, 3, 4]), array([[0, 1, 2],
@@ -131,13 +130,13 @@ def _unique1d_njit(flatdata: ndarray):
     nU = len(unique)
     counts = np.zeros(nU, dtype=np.int64)
     inverse = np.zeros(nF, dtype=np.int64)
-    imap = Dict.empty(key_type=i64, value_type=i64)
+    imap = Dict.empty(key_type=int64, value_type=int64)
     for i in range(nU):
         imap[unique[i]] = i
     for i in range(nF):
         counts[imap[flatdata[i]]] += 1
         inverse[i] = imap[flatdata[i]]
-    indices = Dict.empty(key_type=i64, value_type=i64A)
+    indices = Dict.empty(key_type=int64, value_type=int64_1d)
     for i in range(nU):
         indices[unique[i]] = np.zeros((counts[i]), dtype=np.int64)
     counts[:] = 0
@@ -156,14 +155,14 @@ def _unique2d_njit(data: ndarray):
     nU = len(unique)
     counts = np.zeros(nU, dtype=np.int64)
     inverse = np.zeros(nF, dtype=np.int64)
-    imap = Dict.empty(key_type=i64, value_type=i64)
+    imap = Dict.empty(key_type=int64, value_type=int64)
     for i in range(nU):
         imap[unique[i]] = i
     for i in range(nF):
         counts[imap[flatdata[i]]] += 1
         inverse[i] = imap[flatdata[i]]
     inverse = inverse.reshape(data.shape)
-    indices = Dict.empty(key_type=i64, value_type=i64A2)
+    indices = Dict.empty(key_type=int64, value_type=int64_2d)
     for i in range(nU):
         indices[unique[i]] = np.zeros((counts[i], 2), dtype=np.int64)
     counts[:] = 0

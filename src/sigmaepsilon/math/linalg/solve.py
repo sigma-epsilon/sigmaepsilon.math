@@ -4,7 +4,7 @@ from typing import Union, Tuple
 
 import numpy as np
 from numpy.linalg import LinAlgError
-from numba import njit
+from sigmaepsilon.core.jit import njit
 
 __cache = True
 

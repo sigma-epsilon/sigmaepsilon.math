@@ -6,7 +6,7 @@ import itertools
 
 import numpy as np
 from numpy import ndarray
-from numba import njit, prange, guvectorize as guv
+from sigmaepsilon.core.jit import njit, prange, NUMBA_AVAILABLE
 import sympy as sy
 from sympy import symbols, Matrix
 from sympy.physics.vector import ReferenceFrame as SymPyFrame
@@ -17,6 +17,11 @@ from .meta import TensorLike, ArrayWrapper, FrameLike
 from .exceptions import LinalgOperationInputError, LinalgMissingInputError, LinalgError
 
 __cache = True
+
+if NUMBA_AVAILABLE:
+    from numba import guvectorize as guv
+else:
+    from ._gufunc_fallbacks import guvectorize as guv
 
 
 __all__ = [
@@ -372,6 +377,7 @@ def show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
     numpy.ndarray
         The new coordinates with the same shape as `arr`.
     """
+    dcm, arr = np.asarray(dcm), np.asarray(arr)
     if len(arr.shape) == 1 and len(dcm.shape) == 2:
         return _show_vector(dcm, arr)  # dcm @ arr
     elif len(arr.shape) == 2 and len(dcm.shape) == 2:
@@ -393,6 +399,7 @@ def show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
     The target frame is specified by one or several DCM matrices, dispatching
     to the appropriate implementation based on the shapes of `dcm` and `arr`.
     """
+    dcm, arr = np.asarray(dcm), np.asarray(arr)
     if len(arr.shape) == 2 and len(dcm.shape) == 2:
         return _show_frame(dcm, arr)  # dcm @ arr
     elif len(arr.shape) == 3 and len(dcm.shape) == 2:

@@ -1,15 +1,12 @@
 """Graph algorithm helpers (rooted level structures, peripheral nodes)."""
 
 import numpy as np
-from numba import jit
-from numba.types import int64, Array
-from numba.typed import Dict
+from sigmaepsilon.core.jit import jit
 
+from .._nbtypes import Dict, int64, int64_1d_c
 from ..linalg.sparse import csr_matrix
 
 __all__ = ["rooted_level_structure", "pseudo_peripheral_nodes"]
-
-int64A = Array(int64, 1, "C")
 
 
 @jit(nopython=True, nogil=True, fastmath=False, cache=True)
@@ -33,7 +30,7 @@ def rooted_level_structure(adj: csr_matrix, root: int = 0) -> Dict:
     nN = len(adj.indptr) - 1
     rls = Dict.empty(
         key_type=int64,
-        value_type=int64A,
+        value_type=int64_1d_c,
     )
     level = 0
     rls[level] = np.array([root], dtype=np.int64)

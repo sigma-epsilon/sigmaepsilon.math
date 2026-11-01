@@ -4,7 +4,7 @@ import operator
 import numpy as np
 from numpy import vstack
 from scipy.sparse import csr_matrix as csr_scipy
-from numba import njit
+from sigmaepsilon.core.jit import njit, NUMBA_AVAILABLE
 import sympy as sy
 
 from sigmaepsilon.math.linalg.testing import LinalgTestCase
@@ -767,7 +767,8 @@ class TestLinsolve(LinalgTestCase):
 
 
 class TestSparse(LinalgTestCase):
-    def test_csr(self):
+    @unittest.skipUnless(NUMBA_AVAILABLE, "Numba is not installed")
+    def test_csr_njit(self):
         @njit
         def csr_row(csr: csr_matrix, i: int):
             return csr.row(i)
@@ -783,9 +784,14 @@ class TestSparse(LinalgTestCase):
         np.random.seed(0)
         mat = csr_scipy(np.random.rand(10, 12) > 0.8, dtype=int)
         csr = csr_matrix(mat)
-        csr_row(csr, 0)
-        csr_irow(csr, 0)
-        csr_data(csr)
+        self.assertTrue(np.array_equal(csr_row(csr, 0), csr.row(0)))
+        self.assertTrue(np.array_equal(csr_irow(csr, 0), csr.irow(0)))
+        self.assertTrue(np.array_equal(csr_data(csr), csr.data))
+
+    def test_csr(self):
+        np.random.seed(0)
+        mat = csr_scipy(np.random.rand(10, 12) > 0.8, dtype=int)
+        csr = csr_matrix(mat)
         csr_matrix.eye(3)
         csr.to_numpy()
         csr.to_scipy()
