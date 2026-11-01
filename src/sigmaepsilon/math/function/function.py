@@ -171,7 +171,7 @@ class Function(MetaFunction):
         f2: Callable | None = None,
         *args,
         variables: Iterable | None = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.update(f0, f1, f2, *args, variables=variables, **kwargs)
@@ -183,7 +183,7 @@ class Function(MetaFunction):
         f2: Callable | None = None,
         *_,
         variables: Iterable | None = None,
-        **kwargs
+        **kwargs,
     ):
         """Update the instance in place with new function definitions."""
         self.from_str = None

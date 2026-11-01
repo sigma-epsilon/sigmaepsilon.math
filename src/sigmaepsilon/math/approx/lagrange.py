@@ -33,7 +33,7 @@ def gen_Lagrange_1d(
     sym: bool = False,
     N: int | None = None,
     lambdify: bool = False,
-    out: dict | None = None
+    out: dict | None = None,
 ) -> dict:
     """Generate Lagrange polynomials and their derivatives.
 
