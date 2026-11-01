@@ -199,4 +199,4 @@ class csr_matrix:
 
 if NUMBA_AVAILABLE:
     # registers the Numba type of csr_matrix
-    from . import _csr_numba  # noqa: F401
+    from . import _csr_numba  # noqa: F401 # pylint: disable=unused-import

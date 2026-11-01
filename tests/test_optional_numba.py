@@ -1,6 +1,6 @@
 import importlib
 import importlib.util
-import subprocess
+import subprocess  # nosec B404
 import sys
 import textwrap
 import unittest
@@ -136,8 +136,9 @@ class TestWithoutNumba(unittest.TestCase):
             print("OK")
             """
         )
-        result = subprocess.run(
-            [sys.executable, "-c", script], capture_output=True, text=True
+        # runs a fixed script with the current interpreter
+        result = subprocess.run(  # nosec B603
+            [sys.executable, "-c", script], capture_output=True, text=True, check=False
         )
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "OK")
