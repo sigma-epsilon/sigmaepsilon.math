@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `sigmaepsilon.math` is a Python library of general-purpose applied-math tools (vector/tensor algebra,
 sparse arrays, function/relation modeling, least-squares & moving-least-squares approximation,
-optimization: linear programming, genetic algorithms) used as a foundation package in the SigmaEpsilon
+optimization: linear programming, genetic algorithms, ACO, PSO, differential evolution) used as a foundation package in the SigmaEpsilon
 computational-solid-mechanics ecosystem. It is distributed as the namespace package `sigmaepsilon.math`
 (source under `src/sigmaepsilon/math`), and depends on `sigmaepsilon-core` / `sigmaepsilon-deepdict` from
 the same ecosystem, plus NumPy, SciPy, Awkward and SymPy. Numba is an optional dependency (the `numba`
@@ -104,7 +104,19 @@ The package exposes several largely independent subpackages under `src/sigmaepsi
   - `bga.py`: `BinaryGeneticAlgorithm` — binary-encoded GA subclassing `GeneticAlgorithm`, for
     unconstrained real-valued problems over box ranges; encodes each scalar argument into a fixed-length
     chromosome (`length` controls precision).
-  - `state.py`: `OptimizerState` — shared state/result object threaded through GA iterations.
+  - `population.py`: `PopulationOptimizer` — the shared driver of PSO and DE. It follows the GA's
+    usage pattern, and subclasses implement `initialize`/`step`/`archive`. It also holds the
+    multi-solution machinery: with `n_solutions > 1`, the `solutions` property picks distinct optima
+    from `archive()` using `distinct_optima` (a `niche_radius` filter in normalized space plus a
+    hill-valley test), and stopping switches to stagnation of the whole archive. Results are
+    `Candidate`s.
+  - `pso.py`: `ParticleSwarmOptimization` — global-best PSO, or species-based PSO when
+    `n_solutions > 1`.
+  - `de.py`: `DifferentialEvolution` — DE with `rand/1`, `best/1` and `current-to-best/1`
+    strategies, or neighbourhood-based crowding DE when `n_solutions > 1`.
+  - `aco.py`: ant colony optimization (continuous ACOR and combinatorial Ant System), with its own
+    GA-like driver.
+  - `state.py`: `OptimizerState` — shared state/result object threaded through optimizer iterations.
 
 - **`approx/`** — least-squares style approximation.
   - `ls.py` (`least_squares`, `weighted_least_squares`, `moving_least_squares`) and `mls.py`

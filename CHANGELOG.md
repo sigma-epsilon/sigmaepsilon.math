@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file. If you are 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0]
+
+### Added
+
+- `ParticleSwarmOptimization` (PSO) and `DifferentialEvolution` (DE) in `sigmaepsilon.math.optimize`, for continuous, box-bounded problems. They are used the same way as the genetic algorithms (`solve`, `evolve`, `champion`, `state`, `minimize`, `seed`, `vectorized`, `n_jobs`, ...). DE supports the `rand/1/bin`, `best/1/bin` and `current-to-best/1/bin` mutation strategies.
+- Both optimizers can return several distinct solutions in one run, one per local optimum. Set `n_solutions` and read the `solutions` property. During the search, PSO switches to species-based PSO and DE to neighbourhood-based crowding DE, which keeps several basins populated. The returned solutions are filtered by distance (`niche_radius`) and by a hill-valley test, so the same optimum is never returned twice.
+- New base class `PopulationOptimizer` and result class `Candidate` shared by the two optimizers.
+- User guide pages on PSO and DE, and a page on solving constrained problems with penalty functions.
+
 ## [2.7.1]
 
 ### Fixed
