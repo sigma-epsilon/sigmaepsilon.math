@@ -108,7 +108,7 @@ def rotation_matrix(
 
     See Also
     --------
-    :func:`sympy.physics.vector.ReferenceFrame.orientnew`
+    :meth:`sympy.physics.vector.ReferenceFrame.orientnew`
 
     Example
     -------
@@ -178,7 +178,7 @@ def dot(
 
     Returns
     -------
-    :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or numpy.ndarray or scalar
+    :class:`~sigmaepsilon.math.linalg.meta.TensorLike` or numpy.ndarray or float
         An array or a tensor, depending on the inputs.
 
     Notes

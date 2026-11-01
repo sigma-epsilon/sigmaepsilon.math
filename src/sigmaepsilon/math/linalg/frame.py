@@ -324,9 +324,9 @@ class ReferenceFrame(FrameLike):
 
         Parameters
         ----------
-        source: 'ReferenceFrame', Optional
+        source: ReferenceFrame, Optional
             Source frame. Default is None.
-        target: 'ReferenceFrame', Optional
+        target: ReferenceFrame, Optional
             Target frame. Default is None.
 
         Returns
@@ -634,7 +634,7 @@ class RectangularFrame(ReferenceFrame):
 
     Examples
     --------
-    For operators *= and /= the type of the instance is unchanged
+    For operators ``*=`` and ``/=`` the type of the instance is unchanged
 
     >>> from sigmaepsilon.math.linalg import RectangularFrame
     >>> A = RectangularFrame(dim=3)
@@ -718,7 +718,7 @@ class CartesianFrame(RectangularFrame):
 
     Examples
     --------
-    For operators *= and /= the type of the instance is cast to RectangularFrame
+    For operators ``*=`` and ``/=`` the type of the instance is cast to RectangularFrame
 
     >>> from sigmaepsilon.math.linalg import CartesianFrame
     >>> import numpy as np

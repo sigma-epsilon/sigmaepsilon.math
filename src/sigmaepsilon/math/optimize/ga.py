@@ -80,7 +80,7 @@ class Genom(BaseModel):
 
     @property
     def fittness(self) -> float:  # pragma: no cover
-        """Return the fitness value (deprecated alias for :attr:`fitness`)."""
+        """Return the fitness value (deprecated alias for ``fitness``)."""
         import warnings
 
         warnings.warn(
@@ -103,7 +103,7 @@ class GeneticAlgorithm:
     :func:`encode`/:func:`decode` default to the identity mapping (suitable for
     representations where genotype and phenotype coincide, e.g. real-valued encodings)
     and :func:`select` already comes with a working, pluggable default (see
-    :attr:`selection_strategy` /
+    the ``selection_strategy`` attribute and
     :class:`~sigmaepsilon.math.optimize.selection.SelectionStrategy`); override them only
     if you need representation-specific behavior. It is also possible to use a custom
     stopping criteria by overriding :func:`stopping_criteria`. See the
@@ -760,7 +760,7 @@ class GeneticAlgorithm:
     def select(
         self, genotypes: ndarray | None = None, phenotypes: ndarray | None = None
     ) -> ndarray:
-        """Run :attr:`selection_strategy` over the current population's fitness values.
+        """Run ``selection_strategy`` over the current population's fitness values.
 
         Returns the genotypes of the winners.
 

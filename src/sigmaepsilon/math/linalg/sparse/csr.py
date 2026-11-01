@@ -31,7 +31,8 @@ class csr_matrix:
         right and top to bottom. If this is a CSC matrix, the walk
         happens along the columns. From version 0.0.8, `Awkward` arrays
         are also accepted.
-        .. versionmodified:: 0.0.8
+
+        .. versionchanged:: 0.0.8
     indices : numpy.ndarray, Optional
         The indices of the columns (rows) during the walk.
         Default is None.
@@ -167,7 +168,7 @@ class csr_matrix:
     def row(self, i: int = 0) -> np.ndarray:
         """Return the values of the i-th row.
 
-        .. versionmodified:: 0.0.8
+        .. versionchanged:: 0.0.8
 
         The behavior was changed in version 0.0.8. After that, the
         call only returns the data related to the i-th row. For the

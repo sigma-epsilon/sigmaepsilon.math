@@ -15,10 +15,14 @@ class BitChromosomeGeneticAlgorithm(GeneticAlgorithm):
     by linearly scaling each variable's ``length``-bit segment into its ``ranges[d]``
     bounds.
 
-    This class provides the representation-specific machinery (:func:`populate`,
-    :func:`crossover`, :func:`mutate`, :func:`decode`) for any bit-chromosome GA. What
-    varies between concrete subclasses is only how the linearly-decoded scalar is
-    interpreted, which is controlled by the :func:`_postprocess_phenotypes` hook:
+    This class provides the representation-specific machinery
+    (:meth:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.populate`,
+    :meth:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.crossover`,
+    :meth:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.mutate`,
+    :meth:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.decode`) for any
+    bit-chromosome GA. What varies between concrete subclasses is only how the
+    linearly-decoded scalar is interpreted, which is controlled by the
+    ``_postprocess_phenotypes`` hook:
 
     - :class:`~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm` keeps the
       continuous, floating point value (suitable for real-valued, box-constrained

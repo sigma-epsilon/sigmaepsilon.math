@@ -55,7 +55,7 @@ class Function(MetaFunction):
         Keyword only parameter.Same as `f1`.
     Hessian: Callable, Optional
         Keyword only parameter.Same as `f2`.
-    dimension or dim or d : int, Optional
+    dimension, dim, d : int, Optional
         Keyword only parameter. The number of dimensions of the domain of the function. This property
         is only required if the function is defined by numerical functions.
 

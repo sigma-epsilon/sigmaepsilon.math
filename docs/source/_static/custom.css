@@ -117,3 +117,35 @@ html[data-theme=dark] h1 {
 html[data-theme=dark] h3 {
   color: #0a6774;
 }
+
+/* Download and copy buttons of the LLM page (see LLMs.md and js/llm_tools.js) */
+
+.llm-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.llm-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 1.2em;
+  border: 1px solid var(--pst-color-primary);
+  border-radius: 4px;
+  background-color: var(--pst-color-primary);
+  color: var(--pst-color-background) !important;
+  font: inherit;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+.llm-button:hover {
+  filter: brightness(1.1);
+}
+
+.llm-button-secondary {
+  background-color: transparent;
+  color: var(--pst-color-primary) !important;
+}

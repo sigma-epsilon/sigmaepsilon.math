@@ -74,7 +74,7 @@ def least_squares(
         [[f11, f12, ..., f1r], ..., [fn1, fn2, ..., fnr]]
     deg: int, Optional
         The degree of the fit function. Default is 1.
-    order: int, Optional.
+    order: int, Optional
         The order of the approximation. Default is 2.
 
     Returns
@@ -111,7 +111,7 @@ def weighted_least_squares(
         The degree of the fit function. Default is 1.
     w: MLSWeightFunction, Optional
         A proper weight function. Default is a `ConstantWeightFunction`.
-    order: int, Optional.
+    order: int, Optional
         The order of the approximation. Default is 2.
 
     Returns

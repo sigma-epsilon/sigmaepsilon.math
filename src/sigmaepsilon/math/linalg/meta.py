@@ -154,7 +154,7 @@ class ArrayWrapper(NDArrayOperatorsMixin, Wrapper):
 
         Returns
         -------
-        ~`sigmaepsilon.math.linalg.meta.ArrayWrapper`
+        sigmaepsilon.math.linalg.meta.ArrayWrapper
             The object the call was made upon.
         """
         self._array[np.where(np.abs(self._array) < tol)] = 0.0
