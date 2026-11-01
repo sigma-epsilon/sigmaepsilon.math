@@ -12,8 +12,8 @@ build:
       # Install uv
       - pip install uv
     post_install:
-      # Install the package with the 'docs' dependency group
-      - uv pip install --python $READTHEDOCS_VIRTUALENV_PATH/bin/python -e . --group docs
+      # Install the package with Numba and the 'docs' dependency group
+      - uv pip install --python $READTHEDOCS_VIRTUALENV_PATH/bin/python -e ".[numba]" --group docs
 
 sphinx:
   configuration: docs/source/conf.py
