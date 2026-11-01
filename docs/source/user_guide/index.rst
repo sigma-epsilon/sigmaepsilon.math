@@ -7,7 +7,7 @@ Introduction
 What is `sigmaepsilon.math`?
 ============================
 
-.. include:: ..\global_refs.rst
+.. include:: ../global_refs.rst
 
 The `sigmaepsilon.math`_ library is the mathematical department of the `SigmaEpsilon` project, 
 a collection of Python libraries for computational mechanics and related disciplines.

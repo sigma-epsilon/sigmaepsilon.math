@@ -2,7 +2,7 @@
 Data Model
 ==========
 
-.. include:: ..\global_refs.rst
+.. include:: ../global_refs.rst
 
 The data model is a combination of the two approaches suggested by `NumPy`_ for creating
 NumPy-compliant classes. All Vector and Tensor classes are custom array containers that 

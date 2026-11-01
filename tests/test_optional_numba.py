@@ -86,9 +86,9 @@ class TestGufuncFallbacks(unittest.TestCase):
 
     @unittest.skipUnless(NUMBA_AVAILABLE, "Numba is not installed")
     def test_same_as_numba(self):
-        # det2x2 and det3x3 are left out, since their Numba versions don't
-        # write their output (they rebind `res` instead of assigning to it)
         for name, A in (
+            ("det2x2", self.A2),
+            ("det3x3", self.A3),
             ("inv2x2u", self.A2),
             ("inv3x3u", self.A3),
             ("adj3x3", self.A3),
