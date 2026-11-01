@@ -1,21 +1,20 @@
 ---
 myst:
   html_meta:
-    description: "API reference of the nonlinear optimizers of sigmaepsilon.math: binary, integer and real-valued genetic algorithms, selection strategies, particle swarm optimization and differential evolution."
+    description: "API reference of the metaheuristics of sigmaepsilon.math: binary, integer and real-valued genetic algorithms, selection strategies, ant colony optimization, particle swarm optimization and differential evolution."
 ---
 
-(api_optimization_NLP)=
+(api_optimization_metaheuristics)=
 
-# Nonlinear Programming (NLP)
+# Metaheuristics
 
-**Nonlinear programming (NLP)** is a subset of optimization where the objective
-function or constraints are nonlinear. Unlike linear programming, where relationships
-between variables are linear, NLP deals with more complex systems where variables may
-interact in intricate ways, resulting in non-straightforward solutions. NLP is used
-in a variety of fields such as economics, engineering, machine learning, and
-operations research, where real-world problems often exhibit nonlinear behaviors.
-The goal of NLP is to find the best possible solution (such as maximum profit or
-minimum cost) subject to given constraints.
+**Metaheuristics** are nature-inspired, derivative-free search methods for nonlinear
+problems that only need to evaluate the objective function. They work with objectives that
+are non-smooth, noisy, multimodal or only available as a black box, but they come with no
+optimality guarantee. All of them are used the same way: you pass the objective function
+and the definition of the search space to the constructor, call `solve`, and get back the
+best solution found (the *champion*). See {doc}`../user_guide/optimization/index` for an
+overview and links to the worked examples.
 
 (api_optimization_GA)=
 
@@ -118,7 +117,71 @@ cost of a different exploration behavior.
 .. autoclass:: sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm
 ```
 
-## Population-based optimizers
+(api_optimization_ACO)=
+
+## Ant Colony Optimization (ACO)
+
+**Ant Colony Optimization (ACO)** is a family of metaheuristics inspired by the
+foraging behavior of real ants, which lay down pheromone trails that bias the
+paths taken by other ants, reinforcing shorter or better paths over time. In
+the library, this idea is split into a shared driver,
+{class}`~sigmaepsilon.math.optimize.aco.AntColonyOptimization`, and two concrete
+strategies that differ in how solutions are represented and how "pheromones"
+are stored and used:
+
+* {class}`~sigmaepsilon.math.optimize.aco.ContinuousAntColonyOptimization` (ACOR)
+  for continuous, box-constrained real-valued problems.
+* {class}`~sigmaepsilon.math.optimize.aco.CombinatorialAntColonyOptimization`
+  (Ant System) for permutation problems defined over a distance matrix, such as
+  the Traveling Salesman Problem (TSP).
+
+See {doc}`../user_guide/optimization/aco` for an explanation of how the two
+algorithms work, and worked examples for both.
+
+```{eval-rst}
+.. autoclass:: sigmaepsilon.math.optimize.aco.AntSolution
+    :members:
+
+.. autoclass:: sigmaepsilon.math.optimize.aco.AntColonyOptimization
+    :members:
+
+.. autoclass:: sigmaepsilon.math.optimize.aco.ContinuousAntColonyOptimization
+    :members:
+
+.. autoclass:: sigmaepsilon.math.optimize.aco.CombinatorialAntColonyOptimization
+    :members:
+```
+
+(api_optimization_PSO)=
+
+## Particle Swarm Optimization (PSO)
+
+**Particle Swarm Optimization** moves a swarm of particles through a continuous,
+box-bounded search space, each particle drawn towards the best point it has seen and
+towards good points found by the others. With `n_solutions > 1`, it switches to
+species-based PSO and returns several distinct optima. See
+{doc}`../user_guide/optimization/pso` for an explanation and worked examples.
+
+```{eval-rst}
+.. autoclass:: sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
+    :members: velocities, attractors, initialize, step, archive, reset, set_solution_params
+```
+
+(api_optimization_DE)=
+
+## Differential Evolution (DE)
+
+**Differential Evolution** evolves a population by perturbing its members with scaled
+differences of other members. With `n_solutions > 1`, it switches to neighbourhood-based
+crowding DE and returns several distinct optima. See
+{doc}`../user_guide/optimization/de` for an explanation and worked examples.
+
+```{eval-rst}
+.. autoclass:: sigmaepsilon.math.optimize.de.DifferentialEvolution
+    :members: donors, mutants, crossover, initialize, step, archive, set_solution_params
+```
+
+## Common base of PSO and DE
 
 {class}`~sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization` and
 {class}`~sigmaepsilon.math.optimize.de.DifferentialEvolution` share a common driver,
@@ -126,8 +189,8 @@ cost of a different exploration behavior.
 pattern as the genetic algorithms. Besides the champion, both can return several distinct
 solutions representing different optima of the objective (see the `n_solutions` parameter
 and the {attr}`~sigmaepsilon.math.optimize.population.PopulationOptimizer.solutions`
-property). See {doc}`../user_guide/optimization/pso`, {doc}`../user_guide/optimization/de`
-and {doc}`../user_guide/optimization/penalty` for explanations and worked examples.
+property). Constrained problems can be solved with penalty functions, see
+{doc}`../user_guide/optimization/penalty`.
 
 ```{eval-rst}
 .. autoclass:: sigmaepsilon.math.optimize.population.Candidate
@@ -141,22 +204,4 @@ and {doc}`../user_guide/optimization/penalty` for explanations and worked exampl
 .. autofunction:: sigmaepsilon.math.optimize.population.hill_valley
 
 .. autofunction:: sigmaepsilon.math.optimize.population.distinct_optima
-```
-
-(api_optimization_PSO)=
-
-### Particle Swarm Optimization (PSO)
-
-```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
-    :members: velocities, attractors, initialize, step, archive, reset, set_solution_params
-```
-
-(api_optimization_DE)=
-
-### Differential Evolution (DE)
-
-```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.de.DifferentialEvolution
-    :members: donors, mutants, crossover, initialize, step, archive, set_solution_params
 ```

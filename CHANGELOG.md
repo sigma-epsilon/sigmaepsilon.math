@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The documentation is written in MyST Markdown instead of reStructuredText, and the notebooks are rendered with MyST-NB. The landing page of the user guide and its introduction are separate pages now, the example notebooks are listed in the user guide, and the Theory Guide and the API page of the arrays are part of the navigation.
+- In the user guide and the API reference, the genetic algorithms, ant colony optimization, particle swarm optimization and differential evolution are grouped under Metaheuristics. The API pages of the nonlinear optimizers and of ACO are merged into a single page, `api/api_optimization.metaheuristics`.
 - The deploy jobs on CircleCI end successfully without publishing anything if the version in `pyproject.toml` is already on (Test)PyPI, so merges that don't bump the version no longer fail.
 
 ### Added

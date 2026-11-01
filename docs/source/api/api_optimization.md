@@ -1,7 +1,7 @@
 ---
 myst:
   html_meta:
-    description: "API reference of sigmaepsilon.math.optimize: linear programming, genetic algorithms, particle swarm optimization, differential evolution and ant colony optimization."
+    description: "API reference of sigmaepsilon.math.optimize: linear programming and metaheuristics (genetic algorithms, ant colony optimization, particle swarm optimization and differential evolution)."
 ---
 
 (api_optimization)=
@@ -12,8 +12,7 @@ myst:
 :maxdepth: 1
 
 api_optimization.lp
-api_optimization.nlp
-api_optimization.aco
+api_optimization.metaheuristics
 ```
 
 ## Optimizer state
