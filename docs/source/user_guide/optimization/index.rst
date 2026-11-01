@@ -47,6 +47,17 @@ that gets reinforced along good solutions and decays over time. See :doc:`aco` f
 continuous (ACOR) and combinatorial (Ant System / TSP) variants work, when to reach for them
 instead of a GA or `linprog`, and worked examples of both.
 
+Particle Swarm Optimization (PSO) and Differential Evolution (DE)
+=================================================================
+
+📖 :ref:`Particle Swarm Optimization API Reference <api_optimization_PSO>` · :ref:`Differential Evolution API Reference <api_optimization_DE>`
+
+**Particle Swarm Optimization** moves a swarm of particles through the search space. Each particle is drawn towards the best point it has seen and towards good points found by the others. **Differential Evolution** evolves a population by perturbing its members with scaled differences of other members. Both are robust, derivative-free optimizers for continuous, box-bounded problems, with the same usage pattern as the GAs and ACO. Both can also return **several distinct solutions in a single run**, one per basin of attraction, without ever returning the same optimum twice.
+
+* :doc:`pso` -- how PSO works, how to use it, and how it finds multiple optima (species-based PSO).
+* :doc:`de` -- how DE works, its mutation strategies, and how it finds multiple optima (neighborhood-based crowding DE).
+* :doc:`penalty` -- solving problems with general equality and inequality constraints using penalty functions, including constrained problems with multiple optima.
+
 .. toctree::
     :maxdepth: 1
     :hidden:
@@ -58,3 +69,6 @@ instead of a GA or `linprog`, and worked examples of both.
     ga_performance
     custom_ga
     aco
+    pso
+    de
+    penalty

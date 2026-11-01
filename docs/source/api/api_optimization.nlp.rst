@@ -108,3 +108,43 @@ Gaussian mutation. This avoids the precision/chromosome-length trade-off of BGA,
 cost of a different exploration behavior.
 
 .. autoclass:: sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm
+
+Population-based optimizers
+===========================
+
+:class:`~sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization` and
+:class:`~sigmaepsilon.math.optimize.de.DifferentialEvolution` share a common driver,
+:class:`~sigmaepsilon.math.optimize.population.PopulationOptimizer`, with the same usage
+pattern as the genetic algorithms. Besides the champion, both can return several distinct
+solutions representing different optima of the objective (see the `n_solutions` parameter
+and the :attr:`~sigmaepsilon.math.optimize.population.PopulationOptimizer.solutions`
+property). See :doc:`../user_guide/optimization/pso`, :doc:`../user_guide/optimization/de`
+and :doc:`../user_guide/optimization/penalty` for explanations and worked examples.
+
+.. autoclass:: sigmaepsilon.math.optimize.population.Candidate
+    :members:
+
+.. autoclass:: sigmaepsilon.math.optimize.population.PopulationOptimizer
+    :members:
+
+.. autofunction:: sigmaepsilon.math.optimize.population.normalize
+
+.. autofunction:: sigmaepsilon.math.optimize.population.hill_valley
+
+.. autofunction:: sigmaepsilon.math.optimize.population.distinct_optima
+
+.. _api_optimization_PSO:
+
+Particle Swarm Optimization (PSO)
+---------------------------------
+
+.. autoclass:: sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
+    :members: velocities, attractors, initialize, step, archive, reset, set_solution_params
+
+.. _api_optimization_DE:
+
+Differential Evolution (DE)
+---------------------------
+
+.. autoclass:: sigmaepsilon.math.optimize.de.DifferentialEvolution
+    :members: donors, mutants, crossover, initialize, step, archive, set_solution_params
