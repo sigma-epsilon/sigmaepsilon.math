@@ -727,10 +727,10 @@ def ATBAw(A: ndarray, B: ndarray, w: float = 1.0) -> ndarray:
     return w * (A.T @ B @ A)
 
 
-@guv(["(f8[:, :], f8)"], "(n, n) -> ()", nopython=True, cache=__cache)
+@guv(["(f8[:, :], f8[:])"], "(n, n) -> ()", nopython=True, cache=__cache)
 def det3x3(A, res):
     """Compute the determinant of a 3x3 matrix, or a stack of such matrices."""
-    res = (
+    res[0] = (
         A[0, 0] * A[1, 1] * A[2, 2]
         - A[0, 0] * A[1, 2] * A[2, 1]
         - A[0, 1] * A[1, 0] * A[2, 2]
@@ -740,10 +740,10 @@ def det3x3(A, res):
     )
 
 
-@guv(["(f8[:, :], f8)"], "(n, n) -> ()", nopython=True, cache=__cache)
+@guv(["(f8[:, :], f8[:])"], "(n, n) -> ()", nopython=True, cache=__cache)
 def det2x2(A, res):
     """Compute the determinant of a 2x2 matrix, or a stack of such matrices."""
-    res = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
+    res[0] = A[0, 0] * A[1, 1] - A[0, 1] * A[1, 0]
 
 
 @njit(nogil=True, cache=__cache)

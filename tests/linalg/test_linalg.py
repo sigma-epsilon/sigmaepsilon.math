@@ -691,6 +691,21 @@ class TestLinsolve(LinalgTestCase):
         diff1 = np.abs(det - det1)
         assert diff1 < 1e-8
 
+    def test_det_stack(self):
+        # the determinants are computed before the reference values, so that
+        # the results can't come from memory left behind by NumPy
+        A2 = np.stack([random_posdef_matrix(2) for _ in range(10)])
+        A3 = np.stack([random_posdef_matrix(3) for _ in range(10)])
+        dets2, dets3 = det2x2(A2), det3x3(A3)
+        single2, single3 = det2x2(A2[0]), det3x3(A3[0])
+        out2, out3 = np.zeros(10), np.zeros(10)
+        det2x2(A2, out2)
+        det3x3(A3, out3)
+        for res, A in ((dets2, A2), (dets3, A3), (out2, A2), (out3, A3)):
+            self.assertTrue(np.allclose(res, np.linalg.det(A)))
+        self.assertTrue(np.isclose(single2, np.linalg.det(A2[0])))
+        self.assertTrue(np.isclose(single3, np.linalg.det(A3[0])))
+
     def test_Gauss_Jordan(self):
         A = np.array([[3, 1, 2], [1, 1, 1], [2, 1, 2]], dtype=float)
         B = np.array([11, 6, 10], dtype=float)
