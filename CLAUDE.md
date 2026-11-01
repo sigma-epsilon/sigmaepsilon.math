@@ -9,7 +9,8 @@ sparse arrays, function/relation modeling, least-squares & moving-least-squares 
 optimization: linear programming, genetic algorithms) used as a foundation package in the SigmaEpsilon
 computational-solid-mechanics ecosystem. It is distributed as the namespace package `sigmaepsilon.math`
 (source under `src/sigmaepsilon/math`), and depends on `sigmaepsilon-core` / `sigmaepsilon-deepdict` from
-the same ecosystem, plus NumPy, SciPy, Numba, Awkward and SymPy.
+the same ecosystem, plus NumPy, SciPy, Awkward and SymPy. Numba is an optional dependency (the `numba`
+extra) that JIT-compiles the performance-critical kernels.
 
 Package/dependency management is uv (hatchling build backend). Packaging metadata, dependencies and tool
 config live in `pyproject.toml`; the lock file is `uv.lock`.
@@ -19,8 +20,10 @@ config live in `pyproject.toml`; the lock file is `uv.lock`.
 Install dependencies into an in-project `.venv` (no dependency group is installed by default):
 
 ```
-uv sync --group dev --group test --group docs
+uv sync --extra numba --group dev --group test --group docs
 ```
+
+Leave out `--extra numba` to work in (and test) an environment without Numba.
 
 To work against sibling `sigmaepsilon.*` checkouts in editable mode: `uv pip install -e ../sigmaepsilon.<pkg>`
 (undone by the next `uv sync`).
@@ -133,3 +136,7 @@ forces the Matplotlib backend to `agg` for all tests.
 - Numba (`@njit`) is used for performance-critical numeric kernels (notably in `linalg/sparse/`);
   coverage reporting intentionally excludes these (`.coveragerc` excludes `@njit`/`@jit`/`@guv`
   decorated code from coverage).
+- Numba is optional, so never import it directly: take `njit`, `jit`, `prange` and `NUMBA_AVAILABLE`
+  from `sigmaepsilon.core.jit` (pure Python fallbacks without Numba), typed containers and Numba types
+  from `sigmaepsilon/math/_nbtypes.py`, and guard anything else (e.g. `guvectorize`, `numba.extending`)
+  with `NUMBA_AVAILABLE`. The whole test suite must also pass without Numba (`run_tests_no_numba` CI job).

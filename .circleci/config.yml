@@ -20,6 +20,10 @@ jobs:
         type: enum
         enum: ["highest", "lowest-direct"]
         default: "highest"
+      extras:
+        description: Extras to install. Pass an empty string to test without Numba.
+        type: string
+        default: "--extra numba"
     steps:
       - checkout
       - run:
@@ -31,14 +35,20 @@ jobs:
           steps:
             - run:
                 name: Install project
-                command: uv sync --locked --group test --python << parameters.python >>
+                command: uv sync --locked --group test << parameters.extras >> --python << parameters.python >>
       - when:
           condition:
             equal: ["lowest-direct", << parameters.resolution >>]
           steps:
             - run:
                 name: Install project with the lowest direct dependencies
-                command: uv sync --resolution lowest-direct --group test --python << parameters.python >>
+                command: uv sync --resolution lowest-direct --group test << parameters.extras >> --python << parameters.python >>
+      - run:
+          name: Check that Numba is not installed when testing without it
+          command: |
+            if [ -z "<< parameters.extras >>" ]; then
+              uv run --no-sync python -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('numba') is not None)"
+            fi
       - run:
           name: Run tests and generate coverage report
           command: uv run --no-sync pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.math
@@ -101,12 +111,19 @@ workflows:
           python: "3.10"
           resolution: "lowest-direct"
 
+      # the pure Python fallbacks, its coverage is merged with the others on Codecov
+      - run_tests:
+          name: run_tests_no_numba
+          python: "3.12"
+          extras: ""
+
       - deploy_to_test_pypi:
           context:
             - TestPyPI deploy
           requires:
             - run_tests
             - run_tests_lowest
+            - run_tests_no_numba
           filters:
             branches:
               only:
@@ -118,6 +135,7 @@ workflows:
           requires:
             - run_tests
             - run_tests_lowest
+            - run_tests_no_numba
           filters:
             branches:
               only:

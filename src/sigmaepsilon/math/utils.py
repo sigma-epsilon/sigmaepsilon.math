@@ -3,7 +3,7 @@
 import numpy as np
 import numbers
 from numpy import ndarray
-from numba import njit, prange
+from sigmaepsilon.core.jit import njit, prange
 from typing import Union, Tuple, Iterable
 
 try:

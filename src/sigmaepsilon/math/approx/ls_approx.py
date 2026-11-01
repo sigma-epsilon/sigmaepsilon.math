@@ -3,7 +3,7 @@
 from typing import Tuple
 
 from numpy import ndarray
-from numba import njit
+from sigmaepsilon.core.jit import njit
 
 
 def _mls_approx(*args, dim: int = None, **kwargs):

@@ -15,14 +15,17 @@ steps below:
    pip install uv
    
 
-3. Install the library with the necessary optional dependency groups by issuing the following command:
+3. Install the library with Numba and the necessary optional dependency groups by issuing the following command:
 
 .. code-block:: shell
-   
-   uv sync --group dev --group test --group docs
-   
+
+   uv sync --extra numba --group dev --group test --group docs
+
 
 This process will create a virtual environment in `.venv` and install the library with all dependencies.
+Numba is an optional dependency of the library. To run the tests without it, the way the
+``run_tests_no_numba`` CI job does, leave out ``--extra numba`` (a subsequent ``uv sync`` without the
+extra uninstalls Numba from the environment).
 Note that with `uv`, the project itself is always installed in editable mode. 
 If you are working across several solutions in the SigmaEpsilon namespace, and you want them installed in editable mode, 
 you can install them into the same environment with `uv pip`. For instance, if you want to install `sigmaepsilon.core` in editable mode and it is located at the same level as 

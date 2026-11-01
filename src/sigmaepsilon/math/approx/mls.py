@@ -4,7 +4,7 @@ from numbers import Number
 
 from numpy import ndarray
 import numpy as np
-from numba import njit, prange
+from sigmaepsilon.core.jit import njit, prange
 
 from ..knn import k_nearest_neighbours
 from .. import atleast2d

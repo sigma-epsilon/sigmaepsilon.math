@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file. If you are 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0]
+
+### Changed
+
+- Numba is now an optional dependency. Install it with `pip install "sigmaepsilon.math[numba]"` for the best performance. Without Numba, the performance-critical parts of the library run as plain Python with the same results, but they can be orders of magnitude slower. The optimizers, the `function` module, numerical integration and k-nearest neighbour search don't use Numba at all. See the installation guide in the documentation for details.
+- `sigmaepsilon.core>=1.4.0` is required.
+
 ## [2.2.0]
 
 ### Changed

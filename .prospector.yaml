@@ -1,0 +1,48 @@
+# Prospector configuration, picked up by Codacy instead of the pattern
+# settings of its web UI. The tools mirror what is enabled there.
+
+doc-warnings: true
+
+pycodestyle:
+  run: true
+
+pyflakes:
+  run: true
+
+mccabe:
+  run: true
+
+dodgy:
+  run: true
+
+pydocstyle:
+  run: true
+  # pydocstyle enables mutually exclusive checks by default. The docstrings
+  # in this project start the summary on the first line (D212) and use
+  # NumPy style sections, so the checks contradicting that are disabled.
+  # This is the 'numpy' convention of pydocstyle, except for D212.
+  disable:
+    - D107  # Missing docstring in __init__
+    - D203  # 1 blank line required before class docstring (vs. D211)
+    - D213  # Multi-line docstring summary should start at the second line (vs. D212)
+    - D402  # First line should not be the function's signature
+    - D413  # Missing blank line after last section (Google style)
+    - D415  # First line should end with a punctuation mark (covered by D400)
+    - D416  # Section name should end with a colon (Google style)
+    - D417  # Missing argument descriptions (Google style)
+
+# Tools that are disabled in Codacy, or covered by other Codacy tools.
+pylint:
+  run: false
+
+mypy:
+  run: false
+
+vulture:
+  run: false
+
+bandit:
+  run: false
+
+pyroma:
+  run: false

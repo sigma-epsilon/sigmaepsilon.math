@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Histogram utilities built on top of NumPy."""
-from numba import njit, prange
+from sigmaepsilon.core.jit import njit, prange
 import numpy as np
 
 
