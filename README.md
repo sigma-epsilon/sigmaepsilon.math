@@ -17,7 +17,16 @@ The [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/) is hoste
 
 ## Installation
 
-For instructions on installation, refer to the [documentation](https://sigmaepsilonmath.readthedocs.io/en/latest/).
+The library can be installed from PyPI. For the best performance, install it together with [Numba](https://numba.pydata.org/):
+
+```shell
+pip install "sigmaepsilon.math[numba]"  # recommended, with Numba
+pip install sigmaepsilon.math           # without Numba
+```
+
+> **Performance:** Numba is optional, but strongly recommended. It compiles the performance-critical parts of the library to machine code; without it, they run as plain Python, which can be orders of magnitude slower. Some parts of the library, like the optimizers, don't use Numba at all.
+
+For more details, including what Numba does and which parts of the library benefit from it, see the [installation guide](https://sigmaepsilonmath.readthedocs.io/en/latest/user_guide/installation.html) in the documentation.
 
 ## Changes and versioning
 
