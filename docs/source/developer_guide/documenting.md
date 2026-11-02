@@ -97,7 +97,10 @@ version control). To document a new object, add it to the table of the topic it 
 ```
 ````
 
-The `~` prefix makes the table show the short name only. The templates in
+The `~` prefix makes the table show the short name only. The landing page of the reference,
+`docs/source/api.md`, repeats the tables of all topics as an overview, without the
+`:toctree:` option (the pages are generated from the topic pages), so add the object to the
+matching table there as well. The templates in
 `docs/source/_templates/` are `custom-class-template.rst` for classes,
 `custom-module-template.rst` for modules and `custom-data-template.rst` for module level
 variables like type aliases, which are documented with `#:` comments above them. Functions
