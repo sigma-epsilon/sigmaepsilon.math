@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file. If you are 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- The documentation is written in MyST Markdown instead of reStructuredText, and the notebooks are rendered with MyST-NB. The landing page of the user guide and its introduction are separate pages now, the example notebooks are listed in the user guide, and the Theory Guide and the API page of the arrays are part of the navigation.
+- In the user guide and the API reference, the genetic algorithms, ant colony optimization, particle swarm optimization and differential evolution are grouped under Metaheuristics. The API pages of the nonlinear optimizers and of ACO are merged into a single page, `api/api_optimization.metaheuristics`.
+- The API reference is built with autosummary: the API pages list the objects in summary tables, and every class, function and module gets a page of its own.
+- The deploy jobs on CircleCI end successfully without publishing anything if the version in `pyproject.toml` is already on (Test)PyPI, so merges that don't bump the version no longer fail.
+
+### Added
+
+- LLM-friendly documentation with `sphinx-llm`: `llms.txt`, `llms-full.txt` and a Markdown version of every page, with a page on using the library with LLMs. To keep LLM contexts small, the index and the bundle only contain the user guide, the examples and the API reference. Every page has a description in its front matter, used in `llms.txt`.
+- `TensorLike`, `FunctionLike`, `OptimizerState` and the base classes of the test functions are part of the API reference.
+
+### Fixed
+
+- The documentation builds without warnings. Fixed the docstrings with broken markup or cross-references, among them the description of `MLSApproximator`, which referred to a nonexistent `fit` method, and the return type of `Graph.adjacency_matrix`.
+
 ## [2.8.0]
 
 ### Added

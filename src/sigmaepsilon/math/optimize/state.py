@@ -14,9 +14,9 @@ class OptimizerState(BaseModel):
 
     Attributes
     ----------
-    x : list[float] | NoneType
+    x : list[float] | None
         The current solution vector, or None if not set.
-    fun : float | NoneType
+    fun : float | None
         The value of the objective function at the current solution, or None if not set.
     n_fev : int
         The number of function evaluations performed.

@@ -52,7 +52,7 @@ try:
 
             Returns
             -------
-            NumPy array, SciPy array or csr_matrix
+            scipy.sparse.sparray or sigmaepsilon.math.linalg.sparse.csr_matrix
                 The adjacency representation of the graph.
 
             Examples

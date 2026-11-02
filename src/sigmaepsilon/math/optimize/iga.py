@@ -66,7 +66,7 @@ class IntegerGeneticAlgorithm(BitChromosomeGeneticAlgorithm):
     seed: int | numpy.random.SeedSequence | numpy.random.Generator | None, Optional
         A seed for a per-instance random number generator. Default is None.
     selection_strategy: :class:`~sigmaepsilon.math.optimize.selection.SelectionStrategy`, Optional
-        The selection strategy used by :func:`select`. Default is
+        The selection strategy used by :meth:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.select`. Default is
         :class:`~sigmaepsilon.math.optimize.selection.TournamentSelection`.
     vectorized: bool, Optional
         See :func:`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm.evaluate`. Default is False.

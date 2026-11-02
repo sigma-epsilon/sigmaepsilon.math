@@ -19,7 +19,7 @@ def linsolve(
     presc_bool: np.ndarray = None,
     presc_val: np.ndarray = None,
     method: str = "numpy",
-    inplace: bool = False
+    inplace: bool = False,
 ) -> Union[np.ndarray, Tuple[np.ndarray]]:
     """
     Solves a linear system of equations using various methods. It supports prescription of values.
@@ -124,7 +124,7 @@ def linsolve(
                 res = backsub(
                     *fnc(A.copy(), B.copy(), presc_bool, presc_val),
                     presc_bool,
-                    presc_val
+                    presc_val,
                 )
             if pre:
                 return res

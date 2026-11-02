@@ -90,7 +90,7 @@ class AntColonyOptimization:
     This is an abstract base class. Use :class:`ContinuousAntColonyOptimization` for
     real-valued optimization or :class:`CombinatorialAntColonyOptimization` for
     discrete/graph-based problems.
-    
+
     """
 
     @unique
@@ -569,9 +569,8 @@ class CombinatorialAntColonyOptimization(AntColonyOptimization):
 
             for step in range(1, self.nNodes):
                 unvisited = np.where(~visited)[0]
-                probs = (
-                    (self._tau[current, unvisited] ** self.alpha)
-                    * (self._eta[current, unvisited] ** self.beta)
+                probs = (self._tau[current, unvisited] ** self.alpha) * (
+                    self._eta[current, unvisited] ** self.beta
                 )
                 prob_sum = probs.sum()
                 if prob_sum > 0:

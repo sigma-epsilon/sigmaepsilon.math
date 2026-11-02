@@ -48,8 +48,8 @@ class MLSApproximator:
         The source points.
     Y_S: ndarray, Optional
         The source data.
-    knn_backend: {"scipy", "sklearn"}, Optional
-        The backend to use for the KNN calculation. If None, the default backend
+    knn_backend: str, Optional
+        The backend to use for the KNN calculation, "scipy" or "sklearn". If None, the default backend
         of the library is used. Default is None.
     k: int, Optional
         The number of neighbours to consider. Default is None.
@@ -60,9 +60,9 @@ class MLSApproximator:
     -----
     1) There is a KNN calculation involved in the process, which is done using either
     scipy or sklearn.
-    2) The target points can be provided when calling the :func:`fit` method to precalculate
-    the neighbours and factors. If not provided, the neighbours and factors are calculated
-    when the :func:`approximate` method is called.
+    2) The neighbours and factors of the target points are calculated when the
+    :func:`approximate` method is called, and are available through the
+    :attr:`neighbours` and :attr:`factors` properties afterwards.
     3) We use Numba to speed up the approximation, hence the first call might be slower.
 
     Examples

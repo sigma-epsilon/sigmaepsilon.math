@@ -17,6 +17,8 @@ from .symutils import substitute
 __all__ = ["Function", "FunctionLike"]
 
 
+#: The types a function can be defined with, which are a string expression, a Python
+#: callable or a SymPy expression.
 FunctionLike = TypeVar("FunctionLike", str, Callable, Expr)
 
 
@@ -55,7 +57,7 @@ class Function(MetaFunction):
         Keyword only parameter.Same as `f1`.
     Hessian: Callable, Optional
         Keyword only parameter.Same as `f2`.
-    dimension or dim or d : int, Optional
+    dimension, dim, d : int, Optional
         Keyword only parameter. The number of dimensions of the domain of the function. This property
         is only required if the function is defined by numerical functions.
 
@@ -171,7 +173,7 @@ class Function(MetaFunction):
         f2: Callable | None = None,
         *args,
         variables: Iterable | None = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__()
         self.update(f0, f1, f2, *args, variables=variables, **kwargs)
@@ -183,7 +185,7 @@ class Function(MetaFunction):
         f2: Callable | None = None,
         *_,
         variables: Iterable | None = None,
-        **kwargs
+        **kwargs,
     ):
         """Update the instance in place with new function definitions."""
         self.from_str = None

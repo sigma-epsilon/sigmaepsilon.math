@@ -33,7 +33,7 @@ def gen_Lagrange_1d(
     sym: bool = False,
     N: int | None = None,
     lambdify: bool = False,
-    out: dict | None = None
+    out: dict | None = None,
 ) -> dict:
     """Generate Lagrange polynomials and their derivatives.
 
@@ -58,7 +58,7 @@ def gen_Lagrange_1d(
     fsym: str, Optional
         Symbol of the function in the symbolic representation of the generated functions.
         Default is 'f'.
-    sym: bool, Optional.
+    sym: bool, Optional
         If True, locations of the data points are left in a symbolic state. This requires
         the inversion of a symbolic matrix, which has some reasonable limitations.
         Default is False.

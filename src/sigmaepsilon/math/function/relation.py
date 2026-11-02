@@ -60,12 +60,12 @@ class Relation(Function):
 
     Parameters
     ----------
-    op or operator : str or callable
+    op, operator : str or Callable
         The operator to be used in the relation. If a string is provided, it should be one of
         =, >, >=, <, <=. If a callable is provided, it should implement a binary operator.
-    op_str: {'=', '>', '>=', '<', '<='}, Optional
+    op_str: str, Optional
         If the operator is defined with a callable, you can define the symbol for the operator as
-        a string. This is optional and only used in some cases, for instance when generating
+        a string, one of ``'='``, ``'>'``, ``'>='``, ``'<'`` or ``'<='``. This is optional and only used in some cases, for instance when generating
         the LaTeX representation of the relation. Also, providing this parameter will help the
         constructor to tetermine the class of the instance when calling the `__new__` method.
 

@@ -17,10 +17,10 @@ __all__ = ["LinearProgrammingProblem"]
 
 class LinearProgrammingProblem:
     r"""
-    A class to solve linear programming problems [1]_.
+    A class to solve `linear programming <https://en.wikipedia.org/wiki/Linear_programming>`_ problems.
 
     It uses the :func:`scipy.optimize.linprog`
-    function as a solver [2]_, which eventually calls into the HIGHS solver [3]_.
+    function as a solver, which eventually calls into the `HiGHS <https://highs.dev/>`_ solver.
 
     To define the objective and the constraints,
     you can use the `Function`, `Relation`, `Equality` and `InEquality` 
@@ -112,12 +112,7 @@ class LinearProgrammingProblem:
     >>> f = Function(3 * x2 + 2 * x3, variables=variables)
     >>> eq = Relation("2 * x1 + 2 * x2 - 4 * x3 = 5", variables=variables)
     >>> problem = LPP(f, [eq], variables=variables, bounds=(0, None))
-    
-    References
-    ----------
-    .. [1] https://en.wikipedia.org/wiki/Linear_programming
-    .. [2] https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html
-    .. [3] https://highs.dev/
+
     """
 
     __slots__ = [
