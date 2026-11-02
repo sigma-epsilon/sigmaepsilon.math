@@ -7,15 +7,12 @@ myst:
 # Reference Frames
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.linalg.meta.FrameLike
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.linalg.ReferenceFrame
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.RectangularFrame
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.CartesianFrame
-    :members:
+   ~sigmaepsilon.math.linalg.meta.FrameLike
+   ~sigmaepsilon.math.linalg.ReferenceFrame
+   ~sigmaepsilon.math.linalg.RectangularFrame
+   ~sigmaepsilon.math.linalg.CartesianFrame
 ```

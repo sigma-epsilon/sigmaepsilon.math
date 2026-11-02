@@ -27,6 +27,9 @@ $$
 where $c_i, b_i$, and $a_{ji}$ are the data of the problem.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.LinearProgrammingProblem
-   :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.LinearProgrammingProblem
 ```

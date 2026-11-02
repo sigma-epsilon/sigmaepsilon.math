@@ -7,9 +7,10 @@ myst:
 # Routines
 
 ```{eval-rst}
-.. automodule:: sigmaepsilon.math.linalg.logical
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
 
-.. automodule:: sigmaepsilon.math.linalg.utils
-    :members:
+   ~sigmaepsilon.math.linalg.logical
+   ~sigmaepsilon.math.linalg.utils
 ```

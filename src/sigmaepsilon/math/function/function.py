@@ -17,6 +17,8 @@ from .symutils import substitute
 __all__ = ["Function", "FunctionLike"]
 
 
+#: The types a function can be defined with, which are a string expression, a Python
+#: callable or a SymPy expression.
 FunctionLike = TypeVar("FunctionLike", str, Callable, Expr)
 
 

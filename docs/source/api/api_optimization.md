@@ -21,6 +21,9 @@ The iterative optimizers keep track of their progress in an
 {class}`~sigmaepsilon.math.optimize.state.OptimizerState` instance.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.state.OptimizerState
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.state.OptimizerState
 ```

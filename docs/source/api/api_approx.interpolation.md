@@ -9,6 +9,9 @@ myst:
 # Interpolation
 
 ```{eval-rst}
-.. automodule:: sigmaepsilon.math.approx.lagrange
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+
+   ~sigmaepsilon.math.approx.lagrange
 ```

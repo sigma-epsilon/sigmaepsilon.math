@@ -81,18 +81,32 @@ before committing it.
 
 ## The API reference
 
-The pages of the API reference live in `docs/source/api/`, one page per topic, and
-document the objects with the autodoc directives (`autoclass`, `automodule`,
-`autofunction`), wrapped in `{eval-rst}` blocks:
+The pages of the API reference live in `docs/source/api/`, one page per topic, and are
+built with [autosummary](https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html):
+the objects of a topic are listed in summary tables, and every object in them gets its own
+page, generated into `docs/source/api/_autosummary/` at build time (the folder is not under
+version control). To document a new object, add it to the table of the topic it belongs to:
 
 ````markdown
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
 ```
 ````
 
-To document a new object, add it to the page of the topic it belongs to.
+The `~` prefix makes the table show the short name only. The templates in
+`docs/source/_templates/` are `custom-class-template.rst` for classes,
+`custom-module-template.rst` for modules and `custom-data-template.rst` for module level
+variables like type aliases, which are documented with `#:` comments above them. Functions
+need no template. A module page lists the public classes and functions of the module (the
+ones in its `__all__`, if it has one), each with a page of its own, so new functions of a
+listed module show up in the reference without editing the API pages.
+
+The generated pages have no front matter; their description in `llms.txt` is the first
+sentence of the docstring of the object, added by `_add_api_page_description` in `conf.py`.
 
 ## Page descriptions and LLM-friendly documentation
 

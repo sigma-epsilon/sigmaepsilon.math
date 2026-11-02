@@ -7,6 +7,9 @@ myst:
 # Graph Routines
 
 ```{eval-rst}
-.. automodule:: sigmaepsilon.math.graph.utils
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+
+   ~sigmaepsilon.math.graph.utils
 ```

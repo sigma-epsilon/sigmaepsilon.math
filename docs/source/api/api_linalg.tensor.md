@@ -7,21 +7,14 @@ myst:
 # Tensors
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.linalg.meta.TensorLike
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.linalg.Tensor
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.Tensor2
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.Tensor2x3
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.Tensor4
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.Tensor4x3
-    :members:
+   ~sigmaepsilon.math.linalg.meta.TensorLike
+   ~sigmaepsilon.math.linalg.Tensor
+   ~sigmaepsilon.math.linalg.Tensor2
+   ~sigmaepsilon.math.linalg.Tensor2x3
+   ~sigmaepsilon.math.linalg.Tensor4
+   ~sigmaepsilon.math.linalg.Tensor4x3
 ```

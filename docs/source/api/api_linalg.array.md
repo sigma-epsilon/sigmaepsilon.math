@@ -7,15 +7,12 @@ myst:
 # Arrays
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.linalg.meta.Array
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.linalg.meta.ArrayWrapper
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.sparse.JaggedArray
-    :members:
-
-.. autoclass:: sigmaepsilon.math.linalg.sparse.csr_matrix
-    :members:
+   ~sigmaepsilon.math.linalg.meta.Array
+   ~sigmaepsilon.math.linalg.meta.ArrayWrapper
+   ~sigmaepsilon.math.linalg.sparse.JaggedArray
+   ~sigmaepsilon.math.linalg.sparse.csr_matrix
 ```

@@ -35,11 +35,12 @@ For a good explanation of how Genetic Algorithms work, read
 from [MathWorks](https://www.mathworks.com/?s_tid=gn_logo).
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.ga.GeneticAlgorithm
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.optimize.ga.Genom
-    :members:
+   ~sigmaepsilon.math.optimize.ga.GeneticAlgorithm
+   ~sigmaepsilon.math.optimize.ga.Genom
 ```
 
 ### Selection strategies
@@ -50,17 +51,14 @@ via the `selection_strategy` constructor argument of
 {class}`~sigmaepsilon.math.optimize.ga.GeneticAlgorithm` and its subclasses.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.selection.SelectionStrategy
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.optimize.selection.TournamentSelection
-    :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.selection.RouletteSelection
-    :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.selection.RankSelection
-    :members:
+   ~sigmaepsilon.math.optimize.selection.SelectionStrategy
+   ~sigmaepsilon.math.optimize.selection.TournamentSelection
+   ~sigmaepsilon.math.optimize.selection.RouletteSelection
+   ~sigmaepsilon.math.optimize.selection.RankSelection
 ```
 
 (api_optimization_BGA)=
@@ -83,9 +81,12 @@ only differ in whether the decoded value is kept as a continuous float (BGA) or 
 to the nearest integer (IGA).
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.bitchromosome.BitChromosomeGeneticAlgorithm
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm
+   ~sigmaepsilon.math.optimize.bitchromosome.BitChromosomeGeneticAlgorithm
+   ~sigmaepsilon.math.optimize.bga.BinaryGeneticAlgorithm
 ```
 
 (api_optimization_IGA)=
@@ -101,7 +102,11 @@ representation for discrete variables and cheaper than retaining unneeded floati
 precision.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.iga.IntegerGeneticAlgorithm
 ```
 
 (api_optimization_RGA)=
@@ -114,7 +119,11 @@ Gaussian mutation. This avoids the precision/chromosome-length trade-off of BGA,
 cost of a different exploration behavior.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.rga.RealValuedGeneticAlgorithm
 ```
 
 (api_optimization_ACO)=
@@ -139,17 +148,14 @@ See {doc}`../user_guide/optimization/aco` for an explanation of how the two
 algorithms work, and worked examples for both.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.aco.AntSolution
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.optimize.aco.AntColonyOptimization
-    :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.aco.ContinuousAntColonyOptimization
-    :members:
-
-.. autoclass:: sigmaepsilon.math.optimize.aco.CombinatorialAntColonyOptimization
-    :members:
+   ~sigmaepsilon.math.optimize.aco.AntSolution
+   ~sigmaepsilon.math.optimize.aco.AntColonyOptimization
+   ~sigmaepsilon.math.optimize.aco.ContinuousAntColonyOptimization
+   ~sigmaepsilon.math.optimize.aco.CombinatorialAntColonyOptimization
 ```
 
 (api_optimization_PSO)=
@@ -163,8 +169,11 @@ species-based PSO and returns several distinct optima. See
 {doc}`../user_guide/optimization/pso` for an explanation and worked examples.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
-    :members: velocities, attractors, initialize, step, archive, reset, set_solution_params
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.pso.ParticleSwarmOptimization
 ```
 
 (api_optimization_DE)=
@@ -177,8 +186,11 @@ crowding DE and returns several distinct optima. See
 {doc}`../user_guide/optimization/de` for an explanation and worked examples.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.de.DifferentialEvolution
-    :members: donors, mutants, crossover, initialize, step, archive, set_solution_params
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.optimize.de.DifferentialEvolution
 ```
 
 ## Common base of PSO and DE
@@ -193,15 +205,19 @@ property). Constrained problems can be solved with penalty functions, see
 {doc}`../user_guide/optimization/penalty`.
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.optimize.population.Candidate
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.optimize.population.PopulationOptimizer
-    :members:
+   ~sigmaepsilon.math.optimize.population.Candidate
+   ~sigmaepsilon.math.optimize.population.PopulationOptimizer
+```
 
-.. autofunction:: sigmaepsilon.math.optimize.population.normalize
+```{eval-rst}
+.. autosummary::
+   :toctree: _autosummary
 
-.. autofunction:: sigmaepsilon.math.optimize.population.hill_valley
-
-.. autofunction:: sigmaepsilon.math.optimize.population.distinct_optima
+   ~sigmaepsilon.math.optimize.population.normalize
+   ~sigmaepsilon.math.optimize.population.hill_valley
+   ~sigmaepsilon.math.optimize.population.distinct_optima
 ```

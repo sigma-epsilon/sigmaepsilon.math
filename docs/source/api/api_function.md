@@ -9,23 +9,31 @@ myst:
 ## Functions
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.function.Function
-   :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autodata:: sigmaepsilon.math.function.function.FunctionLike
+   ~sigmaepsilon.math.function.Function
+```
+
+```{eval-rst}
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-data-template.rst
+
+   ~sigmaepsilon.math.function.function.FunctionLike
 ```
 
 ## Relations
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.function.Relation
-   :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
 
-.. autoclass:: sigmaepsilon.math.function.Equality
-   :members:
-
-.. autoclass:: sigmaepsilon.math.function.InEquality
-   :members:
+   ~sigmaepsilon.math.function.Relation
+   ~sigmaepsilon.math.function.Equality
+   ~sigmaepsilon.math.function.InEquality
 ```
 
 ## Test Functions for Optimization
@@ -34,9 +42,10 @@ The test functions share a few base classes, that you can also use to define you
 benchmark functions with known optima.
 
 ```{eval-rst}
-.. automodule:: sigmaepsilon.math.function.testfunction
-   :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
 
-.. automodule:: sigmaepsilon.math.function.functions
-   :members:
+   ~sigmaepsilon.math.function.testfunction
+   ~sigmaepsilon.math.function.functions
 ```

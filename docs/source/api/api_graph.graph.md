@@ -7,6 +7,9 @@ myst:
 # Graph
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.graph.graph.Graph
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.graph.graph.Graph
 ```

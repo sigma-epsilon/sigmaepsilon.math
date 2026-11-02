@@ -9,21 +9,11 @@ myst:
 # Regression
 
 ```{eval-rst}
-.. automodule:: sigmaepsilon.math.approx.functions
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
 
-.. automodule:: sigmaepsilon.math.approx.ls_approx
-    :members:
-
-.. automodule:: sigmaepsilon.math.approx.ls_poly
-    :members:
-
-.. automodule:: sigmaepsilon.math.approx.ls_preproc
-    :members:
-
-.. automodule:: sigmaepsilon.math.approx.ls
-    :members:
-
-.. automodule:: sigmaepsilon.math.approx.mls
-    :members:
+   ~sigmaepsilon.math.approx.functions
+   ~sigmaepsilon.math.approx.ls
+   ~sigmaepsilon.math.approx.mls
 ```

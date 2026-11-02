@@ -7,6 +7,9 @@ myst:
 # Vectors
 
 ```{eval-rst}
-.. autoclass:: sigmaepsilon.math.linalg.Vector
-    :members:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+
+   ~sigmaepsilon.math.linalg.Vector
 ```

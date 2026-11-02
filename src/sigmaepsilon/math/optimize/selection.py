@@ -100,7 +100,7 @@ class RouletteSelection(SelectionStrategy):
 
 
 class RankSelection(SelectionStrategy):
-    """Rank-based selection: the probability of an individual being picked depends on its rank within the population rather than the raw fitness value, which reduces the influence of outlier fitness values compared to :class:`RouletteSelection`."""
+    """Rank-based selection: the probability of an individual being picked depends on its rank within the population rather than the raw fitness value, which reduces the influence of outlier fitness values compared to :class:`~sigmaepsilon.math.optimize.selection.RouletteSelection`."""
 
     def select(self, ga: "GeneticAlgorithm", fitness: ndarray) -> ndarray:
         """Select winners with probability proportional to their fitness rank."""
