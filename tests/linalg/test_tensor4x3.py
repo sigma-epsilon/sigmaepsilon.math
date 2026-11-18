@@ -81,7 +81,7 @@ class TestTensor4x3(LinalgTestCase):
 
         axes = repeat(np.eye(3, 3), 2)
         target = ReferenceFrame(axes)
-        self.assertFailsProperly(NotImplementedError, self.tensor_single.show, target)
+        self.assertFailsProperly(ValueError, self.tensor_single.show, target)
         self.tensor_bulk.show(target)
 
     def test_dual(self):

@@ -115,7 +115,7 @@ class JaggedArray(NDArrayOperatorsMixin, Wrapper):
            [7, 8, 9]])
 
     Since we use the Awkward library to deflatten arrays, if we provide
-    the argument `force_numpy=False`, which is the default behaviour, the data
+    the argument `force_numpy=False` (the default is `True`), the data
     is stored as an Awkward array:
 
     >>> JaggedArray(data, cuts=[3, 3, 3], force_numpy=False)

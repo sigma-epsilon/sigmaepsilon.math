@@ -222,12 +222,16 @@ def dot(
                 raise LinalgOperationInputError(
                     "Parameter 'out' is not allowed with tensors."
                 )
-            return np.dot(a.show(), b.show())
+            # one dot product per vector for bulk inputs
+            return np.einsum("...i,...i->...", a.show(), b.show())
         elif ra == 2 and rb == 1:
-            arr = (a.array @ b.show(a.frame.dual()).T).T
+            # T^{ij} g_i (g_j . b): contract with the covariant components of b
+            arr = np.einsum("...ij,...j->...i", a.array, b.show(a.frame.dual()))
             result = b.__class__(arr, frame=a.frame)
         elif ra == 1 and rb == 2:
-            arr = (a.array.T @ b.show(a.frame.dual()).T).T
+            # a^i g_i . T^{kl} g_k g_l = a^i G_ik T^{kl} g_l
+            g = a.frame.Gram()
+            arr = np.einsum("...i,...ik,...kl->...l", a.array, g, b.show(a.frame))
             result = a.__class__(arr, frame=a.frame)
         elif ra == 2 and rb == 2:
             g = a.frame.Gram()
@@ -265,7 +269,7 @@ def cross(
     frame: FrameLike = None,
     **kwargs,
 ) -> Union[TensorLike, ndarray]:
-    """Calculate the cross product of two vectors or one vector and a second order tensor.
+    r"""Calculate the cross product of two vectors or one vector and a second order tensor.
 
     The behaviour coincides with NumPy when all inputs are arrays and generalizes
     when they are not, but all inputs must be either all arrays or all tensors of some kind.
@@ -292,9 +296,32 @@ def cross(
     numpy.ndarray or :class:`~sigmaepsilon.math.linalg.meta.TensorLike`
         An 1d or 2d array, or an 1d or 2d tensor, depending on the inputs.
 
+    Notes
+    -----
+    The products are computed from the components in the ambient frame, which is
+    taken to be right-handed. Hence the result is the same in any frame, whether it
+    is oblique or left-handed.
+
+    The cross product of a second-order tensor and a vector follows the dyadic
+    convention of Gibbs, as set out by Wilson :cite:p:`wilson1901vector` (§104), which is
+    linear in the tensor:
+
+    .. math::
+
+        (\mathbf{a} \otimes \mathbf{c}) \times \mathbf{b} =
+        \mathbf{a} \otimes (\mathbf{c} \times \mathbf{b}), \qquad
+        \mathbf{b} \times (\mathbf{a} \otimes \mathbf{c}) =
+        (\mathbf{b} \times \mathbf{a}) \otimes \mathbf{c}.
+
+    In components with respect to an orthonormal, right-handed frame this means
+    :math:`(\mathbf{A} \times \mathbf{b})_{ij} = \epsilon_{jkl} A_{ik} b_l` and
+    :math:`(\mathbf{b} \times \mathbf{A})_{ij} = \epsilon_{ikl} b_k A_{lj}`.
+
     References
     ----------
-    https://mathworld.wolfram.com/CrossProduct.html
+    - https://mathworld.wolfram.com/CrossProduct.html
+    - E. B. Wilson, *Vector Analysis*, founded upon the lectures of J. W. Gibbs,
+      Charles Scribner's Sons, New York, 1901, §104. :cite:p:`wilson1901vector`
 
     Examples
     --------
@@ -313,23 +340,29 @@ def cross(
 
     >>> A = Tensor2(np.eye(3), frame=frame)
     >>> cross(A, b)
-    Array([[ 0.,  0., -1.],
+    Array([[ 0.,  0.,  1.],
            [ 0.,  0.,  0.],
-           [ 1.,  0.,  0.]])
+           [-1.,  0.,  0.]])
 
     """
     if isinstance(a, TensorLike) and isinstance(b, TensorLike):
         ra, rb = a.rank, b.rank
         result = None
         if ra == 1 and rb == 1:
-            arr = np.cross(a.array, b.show(a.frame), axis=0)
-            result = a.__class__(arr, frame=a.frame)
+            # computed in the ambient frame, then expressed in the frame of `a`
+            arr = np.cross(a.show(), b.show())
+            result = a.__class__(arr, bulk=a._bulk)
+            result.frame = a.frame
         elif ra == 2 and rb == 1:
-            arr = np.cross(a.show(), b.show(), axis=0)
-            result = a.__class__(arr)
+            # (A x b)_ij = e_jkl A_ik b_l: cross the rows of A with b
+            arr = np.cross(a.show(), b.show()[..., None, :])
+            result = a.__class__(arr, bulk=a._bulk)
         elif ra == 1 and rb == 2:
-            arr = np.cross(a.show(), b.show(), axis=0)
-            result = b.__class__(arr)
+            # (b x A)_ij = e_ikl b_k A_lj: cross b with the columns of A
+            arr = np.cross(
+                a.show()[..., :, None], b.show(), axisa=-2, axisb=-2, axisc=-2
+            )
+            result = b.__class__(arr, bulk=b._bulk)
         else:
             msg = (
                 "The cross product is not implemented",
@@ -378,19 +411,25 @@ def show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
         The new coordinates with the same shape as `arr`.
     """
     dcm, arr = np.asarray(dcm), np.asarray(arr)
-    if len(arr.shape) == 1 and len(dcm.shape) == 2:
-        return _show_vector(dcm, arr)  # dcm @ arr
-    elif len(arr.shape) == 2 and len(dcm.shape) == 2:
-        return _show_vectors(dcm, arr)  # dcm @ arr
-    elif len(arr.shape) == 2 and len(dcm.shape) == 3:
-        return _show_vectors_multi(dcm, arr)  # dcm @ arr
-    else:
-        msg = (
-            "Mismatch in shapes!"
-            f"Input one has shape {dcm.shape} and input two has shape {arr.shape}."
-            "See the docs for the correct input shapes."
-        )
-        raise LinalgOperationInputError(msg)
+    # NumPy raises on mismatching shapes, unlike parallel Numba kernels
+    try:
+        if len(arr.shape) == 1 and len(dcm.shape) == 2:
+            return dcm @ arr
+        elif len(arr.shape) == 2 and len(dcm.shape) == 2:
+            return arr @ dcm.T
+        elif len(arr.shape) == 2 and len(dcm.shape) == 3:
+            return np.einsum("nij,nj->ni", dcm, arr)
+    except ValueError as e:
+        raise LinalgOperationInputError(_shape_mismatch_msg(dcm, arr)) from e
+    raise LinalgOperationInputError(_shape_mismatch_msg(dcm, arr))
+
+
+def _shape_mismatch_msg(dcm: ndarray, arr: ndarray) -> str:
+    return (
+        "Mismatch in shapes! "
+        f"Input one has shape {dcm.shape} and input two has shape {arr.shape}. "
+        "See the docs for the correct input shapes."
+    )
 
 
 def show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
@@ -400,86 +439,20 @@ def show_frame(dcm: ndarray, arr: ndarray) -> ndarray:
     to the appropriate implementation based on the shapes of `dcm` and `arr`.
     """
     dcm, arr = np.asarray(dcm), np.asarray(arr)
-    if len(arr.shape) == 2 and len(dcm.shape) == 2:
+    # The parallel Numba kernels below don't raise on mismatching shapes, they
+    # would return zeros instead, hence the checks.
+    nd, na = len(dcm.shape), len(arr.shape)
+    valid = (nd, na) in ((2, 2), (2, 3), (3, 3))
+    valid = valid and dcm.shape[-2] == dcm.shape[-1] == arr.shape[-2] == arr.shape[-1]
+    valid = valid and (nd == 2 or dcm.shape[0] == arr.shape[0])
+    if not valid:
+        raise LinalgOperationInputError(_shape_mismatch_msg(dcm, arr))
+    if len(arr.shape) == 2:
         return _show_frame(dcm, arr)  # dcm @ arr
-    elif len(arr.shape) == 3 and len(dcm.shape) == 2:
+    elif len(dcm.shape) == 2:
         return _show_frames(dcm, arr)  # dcm @ arr
-    elif len(arr.shape) == 3 and len(dcm.shape) == 3:
-        return _show_frames_multi(dcm, arr)  # dcm @ arr
     else:
-        msg = (
-            "Mismatch in shapes!"
-            f"Input one has shape {dcm.shape} and input two has shape {arr.shape}."
-            "See the docs for the correct input shapes."
-        )
-        raise LinalgOperationInputError(msg)
-
-
-@njit(nogil=True, cache=__cache)
-def _show_vector(dcm: ndarray, arr: ndarray) -> ndarray:
-    """Return the coordinates of a single vector in a frame.
-
-    The frame is specified by a DCM matrix.
-
-    Parameters
-    ----------
-    dcm: numpy.ndarray
-        The dcm matrix of the transformation as a 2d float array.
-    arr: numpy.ndarray
-        1d float array of coordinates of a single vector.
-
-    Returns
-    -------
-    numpy.ndarray
-        The new coordinates of the vector with the same shape as `arr`.
-    """
-    return dcm @ arr
-
-
-@njit(nogil=True, parallel=True, cache=__cache)
-def _show_vectors(dcm: ndarray, arr: ndarray) -> ndarray:
-    """Return the coordinates of multiple vectors in a frame.
-
-    The frame is specified by a DCM matrix.
-
-    Parameters
-    ----------
-    dcm: numpy.ndarray
-        The dcm matrix of the transformation as a 2d float array.
-    arr: numpy.ndarray
-        2d float array of coordinates of multiple vectors.
-
-    Returns
-    -------
-    numpy.ndarray
-        The new coordinates of the vectors with the same shape as `arr`.
-    """
-    res = np.zeros_like(arr)
-    for i in prange(arr.shape[0]):
-        res[i] = dcm @ arr[i, :]
-    return res
-
-
-@njit(nogil=True, parallel=True, cache=__cache)
-def _show_vectors_multi(dcm: ndarray, arr: ndarray) -> ndarray:
-    """Return the coordinates of multiple vectors and multiple DCM matrices.
-
-    Parameters
-    ----------
-    dcm: numpy.ndarray
-        The dcm matrix of the transformation as a 3d float array.
-    arr: numpy.ndarray
-        2d float array of coordinates of multiple vectors.
-
-    Returns
-    -------
-    numpy.ndarray
-        The new coordinates of the vectors with the same shape as `arr`.
-    """
-    res = np.zeros_like(arr)
-    for i in prange(arr.shape[0]):
-        res[i] = dcm[i] @ arr[i, :]
-    return res
+        return _show_frames_multi(dcm, arr)  # dcm @ arr
 
 
 @njit(nogil=True, parallel=True, cache=__cache)
@@ -554,28 +527,11 @@ def _show_frames_multi(dcm: ndarray, arr: ndarray) -> ndarray:
     return res
 
 
-@njit(nogil=True, parallel=True, cache=__cache)
-def _transpose_multi(dcm: ndarray) -> ndarray:
-    N = dcm.shape[0]
-    res = np.zeros_like(dcm)
-    for i in prange(N):
-        res[i, :, :] = dcm[i].T
-    return res
-
-
 def transpose_axes(arr: ndarray) -> ndarray:
+    """Transpose the last two axes of an array, keeping the leading (data) axes."""
     if len(arr.shape) == 2:
         return arr.T
-    elif len(arr.shape) == 3:
-        # FIXME this might be unnecessary
-        return _transpose_multi(arr)
-    else:
-        shape = arr.shape
-        indices = tuple(range(len(shape)))
-        data_indices = indices[:-2]
-        tensor_indices = indices[len(shape) - 2 :]
-        indices = data_indices + tensor_indices[::-1]
-        return np.transpose(arr, indices)
+    return np.ascontiguousarray(np.swapaxes(arr, -1, -2))
 
 
 def normalize_frame(axes: ndarray) -> ndarray:

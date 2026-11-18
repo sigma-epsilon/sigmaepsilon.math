@@ -1,7 +1,5 @@
 """Numba-jitted helper kernels for tensor transformation rules."""
 
-from typing import Iterable
-
 import numpy as np
 from numpy import ndarray
 from sigmaepsilon.core.jit import njit, prange
@@ -9,7 +7,28 @@ from sigmaepsilon.core.jit import njit, prange
 __cache = True
 
 
+def _check_shapes(arr: ndarray, Q: ndarray, rank: int) -> None:
+    """Raise if the transformation matrices don't fit the components.
+
+    The parallel Numba kernels don't raise on mismatching shapes, they return
+    zeros instead, hence the check.
+    """
+    shape_arr, shape_Q = arr.shape, Q.shape
+    dim = shape_arr[-1] if len(shape_arr) > 0 else None
+    valid = len(shape_arr) >= rank and len(shape_Q) in (2, 3)
+    valid = valid and shape_arr[len(shape_arr) - rank :] == (dim,) * rank
+    valid = valid and shape_Q[-2:] == (dim, dim)
+    if valid and len(shape_Q) == 3:
+        valid = len(shape_arr) > rank and shape_Q[0] == shape_arr[0]
+    if not valid:
+        raise ValueError(
+            f"Transformation matrices of shape {shape_Q} don't fit tensor "
+            f"components of shape {shape_arr}."
+        )
+
+
 def _tr_tensors2(arr: ndarray, Q: ndarray) -> ndarray:
+    _check_shapes(arr, Q, 2)
     shape_arr = arr.shape
     shape_Q = Q.shape
     n_shape_arr = len(shape_arr)
@@ -80,7 +99,24 @@ def _tr_tensors2_multi2(arr: ndarray, Q: ndarray) -> ndarray:
     return res
 
 
+def _tr_tensors4(arr: ndarray, Q: ndarray) -> ndarray:
+    """Transform the components of fourth-order tensors of any dimension.
+
+    The 3x3x3x3 case dispatches to the Numba kernels of :func:`_tr_tensors4x3`,
+    other dimensions use :func:`numpy.einsum`.
+    """
+    _check_shapes(arr, Q, 4)
+    if arr.shape[-1] == 3:
+        return _tr_tensors4x3(arr, Q)
+    if len(Q.shape) == 3:
+        # one matrix per item along the first axis
+        n_data = len(arr.shape) - 4
+        Q = Q.reshape(Q.shape[:1] + (1,) * (n_data - 1) + Q.shape[1:])
+    return np.einsum("...ip,...jq,...kr,...ls,...pqrs->...ijkl", Q, Q, Q, Q, arr)
+
+
 def _tr_tensors4x3(arr: ndarray, Q: ndarray) -> ndarray:
+    _check_shapes(arr, Q, 4)
     shape_arr = arr.shape
     shape_Q = Q.shape
     n_shape_arr = len(shape_arr)
@@ -89,40 +125,18 @@ def _tr_tensors4x3(arr: ndarray, Q: ndarray) -> ndarray:
         return _tr_3333(arr, Q)
     elif n_shape_arr == 5 and n_shape_Q == 2:
         return _tr_3333_multi3(arr, Q)
+    elif n_shape_arr > 5 and n_shape_Q == 2:
+        arr = arr.reshape((-1,) + shape_arr[-4:])
+        return _tr_3333_multi3(arr, Q).reshape(shape_arr)
     elif n_shape_arr == 5 and n_shape_Q == 3:
         return _tr_3333_multi(arr, Q)
     elif n_shape_arr == 6 and n_shape_Q == 3:
         return _tr_3333_multi2(arr, Q)
-    elif n_shape_arr > 6 and n_shape_Q == 3:
+    else:  # n_shape_arr > 6 and n_shape_Q == 3, the rest is ruled out by the check
         nX = np.prod(shape_arr[1:-4], dtype=int)
-        arr = arr.reshape(
-            shape_arr[0], nX, shape_arr[-4], shape_arr[-3], shape_arr[-2], shape_arr[-1]
-        )
+        arr = arr.reshape((shape_arr[0], nX) + shape_arr[-4:])
         res = _tr_3333_multi2(arr, Q)
-        res = res.reshape(shape_arr)
-        return res
-    else:
-        raise NotImplementedError
-
-
-def _tr_3333_sym(array: Iterable, Q: ndarray) -> ndarray:
-    res = np.zeros((3, 3, 3, 3), dtype=array.dtype)
-    for p in prange(3):
-        for q in prange(3):
-            for r in prange(3):
-                for s in prange(3):
-                    for i in prange(3):
-                        for j in prange(3):
-                            for k in prange(3):
-                                for m in prange(3):
-                                    res[i, j, k, m] += (
-                                        Q[i, p]
-                                        * Q[j, q]
-                                        * Q[k, r]
-                                        * Q[m, s]
-                                        * array[p, q, r, s]
-                                    )
-    return res
+        return res.reshape(shape_arr)
 
 
 @njit(nogil=True, parallel=False, fastmath=True, cache=__cache)

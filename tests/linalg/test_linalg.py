@@ -44,7 +44,7 @@ from sigmaepsilon.math.linalg.exceptions import (
 from sigmaepsilon.math.linalg import utils as lautils
 from sigmaepsilon.math import repeat
 from sigmaepsilon.math.linalg import dot, cross
-from sigmaepsilon.math.linalg.tr import _tr_3333, _tr_3333_sym
+from sigmaepsilon.math.linalg.tr import _tr_3333
 
 
 class TestArray(LinalgTestCase):
@@ -351,7 +351,8 @@ class TestTensor(LinalgTestCase):
 
         self.assertTrue(np.allclose(cross(a, b).show(), [0.0, 0.0, 1.0]))
         self.assertTrue(np.allclose(cross(a, b).show(), -cross(b, a).show()))
-        arr = np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+        # (I x e2)_ij = e_jkl d_ik (e2)_l = e_ji2, see issue #115
+        arr = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [-1.0, 0.0, 0.0]])
         self.assertTrue(np.allclose(cross(T, b).show(), arr))
         cross(b, T, frame=target)
         self.assertFailsProperly(NotImplementedError, cross, T, T)
@@ -947,7 +948,6 @@ class TestUtils(LinalgTestCase):
 
         # tensor operations
         _tr_3333(np.ones((3, 3, 3, 3)), np.eye(3))
-        _tr_3333_sym(np.ones((3, 3, 3, 3)), np.eye(3))
 
         # sparse utils
         data = np.eye(3).flatten()

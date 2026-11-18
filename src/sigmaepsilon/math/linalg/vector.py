@@ -1,6 +1,6 @@
 """Vector class built on top of the linalg reference frame and abstract tensor layer."""
 
-from copy import deepcopy as dcopy
+from copy import copy, deepcopy
 
 from numpy import ndarray
 import numbers
@@ -109,9 +109,9 @@ class Vector(AbstractTensor):
 
     def dual(self) -> "Vector":
         """Return the vector described in the dual (or reciprocal) frame."""
-        # NOTE Strictly this should be self.frame.Gram().T @ self.array,
-        # but since the Gram matrix is symmetric, it's cheaper like this
-        a = self.frame.Gram() @ self.array
+        # NOTE Strictly this should be the transpose of the Gram matrix,
+        # but it is symmetric. `show_vector` handles bulk vectors and frames.
+        a = show_vector(self.frame.Gram(), self.array)
         return self.__class__(a, frame=self.frame.dual())
 
     def show(self, target: Frame = None, *, dcm: ndarray = None) -> ndarray:
@@ -140,15 +140,27 @@ class Vector(AbstractTensor):
         return show_vector(dcm, self.array)  # dcm @ arr
 
     def orient(self, *args, dcm: ndarray = None, **kwargs) -> "Vector":
-        """Orient the vector inplace.
+        """Rotate the vector inplace about the axes of the ambient frame.
 
-        If the transformation is not specified by 'dcm', all arguments are
-        forwarded to `orient_new`.
+        The vector is rotated the same way
+        :meth:`~sigmaepsilon.math.linalg.frame.ReferenceFrame.orient` rotates a
+        frame with the same arguments, regardless of the frame the vector is
+        expressed in. The frame of the vector is left unchanged, only the
+        components change. If the frame is rotated together with the vector,
+        the components don't change.
 
         Parameters
         ----------
+        *args: tuple, Optional
+            Positional arguments forwarded to
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`.
         dcm: numpy.ndarray, Optional
-            The DCM matrix of the transformation.
+            The DCM of the rotation, as returned by
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`. If provided,
+            the other arguments are ignored.
+        **kwargs: dict, Optional
+            Keyword arguments forwarded to
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`.
 
         Returns
         -------
@@ -159,51 +171,36 @@ class Vector(AbstractTensor):
         --------
         :func:`orient_new`
         """
-        if not isinstance(dcm, ndarray):
-            fcls = self.__class__._frame_cls_
-            dcm = fcls.eye(dim=len(self)).orient_new(*args, **kwargs).dcm()
-            # self.array = dcm.T @ self._array
-            self.array = show_vector(dcm.T, self.array)
-            # self.array = np.linalg.inv(dcm) @ self._array
-            # FIXME check this
-        else:
-            self.array = show_vector(dcm.T, self.array)
-            # self.array = dcm.T @ self._array
-            # FIXME check if inversion is necessary here
-            # inversion might be necessary here because it is uncertain if the
-            # dcm matrix was fabricated properly.
-            # self.array = np.linalg.inv(dcm) @ self._array
+        # The DCM of a rotation is orthogonal, so its transpose is its inverse.
+        Q = self._orientation_matrix(*args, dcm=dcm, **kwargs)
+        self.array = show_vector(Q, self.array)
         return self
 
     def orient_new(self, *args, **kwargs) -> "Vector":
-        """Return a transformed version of the instance.
+        """Return a copy of the vector, rotated about the axes of the ambient frame.
+
+        All arguments are forwarded to :func:`orient`.
 
         Returns
         -------
         Vector
-            A new vector.
+            A new vector, in the same frame as the instance.
 
         See Also
         --------
         :func:`orient`
         """
-        fcls = self.__class__._frame_cls_
-        dcm = fcls.eye(dim=len(self)).orient_new(*args, **kwargs).dcm()
-        array = dcm.T @ self._array
-        # FIXME check if inversion is necessary or not
-        # array = np.linalg.inv(dcm) @ self._array
-        return Vector(array, frame=self.frame)
+        return self.copy().orient(*args, **kwargs)
 
     def copy(self, deep: bool = False, name: str = None) -> "Vector":
-        """Return a shallow or deep copy of this object, depending of the argument `deepcopy`.
+        """Return a shallow or deep copy of the vector, keeping its frame.
 
-        Default is False.
+        A shallow copy shares the frame of the instance, a deep copy gets a
+        copy of it. The argument `name` is not used, it is kept for backward
+        compatibility.
         """
-        if deep:
-            return self.__class__(dcopy(self.array), name=name)
-        else:
-            return self.__class__(self.array, name=name)
+        return deepcopy(self) if deep else copy(self)
 
     def deepcopy(self, name: str = None) -> "Vector":
-        """Return a deep copy of the frame."""
+        """Return a deep copy of the vector."""
         return self.copy(deep=True, name=name)

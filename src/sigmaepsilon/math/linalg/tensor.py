@@ -1,6 +1,6 @@
 """Tensor classes built on top of the linalg reference frame and abstract tensor layer."""
 
-from copy import deepcopy as dcopy
+from copy import copy, deepcopy
 
 import numpy as np
 from numpy import ndarray
@@ -9,10 +9,9 @@ from sigmaepsilon.core.alphabet import latinrange
 
 from .frame import ReferenceFrame as Frame
 from .abstract import AbstractTensor
-from .tr import _tr_tensors2, _tr_tensors4x3
+from .tr import _tr_tensors2, _tr_tensors4, _tr_tensors4x3
 from .exceptions import TensorShapeMismatchError
-from .utils import transpose_axes
-from .logical import is_hermitian
+from .logical import has_equal_dimensions
 
 __all__ = [
     "Tensor",
@@ -73,7 +72,7 @@ class Tensor(AbstractTensor):
 
     @classmethod
     def _verify_input(cls, arr: ndarray, *_, **kwargs) -> bool:
-        return is_hermitian(arr)
+        return has_equal_dimensions(arr)
 
     @classmethod
     def _from_any_input(cls, *args, **kwargs) -> AbstractTensor:
@@ -131,54 +130,68 @@ class Tensor(AbstractTensor):
             dcm = self.frame.dcm(target=target)
         return self.transform_components(dcm)
 
-    def orient(self, *args, **kwargs) -> "Tensor":
-        """Orient the vector inplace.
+    def orient(self, *args, dcm: ndarray = None, **kwargs) -> "Tensor":
+        """Rotate the tensor inplace about the axes of the ambient frame.
 
-        All arguments are forwarded to `orient_new`.
+        The tensor is rotated the same way
+        :meth:`~sigmaepsilon.math.linalg.frame.ReferenceFrame.orient` rotates a
+        frame with the same arguments, regardless of the frame the tensor is
+        expressed in. The frame of the tensor is left unchanged, only the
+        components change.
+
+        Parameters
+        ----------
+        *args: tuple, Optional
+            Positional arguments forwarded to
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`.
+        dcm: numpy.ndarray, Optional
+            The DCM of the rotation, as returned by
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`. If provided,
+            the other arguments are ignored.
+        **kwargs: dict, Optional
+            Keyword arguments forwarded to
+            :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`.
 
         Returns
         -------
-        Vector
-            The same vector the function is called upon.
+        Tensor
+            The same tensor the function is called upon.
 
         See Also
         --------
         :func:`orient_new`
         """
-        fcls: Frame = self.__class__._frame_cls_
-        dcm = fcls.eye(dim=self.frame.shape[-1]).orient_new(*args, **kwargs).dcm()
-        self.array = self.transform_components(transpose_axes(dcm))
+        Q = self._orientation_matrix(*args, dcm=dcm, **kwargs)
+        self.array = self.transform_components(Q)
         return self
 
     def orient_new(self, *args, **kwargs) -> "Tensor":
-        """Return a transformed version of the instance.
+        """Return a copy of the tensor, rotated about the axes of the ambient frame.
+
+        All arguments are forwarded to :func:`orient`.
 
         Returns
         -------
-        Vector
-            A new vector.
+        Tensor
+            A new tensor, in the same frame as the instance.
 
         See Also
         --------
         :func:`orient`
         """
-        fcls: Frame = self.__class__._frame_cls_
-        dcm = fcls.eye(dim=self.frame.shape[-1]).orient_new(*args, **kwargs).dcm()
-        array = self.transform_components(dcm.T)
-        return self.__class__(array, frame=self.frame)
+        return self.copy().orient(*args, **kwargs)
 
     def copy(self, deep: bool = False, name: str = None) -> "Tensor":
-        """Return a shallow or deep copy of this object, depending of the argument `deepcopy`.
+        """Return a shallow or deep copy of the tensor, keeping its frame.
 
-        Default is False.
+        A shallow copy shares the frame of the instance, a deep copy gets a
+        copy of it. The argument `name` is not used, it is kept for backward
+        compatibility.
         """
-        if deep:
-            return self.__class__(dcopy(self.array), name=name)
-        else:
-            return self.__class__(self.array, name=name)
+        return deepcopy(self) if deep else copy(self)
 
     def deepcopy(self, name: str = None) -> "Tensor":
-        """Return a deep copy of the frame."""
+        """Return a deep copy of the tensor."""
         return self.copy(deep=True, name=name)
 
 
@@ -264,18 +277,22 @@ class Tensor4(Tensor):
     @classmethod
     def _verify_input(cls, arr: ndarray, *_, bulk: bool = False, **kwargs) -> bool:
         shape = arr.shape
-        is_hermitian = (shape[-1],) * 4 == shape[-4:]
+        if len(shape) < 4:
+            return False
+        equal_dims = (shape[-1],) * 4 == shape[-4:]
         if bulk:
-            return len(shape) == 5 and is_hermitian
+            return len(shape) >= 5 and equal_dims
         else:
-            return len(shape) == 4 and is_hermitian
+            return len(shape) == 4 and equal_dims
 
     def transform_components(self, dcm: ndarray) -> ndarray:
         """Return the components of the transformed numerical tensor.
 
-        The transformation is based on the provided direction cosine matrix.
+        The transformation is based on the provided direction cosine matrix. It
+        works in any dimension. In 3 dimensions it uses the same compiled kernels
+        as :class:`~sigmaepsilon.math.linalg.tensor.Tensor4x3`.
         """
-        return _tr_tensors4x3(self._array, dcm)
+        return _tr_tensors4(self._array, dcm)
 
 
 class Tensor4x3(Tensor4):
@@ -309,8 +326,16 @@ class Tensor4x3(Tensor4):
 
     @classmethod
     def _verify_input(cls, arr: ndarray, *_, bulk: bool = False, **kwargs) -> bool:
-        is_hermitian = arr.shape[-4:] == (3, 3, 3, 3)
+        is_3x3x3x3 = arr.shape[-4:] == (3, 3, 3, 3)
         if bulk:
-            return len(arr.shape) >= 5 and is_hermitian
+            return len(arr.shape) >= 5 and is_3x3x3x3
         else:
-            return len(arr.shape) == 4 and is_hermitian
+            return len(arr.shape) == 4 and is_3x3x3x3
+
+    def transform_components(self, dcm: ndarray) -> ndarray:
+        """Return the components of the transformed numerical tensor.
+
+        The transformation is based on the provided direction cosine matrix and
+        runs on compiled 3x3x3x3 kernels.
+        """
+        return _tr_tensors4x3(self._array, dcm)
