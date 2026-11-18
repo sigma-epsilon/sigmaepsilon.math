@@ -11,7 +11,7 @@ from .exceptions import (
     TensorShapeMismatchError,
     LinalgOperationInputError,
 )
-from .utils import dot, cross
+from .utils import dot, cross, rotation_matrix, transpose_axes
 from ..metautils import _new_and_init_
 
 __all__ = ["AbstractTensor"]
@@ -36,6 +36,34 @@ def implements(numpy_function, ufunc: bool = False):
 
 class AbstractTensor(TensorLike):
     """Base class implementing arithmetic and NumPy protocol support for tensors."""
+
+    def _orientation_matrix(
+        self, *args, dcm: np.ndarray | None = None, **kwargs
+    ) -> np.ndarray:
+        r"""Return the matrix that rotates the components of the instance.
+
+        The rotation is about the axes of the ambient frame, the same way
+        :meth:`~sigmaepsilon.math.linalg.frame.ReferenceFrame.orient` rotates
+        frames. If :math:`\mathbf{R}` is the DCM of the rotation, as returned by
+        :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, the ambient
+        components transform as :math:`\mathbf{x}' = \mathbf{R}^T \mathbf{x}`.
+        With the frame :math:`\mathbf{G}` of the instance (rows are the basis
+        vectors, :math:`\mathbf{x} = \mathbf{G}^T \mathbf{a}`), the components
+        transform as :math:`\mathbf{a}' = \mathbf{G}^{-T} \mathbf{R}^T
+        \mathbf{G}^T \mathbf{a}`, which this function returns. The rotation is
+        rigid for any frame, oblique ones included.
+
+        Parameters
+        ----------
+        dcm: numpy.ndarray, Optional
+            The DCM of the rotation. If not provided, all the other arguments
+            are forwarded to :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`.
+        """
+        if dcm is None:
+            dcm = rotation_matrix(*args, **kwargs)
+        G = np.asarray(self.frame.show())
+        Rt = transpose_axes(np.asarray(dcm))
+        return transpose_axes(np.linalg.inv(G)) @ Rt @ transpose_axes(G)
 
     _HANDLED_TYPES_ = (numbers.Number,)
 
@@ -154,7 +182,7 @@ class AbstractTensor(TensorLike):
         if ufunc in HANDLED_UNIVERSAL_FUNCTIONS:
             return HANDLED_UNIVERSAL_FUNCTIONS[ufunc](method, *inputs, **kwargs)
         msg = """
-        Not all NumPy universal functions are not supported by tensors. Try calling 
+        Not all NumPy universal functions are not supported by tensors. Try calling
         this method using the arrays of the tensorial inputs.
         """
         raise LinalgInvalidTensorOperationError(msg)

@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file. If you are 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0]
+
+### Changed
+
+- `orient` and `orient_new` of `Vector`, `Tensor` and their subclasses rotate about the axes of the ambient frame, the same way `ReferenceFrame.orient` rotates frames. Before, they rotated about the axes of the frame of the object, which is not a rigid rotation in an oblique frame. The results only differ if the object is in a frame other than the ambient one. `Tensor.orient` now also accepts `dcm=`, like `Vector.orient`. The docstrings of the frame methods now state that rotations are always about the ambient axes, and that `'Body'` and `'Space'` only set the order of the angles within one call.
+- `ReferenceFrame.volume()` and `CartesianFrame.volume()` return the signed volume `det(axes)`, which is negative for left-handed frames. Before, they returned `sqrt(det(Gram))` and `1.0`, which are never negative.
+- `Tensor4` transforms in any dimension, for single tensors and collections alike. 3x3x3x3 tensors keep using the compiled kernels, which also serve `Tensor4x3`.
+- `linsolve` with the methods `'Jordan'` and `'Gauss-Jordan'` uses partial pivoting, so matrices with zeros on the diagonal are solved. A matrix is considered singular if no pivot is larger than `1e-12` times the largest absolute value of the matrix, instead of an absolute `1e-12`. For a 1d `B` the solution and the residuals are 1d as well, they had the shape `(n, 1)` before.
+- `is_hermitian` is deprecated in favour of `has_equal_dimensions`. It never checked if an array is Hermitian, only that all its dimensions are equal.
+- `show_vector` uses NumPy instead of Numba, which is simpler and at least as fast.
+
+### Fixed
+
+- `dot(vector, Tensor2)` computed `T·a` instead of `a·T`, and gave the result in the wrong frame for oblique frames.
+- `cross(vector, vector)` was only correct in right-handed orthonormal frames. It is computed from the ambient components now, and works for bulk vectors as well.
+- `cross(Tensor2, vector)` returned `-(b × A)` instead of `A × b`. It follows the dyadic convention `(a ⊗ c) × b = a ⊗ (c × b)` of Gibbs, as set out in Wilson's *Vector Analysis* (1901). `cross(vector, Tensor2)` was correct, and now also works for collections.
+- `ReferenceFrame.show(target)` returned the inverse transpose of the components of the frame in the target frame.
+- `Vector.copy()` and `Tensor.copy()` dropped the frame, so the copy of a vector in a rotated frame was a different vector.
+- `Vector.orient_new()`, `Vector.dual()` and `dot(vector, vector)` failed or returned wrong values for bulk vectors.
+- Shape mismatches between components and transformation matrices raise an error. Before, the parallel Numba kernels behind `Tensor2`, `Tensor4`, `show_vector` and `show_frame` returned arrays of zeros.
+- `linsolve` checks the shapes of its inputs. Before, a right-hand side with fewer rows than `A` silently solved a block of `A`. Only singular matrices raise `LinAlgError` now, other errors are no longer reported as a singular matrix.
+- `csr_matrix` takes the number of columns from the largest column index if `shape` is not given, instead of the widest row, which dropped entries.
+
+### Removed
+
+- The unused helper `_tr_3333_sym` in `sigmaepsilon.math.linalg.tr`.
+
 ## [2.8.0]
 
 ### Added

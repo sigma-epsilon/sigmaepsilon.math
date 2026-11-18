@@ -1,5 +1,7 @@
 """Logical predicates for arrays, matrices and reference frames."""
 
+import warnings
+
 import numpy as np
 from numpy import ndarray
 import sympy as sy
@@ -14,6 +16,7 @@ __all__ = [
     "is_normal_frame",
     "is_orthonormal_frame",
     "is_independent_frame",
+    "has_equal_dimensions",
     "is_hermitian",
     "is_pos_def",
     "is_pos_semidef",
@@ -79,11 +82,29 @@ def is_independent_frame(axes: ndarray, tol: float = 0) -> bool:
     return np.linalg.det(Gram(axes)) > tol
 
 
-def is_hermitian(arr: ndarray) -> bool:
-    """Return True if the input is a hermitian array."""
+def has_equal_dimensions(arr: ndarray) -> bool:
+    """Return True if all the dimensions of the input array are equal.
+
+    This is the shape of the components of a tensor of any order, like
+    ``(3, 3)`` or ``(2, 2, 2, 2)``.
+    """
     shp = arr.shape
-    s0 = shp[0]
-    return all([s == s0 for s in shp[1:]])
+    return all(s == shp[0] for s in shp[1:])
+
+
+def is_hermitian(arr: ndarray) -> bool:
+    """Return True if all the dimensions of the input array are equal.
+
+    .. deprecated:: 2.9.0
+        The name is misleading, as the function doesn't check if the array is
+        Hermitian. Use :func:`has_equal_dimensions` instead.
+    """
+    warnings.warn(
+        "'is_hermitian' is deprecated, use 'has_equal_dimensions' instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return has_equal_dimensions(arr)
 
 
 def has_full_row_rank(matrix: ndarray) -> bool:
