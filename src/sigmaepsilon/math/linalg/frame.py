@@ -241,8 +241,10 @@ class ReferenceFrame(FrameLike):
         """Return the signed volume of the general parallelepiped.
 
         The parallelepiped is described by the base vectors that make up the frame.
+        The volume is the determinant of the matrix of the base vectors. It is
+        positive for right-handed frames and negative for left-handed ones.
         """
-        return np.sqrt(np.linalg.det(self.Gram()))
+        return np.linalg.det(self.show())
 
     def dual(self) -> "ReferenceFrame":
         """Return the dual (or reciprocal) frame."""
@@ -298,13 +300,22 @@ class ReferenceFrame(FrameLike):
     def show(self, target: "ReferenceFrame" = None) -> ndarray:
         """Return the components of the current frame in a target frame.
 
-        If the target is None, the componants are returned in the ambient frame.
+        The i-th row of the result holds the components of the i-th base vector
+        of the current frame in the target frame. If the target is None, the
+        components are returned in the ambient frame.
+
+        Parameters
+        ----------
+        target: ReferenceFrame, Optional
+            The target frame. Default is None.
 
         Returns
         -------
         numpy.ndarray
         """
-        return self.dcm(source=target)
+        if target is None:
+            return self.dcm()
+        return self.dcm() @ np.linalg.inv(target.dcm())
 
     def dcm(
         self, *, target: "ReferenceFrame" = None, source: "ReferenceFrame" = None
@@ -350,16 +361,7 @@ class ReferenceFrame(FrameLike):
             return T @ transpose_axes(S)
         elif target is not None:
             S, T = self.dcm(), target.dual().dcm()
-            if len(S.shape) == 3:
-                return T @ transpose_axes(S)
-            elif len(S.shape) == 2:
-                return T @ transpose_axes(S)
-            else:  # pragma: no cover
-                msg = (
-                    "There is no transformation rule implemented for"
-                    " source shape {} and target shape {}"
-                )
-                raise NotImplementedError(msg.format(S.shape, T.shape))
+            return T @ transpose_axes(S)
         # We only get here if the function is called without arguments.
         # The DCM from the ambient frame to the current frame is returned.
         return self.axes
@@ -391,6 +393,19 @@ class ReferenceFrame(FrameLike):
         :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, see there for the
         details.
 
+        The rotation is always about the axes of the ambient (global) frame, also
+        if the frame is already rotated: with :math:`\\mathbf{R}` being the
+        rotation matrix, the new base vectors are the rows of
+        :math:`\\mathbf{G} \\mathbf{R}`, where the rows of :math:`\\mathbf{G}`
+        are the current base vectors. The options ``'Body'`` and ``'Space'`` only
+        set the order of the angles within one call. This differs from
+        :meth:`sympy.physics.vector.ReferenceFrame.orientnew`, which rotates
+        about the axes of the frame itself (:math:`\\mathbf{R} \\mathbf{G}`).
+        The two agree if the frame is the ambient frame. Rotating about the
+        ambient axes keeps lengths and angles of the base vectors for any frame,
+        while rotating about the axes of a frame that is not orthonormal would
+        distort it.
+
         Returns
         -------
         ReferenceFrame
@@ -418,11 +433,12 @@ class ReferenceFrame(FrameLike):
         return self
 
     def orient_new(self, *args, name="", **kwargs) -> "ReferenceFrame":
-        """Return a new frame, oriented relative to the called object.
+        """Return a rotated copy of the frame.
 
         All extra positional and keyword arguments are forwarded to
         :func:`~sigmaepsilon.math.linalg.utils.rotation_matrix`, see there for the
-        details.
+        details. The rotation is about the axes of the ambient frame, see
+        :func:`orient` for the details.
 
         Parameters
         ----------
@@ -780,8 +796,10 @@ class CartesianFrame(RectangularFrame):
         """Return the signed volume of the general parallelepiped.
 
         The parallelepiped is described by the base vectors that make up the frame.
+        For a cartesian frame this is 1 if the frame is right-handed and -1 if it
+        is left-handed.
         """
-        return 1.0
+        return np.linalg.det(self.show())
 
     def dual(self) -> ReferenceFrame:
         """Return the dual (or reciprocal) frame."""

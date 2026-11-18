@@ -365,7 +365,8 @@ class TensorLike(ArrayWrapper):
         if is_deep:
             memo[id(self.array)] = arr
 
-        return cls(arr, frame=frame)
+        kwargs = {} if self._bulk is None else {"bulk": self._bulk}
+        return cls(arr, frame=frame, **kwargs)
 
     @classmethod
     def _from_any_input(cls, *args, **kwargs) -> "TensorLike":

@@ -142,7 +142,10 @@ class csr_matrix:
             self.indices = np.array(indices).astype(np.int32)
             self.indptr = np.array(indptr).astype(np.int32)
             if shape is None:
-                shape = get_shape_sp(indptr)
+                # the number of columns follows from the largest column index
+                n_rows = len(self.indptr) - 1
+                n_cols = int(self.indices.max()) + 1 if len(self.indices) > 0 else 0
+                shape = (n_rows, n_cols)
             self.shape = shape
 
     def to_numpy(self) -> np.ndarray:

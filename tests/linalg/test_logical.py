@@ -14,7 +14,7 @@ from sigmaepsilon.math.linalg.logical import (
     is_normal_frame,
     is_orthonormal_frame,
     is_independent_frame,
-    is_hermitian,
+    has_equal_dimensions,
 )
 
 class TestLinalgLogical(LinalgTestCase):
@@ -38,8 +38,8 @@ class TestLinalgLogical(LinalgTestCase):
         self.assertTrue(is_pos_def(random_posdef_matrix(N)))
         
     def test_hermitian(self):
-        self.assertTrue(is_hermitian(random_posdef_matrix(3)))
-        self.assertFalse(is_hermitian(random_posdef_matrix(3)[:, :2]))
+        self.assertTrue(has_equal_dimensions(random_posdef_matrix(3)))
+        self.assertFalse(has_equal_dimensions(random_posdef_matrix(3)[:, :2]))
 
 
 if __name__ == "__main__":
