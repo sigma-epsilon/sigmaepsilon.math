@@ -332,6 +332,13 @@ class TestTensor4(unittest.TestCase):
                 "nip,njq,nkr,nls,nxpqrs->nxijkl",
             ),
         ]
+        cases.append(
+            (
+                self.rng.random((2, 2, 2, 3, 3, 3, 3)),
+                Qs,
+                "nip,njq,nkr,nls,nxypqrs->nxyijkl",
+            )
+        )
         for arr, Q_, command in cases:
             expected = np.einsum(command, Q_, Q_, Q_, Q_, arr)
             self.assertTrue(np.allclose(_tr_tensors4x3(arr, Q_), expected))
@@ -340,6 +347,23 @@ class TestTensor4(unittest.TestCase):
             self.assertTrue(np.allclose(T.transform_components(Q_), expected))
             T = Tensor4x3(arr, bulk=bulk) if bulk else Tensor4x3(arr)
             self.assertTrue(np.allclose(T.transform_components(Q_), expected))
+
+
+class TestShowFrame(unittest.TestCase):
+    def setUp(self):
+        self.rng = np.random.default_rng(8)
+
+    def test_stack_of_frames(self):
+        arr = self.rng.random((5, 3, 3))
+        dcm = self.rng.random((3, 3))
+        expected = np.einsum("ij,nkj->nki", dcm, arr)
+        self.assertTrue(np.allclose(show_frame(dcm, arr), expected))
+
+    def test_stack_of_frames_and_dcms(self):
+        arr = self.rng.random((5, 3, 3))
+        dcm = self.rng.random((5, 3, 3))
+        expected = np.einsum("nij,nkj->nki", dcm, arr)
+        self.assertTrue(np.allclose(show_frame(dcm, arr), expected))
 
 
 class TestShapeChecks(unittest.TestCase):
@@ -367,6 +391,13 @@ class TestShapeChecks(unittest.TestCase):
         for Q in (np.eye(2), self.rng.random((5, 2, 2)), self.rng.random((4, 3, 3))):
             with self.assertRaises(LinalgOperationInputError):
                 show_vector(Q, arr)
+        with self.assertRaises(LinalgOperationInputError):
+            show_vector(np.eye(3), self.rng.random((5, 3, 3)))
+
+    def test_tensor4_rank(self):
+        self.assertFalse(Tensor4._verify_input(np.ones((3, 3))))
+        with self.assertRaises(ValueError):
+            Tensor4(np.ones((3, 3)))
 
     def test_show_frame(self):
         arr = self.rng.random((5, 3, 3))
@@ -460,6 +491,14 @@ class TestLinsolve(unittest.TestCase):
                     linsolve(A, method=method, **kwargs)
             with self.assertRaises(LinAlgError):
                 linsolve(np.ones((3, 3)), np.ones(3), method=method)
+            with self.assertRaises(ValueError):
+                linsolve(np.ones((2, 2, 2)), np.ones((2, 2, 2)), method=method)
+        with self.assertRaises(ValueError):
+            linsolve(A, self.rng.random(8), presc_bool=pb, method="numpy")
+        # inplace reduction can't convert the inputs
+        A_int, B = np.eye(3, dtype=int), np.ones(3)
+        with self.assertRaises(ValueError):
+            reduce(A_int, B, method="Gauss-Jordan", inplace=True)
 
 
 class TestCSR(unittest.TestCase):
